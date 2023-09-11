@@ -1,0 +1,20 @@
+{
+	"name": "dfer/df-php-core",
+	"type": "library",
+	"description": "df-php内核",
+	"license": "MIT",
+	"authors": [{
+		"name": "df",
+		"email": "df_business@qq.com"
+	}],
+	"homepage": "http://www.dfer.top",
+	"require": {
+		"php": ">=7.0"
+	},
+	"keywords": ["df", "dfer.top"],
+	"autoload": {
+		"psr-4": {
+			"Dfer\\Tools\\": "src/"
+		}
+	}
+}
