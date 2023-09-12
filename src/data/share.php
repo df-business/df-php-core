@@ -11,6 +11,17 @@ define('IP', $_SERVER['REMOTE_ADDR']);
 define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/');
 //内核根目录
 define('DF_PHP_ROOT', ROOT . '/vendor/dfer/df-php-core/src/');
+
+require ROOT."vendor/autoload.php";
+
+
+//-----------------------------------调用基础对象
+require_once DF_PHP_ROOT . 'modules/functions.php';
+if(is_file(ROOT . 'modules/functions.php')){
+	require_once ROOT . 'modules/functions.php';
+}
+
+
 // 配置参数
 require is_file(ROOT . 'data/config.php')?ROOT . 'data/config.php':DF_PHP_ROOT . 'data/config.php';
 define('THEME_HOMEPAGE_ROOT', ROOT.'areas/'.THEME_HOMEPAGE.'/');
@@ -32,13 +43,8 @@ header("Content-Type:text/html; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 
 
-//-----------------------------------调用基础对象
-require_once DF_PHP_ROOT . 'modules/functions.php';
-if(is_file(ROOT . 'modules/functions.php')){
-	require_once ROOT . 'modules/functions.php';
-}
 
-require ROOT."vendor/autoload.php";
+
 /*-----------------------------------错误信息的控制
  * http://www.w3school.com.cn/php/php_error.asp
  */
@@ -63,7 +69,7 @@ $m = m('model');
 //连接服务器
 $con = mysqli_connect(SERVER, ACC, PWD);
 if (!$con) {
-    echo "服务器 [{$server}] 连接失败";
+    echo "服务器 [".SERVER."] 连接失败";
     echo "<br>";
     die();
 }

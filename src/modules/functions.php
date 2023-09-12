@@ -2134,3 +2134,14 @@ function debug($str)
         echo sprintf("<!-- [debug]%s -->\n", $str);
     }
 }
+
+
+/**
+ * 获取环境变量
+ **/
+function env($name,$default="")
+{
+	$val=\Dfer\Tools\Env::get($name,$default);
+	// var_dump($val);
+	return $val;
+}

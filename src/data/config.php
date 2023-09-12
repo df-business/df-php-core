@@ -11,7 +11,7 @@ define('THEME_ADMIN', env('THEME_ADMIN','admin'));
 #开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
 define('DEV', env('DEV',1));
 define('SERVER', env('SERVER', 'localhost'));
-define('ACC', env('ACC', 'dfphp_dfer_site')'');
+define('ACC', env('ACC', 'dfphp_dfer_site'));
 define('PWD', env('PWD', 'mMHBCAimbKKjPP67'));
 define('DATABASE', env('DATABASE', 'dfphp_dfer_site'));
 
