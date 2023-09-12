@@ -37,7 +37,7 @@ class Model
         $ver = explode(".", PHP_VERSION);
         $ver_0 = $ver[0];
         if ($ver_0 < DF_PHP_VER) {
-            show_message("PHP版本不符合要求", sprintf("需要至少php%s", DF_PHP_VER), null, "error");
+            echo(sprintf("PHP版本不符合要求,需要至少php%s", DF_PHP_VER));
         }
     }
 

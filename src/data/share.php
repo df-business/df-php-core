@@ -2,6 +2,23 @@
 // 所有文件的主入口
 define('INIT', 'df');
 
+define('DF', 'http://dfer.top/');
+//当前时间
+define('TIMESTAMP', time());
+//访问者ip
+define('IP', $_SERVER['REMOTE_ADDR']);
+//网站根目录
+define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/');
+//内核根目录
+define('DF_PHP_ROOT', ROOT . '/vendor/dfer/df-php-core/src/');
+// 配置参数
+require is_file(ROOT . 'data/config.php')?ROOT . 'data/config.php':DF_PHP_ROOT . 'data/config.php';
+define('THEME_HOMEPAGE_ROOT', ROOT.'areas/'.THEME_HOMEPAGE.'/');
+define('THEME_ADMIN_ROOT', ROOT.'areas/'.THEME_ADMIN.'/');
+
+define('THEME_HOMEPAGE_ASSETS', '/areas/'.THEME_HOMEPAGE.'/'.'view/public/assets');
+define('THEME_ADMIN_ASSETS', '/areas/'.THEME_ADMIN.'/'.'view/public/assets');
+
 //-----------------------------------基础配置
 //使html内容可以擦除
 ob_start();
@@ -16,8 +33,11 @@ header("Access-Control-Allow-Origin: *");
 
 
 //-----------------------------------调用基础对象
-require "config.php";
-require_once ROOT . 'modules/functions.php';
+require_once DF_PHP_ROOT . 'modules/functions.php';
+if(is_file(ROOT . 'modules/functions.php')){
+	require_once ROOT . 'modules/functions.php';
+}
+
 require ROOT."vendor/autoload.php";
 /*-----------------------------------错误信息的控制
  * http://www.w3school.com.cn/php/php_error.asp
@@ -35,14 +55,9 @@ if ($show_err == 1) {
     //屏蔽所有错误信息,主要用于美化界面，治标不治本
     error_reporting(0);
 }
+
 //-----------------------------------模块
-//调用公共模块
 $m = m('model');
-$m->php_ver_notice();
-//mail
-if (EMAIL_ENABLE) {
-    $mail = m('PHPMailer');
-}
 
 //-----------------------------------数据库
 //连接服务器
@@ -73,6 +88,8 @@ if (mysqli_select_db($con, $database)) {
 
 //-----------------------------------基础参数
 if (empty($create)) {
+
+
 	//合并数组
 	$_GP = array_merge($_GET, $_POST);
 	$_gp = $m -> ihtmlspecialchars($_GP);
@@ -84,4 +101,16 @@ if (empty($create)) {
 	'time'=> getTime(TIMESTAMP),
 	'admin'=>boolval(show_first('dt', ['key'=>'admin'])['val'])
 ];
+
+$m->php_ver_notice();
+//mail
+if (EMAIL_ENABLE) {
+    $mail = m('PHPMailer');
 }
+
+
+}
+
+
+
+

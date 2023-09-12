@@ -12,59 +12,72 @@ defined('INIT') or exit('Access Denied');
  * 区域，控制器，方法，布局文件
  * 生成之后进行引用
  */
-function view($area, $ctrl, $func, $layout)
+function view($root, $layout,$other)
 {
+	global $_df;
+// var_dump($root, $layout);
+	$area=$_df['area'];
+	$ctrl=$_df['ctrl'];
+	$func=$_df['action'];
+
     //手机、pc分开调用模板
     //手机模板
     if (isMobile() && WAP_PAGE_ENABLE) {
         //处理控制器之外的文件
-        if (empty($layout)) {
-            $layout = $from = ROOT . "/{$area}/{$ctrl}_m.htm";
-            $back = $to = ROOT . "/cache/{$area}/{$ctrl}_m.php";
+        if ($other) {
+            $layout = $from = $root . "/view/public/{$layout}_m.htm";
+            $back = $to = ROOT . "/cache/view/public/{$layout}_m.php";
             //wap页面不存在就调用pc页面
-            $layout = $from = !is_file($layout) ? ROOT . "/{$area}/{$ctrl}.htm" : $layout;
+            $layout = $from = !is_file($layout) ? $root . "/view/public/{$layout}.htm" : $layout;
         } else {
             $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
             $from_base = ROOT . "/areas/{$area}/view/{$ctrl}/{$func}_m.htm";
             $to = ROOT . "/cache/areas/{$area}/view/{$ctrl}/{$func}_m.php";
-            $layout_base = ROOT . "/share/{$layout}M.htm";
+            $layout_base = $root . "/view/public/{$layout}_m.htm";
             //wap页面不存在就调用pc页面
             $from = !is_file($from_base) ? ROOT . "/areas/{$area}/view/{$ctrl}/{$func}.htm" : $from_base;
-            $layout = !is_file($layout_base) ? ROOT . "/share/{$layout}.htm" : $layout_base;
+            $layout = !is_file($layout_base) ? $root . "/view/public/{$layout}.htm" : $layout_base;
             //	  	die($layout);
         }
     }
     //PC模板
     else {
         //处理控制器之外的文件
-        if (empty($layout)) {
-            $layout = $from = ROOT . "/{$area}/{$ctrl}.htm";
-            $back = $to = ROOT . "/cache/{$area}/{$ctrl}.php";
+        if ($other) {
+            $layout = $from = $root . "/view/public/{$layout}.htm";
+            $back = $to = ROOT . "/cache/view/public/{$layout}.php";
         } else {
             //很奇怪无法获取php文件的修改时间，获取到的是空
             $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
             $from = ROOT . "/areas/{$area}/view/{$ctrl}/{$func}.htm";
             $to = ROOT . "/cache/areas/{$area}/view/{$ctrl}/{$func}.php";
-            $layout = ROOT . "/share/{$layout}.htm";
+            $layout = $root . "/view/public/{$layout}.htm" ;
         }
     }
-
-
 
     //找不到该文件
     if (!is_file($from)) {
         exit("Error: view source '{$from}' is not exist!");
     }
 
-
     //如果前端文件不存在，或者前端文件修改时间小于html、布局页、后台页，或者处于测试状态
     if (!is_file($to) || filemtime($from) > filemtime($to) || filemtime($layout) > filemtime($to) || filemtime($back) > filemtime($to) || DEV) {
         //确认好文件路径之后，进行html的替换，生成php文件
         view_conversion($from, $to, $layout);
     }
-
+				// var_dump($back,$from,$to,$layout);
     return $to;
 }
+
+
+function view_front($layout="common",$other=false){
+	return	view(THEME_HOMEPAGE_ROOT,$layout,$other);
+}
+
+function view_back($layout="common",$other=false){
+	return	view(THEME_ADMIN_ROOT,$layout,$other);
+}
+
 
 //将html转化为php
 function view_conversion($from, $to, $layout)
@@ -182,7 +195,6 @@ function view_replace($str, $layout)
     //打印字符串，只能匹配单行
     $layout = preg_replace('/<df-print value=\"([\s\S]*?)\"\/>/', '<?php echo $1 ?>', $layout);
     $layout = preg_replace('/!!([\s\S]*?)!!/', '<?php echo $1 ?>', $layout);
-				$layout = preg_replace('/{([\s\S]*?)}/', '<?php echo $1 ?>', $layout);
 
 
     //防止关键字被非法格式化而进行注释，最后恢复被注释的内容
@@ -193,23 +205,22 @@ function view_replace($str, $layout)
     return $layout;
 }
 
-
-
-
 //调用model文件，并new一个对象
 function m($name = '')
 {
     if (stripos($name, '/') > -1) {
-        $model = ROOT . "modules/" . $name . '.php';
+					// windows
+        $model =is_file( ROOT . "modules/" . $name . '.php')? ROOT . "modules/" . $name . '.php': DF_PHP_ROOT . "modules/" . $name . '.php';
         if (!is_file($model)) {
-            die(' Model ' . $name . ' Not Found!');
+            die(' Model ' . $model . ' Not Found!');
         }
         require $model;
         $name = explode('/', $name);
         $name = implode('\\', $name);
         $class_name = $name;
     } else {
-        $model = ROOT . "modules/" . strtolower($name) . '.php';
+					// linux
+								$model =is_file( ROOT . "modules/" . strtolower($name) . '.php')? ROOT . "modules/" . strtolower($name) . '.php': DF_PHP_ROOT . "modules/" . strtolower($name) . '.php';
         if (!is_file($model)) {
             die(' Model ' . strtolower($name) . ' Not Found!');
         }
@@ -217,13 +228,10 @@ function m($name = '')
         //首字母变大写
         $class_name = ucfirst($name);
     }
+
     $m = new $class_name();
     return $m;
 }
-
-
-
-
 
 //调用某个plugin文件，并new一个对象
 function p($dir, $name = '')
@@ -239,7 +247,6 @@ function p($dir, $name = '')
     return $m;
 }
 
-
 //网页跳转的提示页面
 function message($msg, $redirect = '')
 {
@@ -249,7 +256,7 @@ function message($msg, $redirect = '')
     } else {
         //		var_dump($redirect);
         $redirect = SplitUrl($redirect);
-        include view('share', 'message', '', '');
+        include view_back('message',true);
     }
     exit();
 }
@@ -271,8 +278,7 @@ function show_message($title = 'df', $msg = '', $return_url = null, $type = 'war
     } else {
         $jump = sprintf('location.href="%s"', $return_url);
     }
-    $model_type = "message";
-    include view('share', 'message', '', '');
+    include view_back('message',true);
     die();
 }
 

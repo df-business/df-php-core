@@ -2,20 +2,14 @@
 defined('INIT') or exit('Access Denied');
 //----------------------------------------------全局参数
 
-define('DF', 'http://dfer.top/');
-//当前时间
-define('TIMESTAMP', time());
-//网站根目录
-define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/');
-//访问者ip
-define('IP', $_SERVER['REMOTE_ADDR']);
-
 // 默认模板
 define('THEME_HOMEPAGE', 'homepage');
 define('THEME_ADMIN', 'admin');
 
+
+
 #开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
-define('DEV', 0);
+define('DEV', 1);
 define('SERVER', 'localhost');
 define('ACC', 'dfphp_dfer_site');
 define('PWD', 'mMHBCAimbKKjPP67');
