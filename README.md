@@ -11,11 +11,6 @@
 ### 使用
 
 ```
-composer require dfer/tools
-composer require dfer/tools:*
-
-composer update dfer/tools
-
-composer remove dfer/tools
+composer require dfer/df-php-core
 ```
 
