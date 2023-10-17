@@ -24,7 +24,7 @@ class Model
     //------------------------------------------常用方法
 
     //截取指定两个字符之间的字符串
-    public function str_cut($begin, $end, $str)
+    public function strCut($begin, $end, $str)
     {
         $b = mb_strpos($str, $begin) + mb_strlen($begin);
         $e = mb_strpos($str, $end) - $b;
@@ -32,7 +32,7 @@ class Model
     }
 
     //php低版本无法兼容高版本，需要进行警告
-    public function php_ver_notice()
+    public function phpVerNotice()
     {
         $ver = explode(".", PHP_VERSION);
         $ver_0 = $ver[0];
@@ -44,19 +44,19 @@ class Model
     //获取浏览器内核信息
     public function getBrowser()
     {
-        return sprintf("%s-%s", $this -> getBrowser_name(), $this -> getBrowser_ver());
+        return sprintf("%s-%s", $this -> getBrowserName(), $this -> getBrowserVer());
     }
 
     //ie兼容性差，对ie内核进行警告
-    public function ie_notice()
+    public function ieNotice()
     {
-        //	echo $this->getBrowser_name();
-        if ($this -> getBrowser_name() == 'ie') {
-            show_message("不支持IE内核", "请检查浏览器");
+        //	echo $this->getBrowserName();
+        if ($this -> getBrowserName() == 'ie') {
+            showMessage("不支持IE内核", "请检查浏览器");
         }
     }
 
-    public function getBrowser_name()
+    public function getBrowserName()
     {
         $agent = $_SERVER["HTTP_USER_AGENT"];
         if (strpos($agent, 'MSIE') !== false || strpos($agent, 'rv:11.0')) {//ie11判断
@@ -72,7 +72,7 @@ class Model
         }
     }
 
-    public function getBrowser_ver()
+    public function getBrowserVer()
     {
         if (empty($_SERVER['HTTP_USER_AGENT'])) {//当浏览器没有发送访问者的信息的时候
             return 'unknow';
@@ -96,7 +96,7 @@ class Model
     /**
      unicode解码
      */
-    public function unicode_decode($unistr)
+    public function unicodeDecode($unistr)
     {
         // $unistr=substr($unistr,2,strlen($unistr));
         $json = '{"str":"' . $unistr . '"}';
@@ -168,7 +168,7 @@ class Model
      * 只对有正常物理路径的图片有效
      * 对于缓存类图片无效
      */
-    public function create_image($img)
+    public function createImage($img)
     {
         $ext = strtolower(substr($img, strrpos($img, '.')));
         if ($ext == '.png') {
@@ -184,7 +184,7 @@ class Model
     //遍历目录，获取目录、文件数组
     public $my_scenfiles = array();
     public $my_files = array();
-    public function my_scandir($dir)
+    public function myScanDir($dir)
     {
         global $my_scenfiles, $my_files;
         //  echo $dir;
@@ -192,7 +192,7 @@ class Model
             while (($file = readdir($handle)) !== false) {
                 if ($file != ".." && $file != ".") {
                     if (is_dir($dir . "/" . $file)) {
-                        my_scandir($dir . "/" . $file);
+                        myScanDir($dir . "/" . $file);
                     } else {
                         $my_scenfiles[] = $dir . "/" . $file;
                         $my_files[] = $file;
@@ -204,7 +204,7 @@ class Model
     }
 
     //拼装随机数，保留0位小数，生成一个字符串
-    public function byte_format($input, $prec = 0)
+    public function byteFormat($input, $prec = 0)
     {
         $prefix_arr = array('D', 'F', 'E', 'R', 'R');
         $value = round($input, $prec);
@@ -218,7 +218,7 @@ class Model
     }
 
     //数组中所有元素都是数组则返回true
-    public function is_array2($array)
+    public function isArray2($array)
     {
         if (is_array($array)) {
             foreach ($array as $k => $v) {
@@ -229,7 +229,7 @@ class Model
     }
 
     //获取最后一天的日期
-    public function get_last_day($year, $month)
+    public function getLastDay($year, $month)
     {
         return date('t', strtotime("{$year}-{$month} -1"));
     }
@@ -237,7 +237,7 @@ class Model
     /*
      * 判断是否是时间戳
      */
-    public function is_timestamp($timestamp)
+    public function isTimestamp($timestamp)
     {
         if (strtotime(date('m-d-Y H:i:s', $timestamp)) === $timestamp) {
             return $timestamp;
@@ -247,7 +247,7 @@ class Model
     }
 
     //base64加密
-    public function b64_encode($obj)
+    public function b64Encode($obj)
     {
         if (is_array($obj)) {
             return urlencode(base64_encode(json_encode($obj)));
@@ -257,7 +257,7 @@ class Model
     }
 
     //base64解密
-    public function b64_decode($str, $is_array = true)
+    public function b64Decode($str, $is_array = true)
     {
         $str = base64_decode(urldecode($str));
 
@@ -272,7 +272,7 @@ class Model
      *
      * 物理路径
      */
-    public function ReadFileStr($fileN)
+    public function readFileStr($fileN)
     {
         $file_path = $fileN;
         if (file_exists($file_path)) {
@@ -318,7 +318,7 @@ class Model
 
     //删除目录和目录下的文件，成功则返回1
     //$dir为目录的物理路径
-    public function deldir($dir)
+    public function delDir($dir)
     {
         try {
             //先删除目录下的文件：
@@ -335,7 +335,7 @@ class Model
                             return false;
                         }
                     } else {
-                        $this -> deldir($fullpath);
+                        $this -> delDir($fullpath);
                         //循环删除文件
                     }
                 }
@@ -349,7 +349,7 @@ class Model
     }
 
     //删除单个文件
-    public function delfile($file)
+    public function delFile($file)
     {
         return unlink($file);
     }
@@ -378,7 +378,7 @@ class Model
 
     //改变图片大小
     //依照像素进行转化
-    public function resizejpg($imgsrc, $imgdst, $imgWidth, $imgHeight)
+    public function resizeJpg($imgsrc, $imgdst, $imgWidth, $imgHeight)
     {
 
         //$imgsrc 原路径
@@ -436,7 +436,7 @@ class Model
     }
 
     //获取文件后缀
-    public function get_ext($file_name)
+    public function getExt($file_name)
     {
         $a = explode('.', $file_name);
         return array_pop($a);
@@ -445,7 +445,7 @@ class Model
     }
 
     //获取"/"后的字符串
-    public function get_last($file_name)
+    public function getLast($file_name)
     {
         $a = explode('/', $file_name);
         return array_pop($a);
@@ -454,7 +454,7 @@ class Model
     }
 
     //判断文件是否存在
-    public function FileExist($filename)
+    public function fileExist($filename)
     {
         if (file_exists($filename)) {#查看文件是否存在于网站目录
             return true;
@@ -471,8 +471,7 @@ class Model
      * 0：跳转；1：获取id
      *
      */
-
-    public function VerifyLogin($type = 0)
+    public function verifyLogin($type = 0)
     {
         global $_df;
 
@@ -486,7 +485,7 @@ class Model
             if ($type == 'all') {
                 return array($id, $nm, $pw);
             }
-            $user = show_first('df', ['nm'=>$nm]);
+            $user = showFirst('df', ['nm'=>$nm]);
 
             if ($user['pw'] == $pw) {
                 if ($type) {
@@ -520,7 +519,7 @@ class Model
      * @param  [Base64] $base64_image_content [要保存的Base64]
      * @param  [目录] $path [要保存的路径]
      */
-    public function base64_image_content($base64_image_content, $path)
+    public function base64ImageContent($base64_image_content, $path)
     {
         $dir = "upload/base64/";
         $err = 'error';
@@ -547,13 +546,13 @@ class Model
      * id不为空就设置缓存
      * id为空，有缓存就读取缓存，没有就读取wx第一条数据
      */
-    public function WxAc($id = '')
+    public function wxAc($id = '')
     {
         if (isset($_GET['WxId'])) {
             return $_GET['WxId'];
         }
         if ($id != '') {
-            SetSession('wx', $id);
+            setSession('wx', $id);
             return $id;
         }
         $id = getSession('wx');
@@ -568,14 +567,14 @@ class Model
 
     //分割字符串
     //Split("1|2|3","|");
-    public function Split($str, $char)
+    public function split($str, $char)
     {
         $rt = explode($char, $str);
         return $rt;
     }
 
     //判断表是否存在
-    public function TableExist($table = 'cache')
+    public function tableExist($table = 'cache')
     {
         global $db;
         $result = $db -> query("SHOW TABLES LIKE '" . $table . "'");
@@ -606,7 +605,7 @@ class Model
     }
 
     //生成一个指定大小的数组
-    public function DefineArr($a)
+    public function defineArr($a)
     {
         $array = array();
         for ($i = 0; $i < $a; $i++) {
@@ -616,11 +615,11 @@ class Model
     }
 
     //收集用户信息
-    public function col_user_info()
+    public function colUserInfo()
     {
         global $_df;
         $db = 'home_user_info';
-        $user = show_first($db, ['ip'=>IP]);
+        $user = showFirst($db, ['ip'=>IP]);
         if ($user) {
             $dt = array('browser' => $_SERVER['HTTP_USER_AGENT'], 'hits' => $user['hits'] + 1, 'time' => $_df['time']);
             update($db, $dt, $user['Id']);
@@ -638,7 +637,7 @@ class Model
  *
  * 结果：可保存、可直接显示。
  */
-class imgcompress
+class ImgCompress
 {
     private $src;
     private $image;

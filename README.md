@@ -12,5 +12,12 @@
 
 ```
 composer require dfer/df-php-core
+
+
+composer update dfer/df-php-core
 ```
 
+
+
+---
+©2017~2023 Dfer.Site

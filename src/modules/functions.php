@@ -65,32 +65,32 @@ function view($root, $layout,$other)
     //如果前端文件不存在，或者前端文件修改时间小于html、布局页、后台页，或者处于测试状态
     if (!is_file($to) || filemtime($from) > filemtime($to) || filemtime($layout) > filemtime($to) || filemtime($back) > filemtime($to) || DEV) {
         //确认好文件路径之后，进行html的替换，生成php文件
-        view_conversion($from, $to, $layout);
+        viewConversion($from, $to, $layout);
     }
 				// var_dump($back,$from,$to,$layout);
     return $to;
 }
 
 
-function view_front($layout="common",$other=false){
+function viewFront($layout="common",$other=false){
 	return	view(THEME_HOMEPAGE_ROOT,$layout,$other);
 }
 
-function view_back($layout="common",$other=false){
+function viewBack($layout="common",$other=false){
 	return	view(THEME_ADMIN_ROOT,$layout,$other);
 }
 
 
 //将html转化为php
-function view_conversion($from, $to, $layout)
+function viewConversion($from, $to, $layout)
 {
     //获取文件目录
     $path = dirname($to);
 
     //创建目录
-    mkdirs($path);
+    mkDirs($path);
 
-    $content = view_replace($from, $layout);
+    $content = viewReplace($from, $layout);
     //写入文件
     file_put_contents($to, $content);
 }
@@ -103,11 +103,11 @@ function view_conversion($from, $to, $layout)
  *
  *
  */
-function mkdirs($path)
+function mkDirs($path)
 {
     //检查指定的文件是否是目录
     if (!is_dir($path)) {
-        mkdirs(dirname($path)); //循环创建上级目录
+        mkDirs(dirname($path)); //循环创建上级目录
         mkdir($path);
     }
     return is_dir($path);
@@ -126,7 +126,7 @@ function mkdirs($path)
  * "df-code"必须放在控件里，不然不会运行
  *
  */
-function view_replace($str, $layout)
+function viewReplace($str, $layout)
 {
     $str = file_get_contents($str);
     if (empty($layout)) {
@@ -174,8 +174,6 @@ function view_replace($str, $layout)
     $layout = preg_replace('/#`([\s\S]*?)`/', '<?php echo $val->{"$1"} ?>', $layout);
     $layout = preg_replace('/<df-val-cache value=\"([\s\S]*?)\"\/>/', '<?php echo $val->{"$1"} ?>', $layout);
 
-
-
     //组装if语句
     $layout = preg_replace('/<df-if ([\s\S]*?)>/', '<?php if($1){ ?>', $layout);
     $layout = preg_replace('/<df-elif ([\s\S]*?)>/', '<?php } else if($1){ ?>', $layout);
@@ -187,21 +185,16 @@ function view_replace($str, $layout)
     $layout = preg_replace('/!{else}/', '<?php } else{ ?>', $layout);
     $layout = preg_replace('/!{\/if}/', '<?php } ?>', $layout);
 
-
-
     //执行代码，单行或多行
     $layout = preg_replace('/!{([\s\S]*?)}!/', '<?php $1 ?>', $layout);
     $layout = preg_replace('/<df-code>([\s\S]*?)<\/df-code>/', '<?php $1 ?>', $layout);
-
 
     //打印字符串，只能匹配单行
     $layout = preg_replace('/<df-print value=\"([\s\S]*?)\"\/>/', '<?php echo $1 ?>', $layout);
     $layout = preg_replace('/!!([\s\S]*?)!!/', '<?php echo $1 ?>', $layout);
 
-
     //防止关键字被非法格式化而进行注释，最后恢复被注释的内容
     $layout = preg_replace('/\/\*d([\s\S]*?)d\*\//', '$1', $layout);
-
 
     $layout = '' . $layout;
     return $layout;
@@ -256,9 +249,9 @@ function message($msg, $redirect = '')
     if (empty($msg) && !empty($redirect)) {
         header('location: ' . $redirect);
     } else {
-        //		var_dump($redirect);
-        $redirect = SplitUrl($redirect);
-        include view_back('message',true);
+        // var_dump($redirect);
+        $redirect = splitUrl($redirect);
+        include viewBack('message',true);
     }
     exit();
 }
@@ -268,7 +261,7 @@ function message($msg, $redirect = '')
  *
  * ['error', 'warning', 'info', 'success', 'input', 'prompt']
  */
-function show_message($title = 'df', $msg = '', $return_url = null, $type = 'warning')
+function showMessage($title = 'df', $msg = '', $return_url = null, $type = 'warning')
 {
 
     //擦除之前的所有显示数据
@@ -280,14 +273,14 @@ function show_message($title = 'df', $msg = '', $return_url = null, $type = 'war
     } else {
         $jump = sprintf('location.href="%s"', $return_url);
     }
-    include view_back('message',true);
+    include viewBack('message',true);
     die();
 }
 
 
 
 //输出json，然后终止当前请求
-function show_json($status = 1, $return = array(), $msg = '')
+function showJson($status = 1, $return = array(), $msg = '')
 {
     $ret = array(
         'status' => $status,
@@ -296,11 +289,10 @@ function show_json($status = 1, $return = array(), $msg = '')
     if ($return) {
         $ret['result'] = $return;
     }
-
-    show_json_base($ret);
+    showJsonBase($ret);
 }
 
-function show_json_base($return = array())
+function showJsonBase($return = array())
 {
     //json格式
     header('content-type:application/json;charset=utf-8');
@@ -308,11 +300,8 @@ function show_json_base($return = array())
     die(json_encode($return, JSON_UNESCAPED_UNICODE));
 }
 
-
-
-
 //是微信端则返回true
-function is_weixin()
+function isWeixin()
 {
     if (empty($_SERVER['HTTP_USER_AGENT']) || strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') === false && strpos($_SERVER['HTTP_USER_AGENT'], 'Windows Phone') === false) {
         return false;
@@ -320,14 +309,8 @@ function is_weixin()
     return true;
 }
 
-
-
-
-
-
-
 //http与https相互转换
-function httpAndhttps()
+function httpAndHttps()
 {
     if ($_SERVER["HTTPS"] == "on") {
         $xredir = "http://" . $_SERVER["SERVER_NAME"] .
@@ -339,8 +322,6 @@ function httpAndhttps()
         header("Location: " . $xredir);
     }
 }
-
-
 
 /*将时间戳转化为正常的时间格式
  *
@@ -388,12 +369,12 @@ function getTimeFromStr($time, $type = 0)
 
 /*拼接url参数
  *
- * SplitUrl("A/c/a/para",array(zdy=>$zdy))
+ * splitUrl("A/c/a/para",array(zdy=>$zdy))
  * eg:
- * SplitUrl("wx/home/share_manage_show/{$v[0]}",array(wxId=>$_df['wxId']))
+ * splitUrl("wx/home/share_manage_show/{$v[0]}",array(wxId=>$_df['wxId']))
  *
  */
-function SplitUrl($str, $get = null)
+function splitUrl($str, $get = null)
 {
     //去掉字符串首尾空格
     $str = trim($str);
@@ -428,11 +409,6 @@ function SplitUrl($str, $get = null)
     $rt = SITE . "{$s[0]}/{$s[1]}/{$s[2]}/{$s[3]}{$s[4]}";
     return $rt;
 }
-
-
-
-
-
 
 //-----------------------------------------------------database--------------------start
 
@@ -520,7 +496,7 @@ function query($sql)
  * query_format('df',['type'=>1]);
  *
  */
-function query_format($tb, $para = array(), $order = array(), $limit = array())
+function queryFormat($tb, $para = array(), $order = array(), $limit = array())
 {
     if (empty($tb)) {
         return array();
@@ -572,8 +548,6 @@ function query_format($tb, $para = array(), $order = array(), $limit = array())
         }
     }
 
-
-
     //带条件获取整个表的数据
     $sqlString = sprintf("select * from `%s` %s %s %s", $tb, $where, $order, $limit); //sql语句的表名区分大小写
 
@@ -614,7 +588,7 @@ WHERE TABLE_NAME = '%s' and COLUMN_NAME='%s';
  * query_format_other('df',['title'=>1],3);
  *
  */
-function query_format_update_insert($tb, $data = array(), $para = array())
+function queryFormatUpdateInsert($tb, $data = array(), $para = array())
 {
     global $db;
     if (empty($tb) || empty($data)) {
@@ -690,18 +664,16 @@ function query_format_update_insert($tb, $data = array(), $para = array())
 /*
  * 删除数据
  *
- * query_format_del('df',['type'=>3])
+ * queryFormatDel('df',['type'=>3])
  *
  * 根据Id删除
- * query_format_del('df',5)
+ * queryFormatDel('df',5)
  *
  * 清空表
- * query_format_del('df')
- *
- *
- *
+ * queryFormatDel('df')
+ * 
  */
-function query_format_del($tb, $para = array())
+function queryFormatDel($tb, $para = array())
 {
     global $db;
     if (empty($tb)) {
@@ -750,7 +722,7 @@ function show($sql)
  *
  * 返回数组
  */
-function show_list($tb, $para = array(), $order = array(), $limit = array())
+function showList($tb, $para = array(), $order = array(), $limit = array())
 {
     $sql = query_format($tb, $para, $order, $limit);
     $rt = show($sql);
@@ -766,7 +738,7 @@ function show_list($tb, $para = array(), $order = array(), $limit = array())
  *
  *
  */
-function show_first($tb, $para = array(), $order = array(), $limit = array())
+function showFirst($tb, $para = array(), $order = array(), $limit = array())
 {
     $sql = query_format($tb, $para, $order, $limit);
     $r = query($sql);
@@ -781,7 +753,7 @@ function show_first($tb, $para = array(), $order = array(), $limit = array())
  * 单行则返回键值对
  *
  */
-function show_auto($tb, $para = array(), $order = array(), $limit = array())
+function showAuto($tb, $para = array(), $order = array(), $limit = array())
 {
     $sql = query_format($tb, $para, $order, $limit);
 
@@ -830,7 +802,7 @@ class Enum
  */
 function update($tb, $data = array(), $para = array(), $rt = null)
 {
-    $sql = query_format_update_insert($tb, $data, $para);
+    $sql = queryFormatUpdateInsert($tb, $data, $para);
     $return = 0;
     //新增
     if (empty($para) || (isset($para["Id"]) && $para["Id"] == 0) || (isset($para["id"]) && $para["id"] == 0) || (isset($para["ID"]) && $para["ID"] == 0)) {
@@ -890,7 +862,7 @@ function update($tb, $data = array(), $para = array(), $rt = null)
  */
 function insert($tb, $data = array(), $rt = null)
 {
-    $sql = query_format_update_insert($tb, $data);
+    $sql = queryFormatUpdateInsert($tb, $data);
     //开启事务。防止高并发
     query("START TRANSACTION");
     $r = query($sql);
@@ -954,7 +926,7 @@ function del($tb, $para = array(), $rt = null)
     global $db;
     $return = 0;
 
-    $sql = query_format_del($tb, $para);
+    $sql = queryFormatDel($tb, $para);
     $r = query($sql);
 
     if ($r) {
@@ -1002,19 +974,16 @@ function exe($sql)
     return $return;
 }
 
-
-
-
 /*
  * dataTable依赖
  *
  * 分页处理
  *
  *
- * show_page($db_Statistics,[],"Df_web_mng/data/".$db_Statistics);
+ * showPage($db_Statistics,[],"Df_web_mng/data/".$db_Statistics);
  *
  */
-function show_page($tb, $para = array(), $url = '')
+function showPage($tb, $para = array(), $url = '')
 {
 
     //var_dump($_POST);
@@ -1030,13 +999,13 @@ function show_page($tb, $para = array(), $url = '')
         //var_dump($order_column,$_POST['order'][0]['column'],$_POST['columns']);
 
         $total_count = show(sprintf("select count(*) from %s", $tb))[0][0];
-        $data = show_list($tb, $para, $order, [$start, $length]);
+        $data = showList($tb, $para, $order, [$start, $length]);
         $data_rt = array();
         if (!empty($url)) {
             foreach ($data as $key => $value) {
-                $url_view = SplitUrl(sprintf("%sview/%s", $url, $value[0]));
-                $url_edit = SplitUrl(sprintf("%sadd/%s", $url, $value[0]));
-                $url_del = SplitUrl(sprintf("%sdel/%s", $url, $value[0]));
+                $url_view = splitUrl(sprintf("%sview/%s", $url, $value[0]));
+                $url_edit = splitUrl(sprintf("%sadd/%s", $url, $value[0]));
+                $url_del = splitUrl(sprintf("%sdel/%s", $url, $value[0]));
                 $opt = <<<EOT
 <a href='{$url_view}'>[预览]</a>
 <a href='{$url_edit}'>[编辑]</a>
@@ -1056,7 +1025,7 @@ EOT;
             'error' => ''
         );
 
-        show_json_base($return);
+        showJsonBase($return);
     }
 }
 
@@ -1067,7 +1036,7 @@ EOT;
 /*
  *第一个参数为空就调用第二个参数
  */
-function set_val($default, $other)
+function setVal($default, $other)
 {
     $rt = empty($default) ? $other : $default;
     return $rt;
@@ -1077,7 +1046,7 @@ function set_val($default, $other)
  *数据不存在的时候用来填充数据
  *
  */
-function table_init($table)
+function tableInit($table)
 {
     global $database;
     //获取表字段名、类型、备注
@@ -1264,7 +1233,7 @@ function writeFile($str, $file = "df.php")
  *
  * $name：控件的name参数
  */
-function upload_file($name, $size = 0, $editTool = 0, $Path = '')
+function uploadFile($name, $size = 0, $editTool = 0, $Path = '')
 {
     global $m;
     //区分不同的数据类型
@@ -1310,7 +1279,7 @@ function upload_file($name, $size = 0, $editTool = 0, $Path = '')
                 echo "-1"; //文件出错
             } else {
                 $path = "upload/pics/" . $name . '/';
-                mkdirs($path);
+                mkDirs($path);
                 //自动生成路径
                 if (empty($Path)) {
                     $newname = $path . $name . "_" . date("YmdHis") . "." . $m->get_ext($filename);
@@ -1400,7 +1369,7 @@ function upload_file($name, $size = 0, $editTool = 0, $Path = '')
             if ($fileErr > 0) { #判断是否出错
                 echo "-1"; //上传受限
             } else {
-                mkdirs($path);
+                mkDirs($path);
                 $newname = $path . $name . "_" . date("YmdHis") . "." . $m->get_ext($filename); //新文件名
                 move_uploaded_file($filetmpname, $newname); #将临时文件移动到网站目录
 //header("Content-type: image/jpeg");
@@ -1425,9 +1394,9 @@ function upload_file($name, $size = 0, $editTool = 0, $Path = '')
  *
  *
  */
-function cache_r($key)
+function cacheR($key)
 {
-    $cachedata = show_first("cache", ["key" => $key]);
+    $cachedata = showFirst("cache", ["key" => $key]);
     //	  var_dump(empty($cachedata));die();
     if (empty($cachedata)) {
         return '';
@@ -1437,12 +1406,12 @@ function cache_r($key)
 
 /*插入及更新
  *
- * $home_layout = show_first("home_layout",1);
+ * $home_layout = showFirst("home_layout",1);
  * cache_w("home_layout",$home_layout);
  *
  *
  */
-function cache_w($key, $data)
+function cacheW($key, $data)
 {
     if (empty($key) || !isset($data)) {
         return false;
@@ -1450,7 +1419,7 @@ function cache_w($key, $data)
     $record = array();
     $record['key'] = $key;
     $record['value'] = $data;
-    $cachedata = show_first("cache", ["key" => $key]);
+    $cachedata = showFirst("cache", ["key" => $key]);
     if (empty($cachedata)) {
         return insert("cache", $record);
     } else {
@@ -1459,14 +1428,14 @@ function cache_w($key, $data)
 }
 
 
-function cache_del($key)
+function cacheDel($key)
 {
     $result = del("cache", ["key" => $key]);
     return $result;
 }
 
 
-function cache_clean()
+function cacheClean()
 {
     $result = del("cache");
     return $result;
@@ -1509,7 +1478,7 @@ function setSession($name, $val, $rt = "")
 {
     $_SESSION[$name] = $val;
     if ($rt != "") {
-        header(sprintf("location:%s", SplitUrl($rt)));
+        header(sprintf("location:%s", splitUrl($rt)));
     }
 }
 
@@ -1524,14 +1493,14 @@ function delSession($name = '', $rt = "")
     if (empty($rt)) {
         header('location: ' . URL);
     } else {
-        header(sprintf("location:%s", SplitUrl($rt)));
+        header(sprintf("location:%s", splitUrl($rt)));
     }
 }
 
 
 //-------------------------------操作session---------------end
 //unicode
-function UnicodeEncode($str)
+function unicodeEncode($str)
 {
     //split word
     preg_match_all('/./u', $str, $matches);
@@ -1557,11 +1526,11 @@ function unicodeDecode($unicode_str)
 
 
 //unicode解码
-function replace_unicode_escape_sequence($match)
+function replaceUnicodeEscapeSequence($match)
 {
     return mb_convert_encoding(pack('H*', $match[1]), 'UTF-8', 'UCS-2BE');
 }
-function unicode_decode($name)
+function unicodeDecode($name)
 {
     $str = preg_replace_callback('/\\\\u([0-9a-f]{4})/i', 'replace_unicode_escape_sequence', $name);
     return $str;
@@ -1680,7 +1649,7 @@ function getPara($str)
 /* 判断远程文件是否存在
  * 如果代码做过404处理就检测不出来
  */
-function http_exist($url)
+function httpExist($url)
 {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -1734,7 +1703,7 @@ function df()
  * 定位系统的域名
  *
  */
-function GetWeb()
+function getWeb()
 {
     $para = array(
         'website' => SITE
@@ -1751,7 +1720,7 @@ function GetWeb()
  *
  * eg:findstr('abc','c')
  */
-function findstr($find, $str)
+function findStr($find, $str)
 {
     $pos = strpos($find, $str);
     //	echo $pos;
@@ -1763,11 +1732,6 @@ function findstr($find, $str)
 
     return $rt;
 }
-
-
-
-
-
 
 
 
@@ -1828,7 +1792,7 @@ function fileW($fileN, $str)
  *
  * eg：/index.php?f=/assets/df.js,/assets/fontFamily/init.js
  */
-function AddF($f)
+function addF($f)
 {
     $files = explode(",", $f);
 
@@ -1887,11 +1851,11 @@ function getEle($html)
 function toUrl($url, $para = null)
 {
     if (!empty($para)) {
-        $url = SplitUrl($url);
+        $url = splitUrl($url);
         $para = http_build_query($para);
         $url = "location:{$url}&{$para}";
     } else {
-        $url = SplitUrl($url);
+        $url = splitUrl($url);
         $url = "location:{$url}";
     }
 
@@ -1912,7 +1876,7 @@ function runJs($js)
  * @param type $str
  * @return type
  */
-function StrToBin($str)
+function strToBin($str)
 {
     //1.列出每个字符
     $arr = preg_split('/(?<!^)(?!$)/u', $str);
@@ -1931,7 +1895,7 @@ function StrToBin($str)
  * @param type $str
  * @return type
  */
-function BinToStr($str)
+function binToStr($str)
 {
     $arr = explode(' ', $str);
     foreach ($arr as &$v) {
@@ -2027,7 +1991,7 @@ function pay($subject, $total_amount, $body, $config_url, $para = 0)
  * 处在同步调用下，方能生效
  *
  */
-function download_document($fileSrc, $mimetype = "application/octet-stream")
+function downloadDocument($fileSrc, $mimetype = "application/octet-stream")
 {
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
     header("Content-Disposition: attachment; filename = $filename");
@@ -2119,7 +2083,7 @@ function isMobile()
 
 
 //判断是否为时间戳
-function is_timestamp($timestamp)
+function isTimestamp($timestamp)
 {
     //检查字符串是否为整数
     if (is_numeric($timestamp)) {

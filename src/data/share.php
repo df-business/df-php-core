@@ -94,8 +94,6 @@ if (mysqli_select_db($con, $database)) {
 
 //-----------------------------------基础参数
 if (empty($create)) {
-
-
 	//合并数组
 	$_GP = array_merge($_GET, $_POST);
 	$_gp = $m -> ihtmlspecialchars($_GP);
@@ -105,10 +103,10 @@ if (empty($create)) {
 	'author'=> "谷雨陈",
 	'qq'=> "3504725309",
 	'time'=> getTime(TIMESTAMP),
-	'admin'=>boolval(show_first('dt', ['key'=>'admin'])['val'])
+	'admin'=>boolval(showFirst('dt', ['key'=>'admin'])['val'])
 ];
 
-$m->php_ver_notice();
+$m->phpVerNotice();
 //mail
 if (EMAIL_ENABLE) {
     $mail = m('PHPMailer');

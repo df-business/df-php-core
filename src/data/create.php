@@ -1,10 +1,3 @@
-<!--
-create.php
-创建数据库
-
-Created by dfer on 2017-10-23.
-Copyright 2017 dfer. All rights reserved.
--->
 <?php
 $create = true;
 require "share.php";
