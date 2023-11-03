@@ -12,23 +12,25 @@ define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/');
 //内核根目录
 define('DF_PHP_ROOT', ROOT . '/vendor/dfer/df-php-core/src/');
 
-require ROOT."vendor/autoload.php";
+require ROOT . "vendor/autoload.php";
 
-
+$common = new \Dfer\Tools\Common;
+$files = new \Dfer\Tools\Files;
+$upload = new \Dfer\Tools\Upload;
 //-----------------------------------调用基础对象
 require_once DF_PHP_ROOT . 'modules/functions.php';
-if(is_file(ROOT . 'modules/functions.php')){
-	require_once ROOT . 'modules/functions.php';
+if (is_file(ROOT . 'modules/functions.php')) {
+    require_once ROOT . 'modules/functions.php';
 }
 
 
 // 配置参数
-require is_file(ROOT . 'data/config.php')?ROOT . 'data/config.php':DF_PHP_ROOT . 'data/config.php';
-define('THEME_HOMEPAGE_ROOT', ROOT.'areas/'.THEME_HOMEPAGE.'/');
-define('THEME_ADMIN_ROOT', ROOT.'areas/'.THEME_ADMIN.'/');
+require is_file(ROOT . 'data/config.php') ? ROOT . 'data/config.php' : DF_PHP_ROOT . 'data/config.php';
+define('THEME_HOMEPAGE_ROOT', ROOT . 'areas/' . THEME_HOMEPAGE . '/');
+define('THEME_ADMIN_ROOT', ROOT . 'areas/' . THEME_ADMIN . '/');
 
-define('THEME_HOMEPAGE_ASSETS', '/areas/'.THEME_HOMEPAGE.'/'.'view/public/assets');
-define('THEME_ADMIN_ASSETS', '/areas/'.THEME_ADMIN.'/'.'view/public/assets');
+define('THEME_HOMEPAGE_ASSETS', '/areas/' . THEME_HOMEPAGE . '/' . 'view/public/assets');
+define('THEME_ADMIN_ASSETS', '/areas/' . THEME_ADMIN . '/' . 'view/public/assets');
 
 //-----------------------------------基础配置
 //使html内容可以擦除
@@ -63,17 +65,17 @@ if ($show_err == 1) {
 }
 
 //-----------------------------------模块
-$m = m('model');
+$m = m('Other');
 
 //-----------------------------------数据库
 //连接服务器
 $con = mysqli_connect(SERVER, ACC, PWD);
 if (!$con) {
-    echo "服务器 [".SERVER."] 连接失败";
+    echo "服务器 [" . SERVER . "] 连接失败";
     echo "<br>";
     die();
 }
-$database=DATABASE;
+$database = DATABASE;
 if (mysqli_select_db($con, $database)) {
     //数据库存在
     @$db = new MySQLi(SERVER, ACC, PWD, $database);
@@ -81,11 +83,11 @@ if (mysqli_select_db($con, $database)) {
     //当bool1为false就会执行bool2，当数据库出错就会输出字符并终止程序
     !mysqli_connect_error() or die("数据库 [{$database}] 错误");
     //防止乱码
-    $db -> query('set names utf8');
+    $db->query('set names utf8');
 } else {
     if (empty($create)) {
         //数据库不存在会执行到这里（创建库之后自动刷新不会执行到这里）
-        echo("数据库 [{$database}] 不存在 <br> <a href='/data/create.php'>创建数据库</a> <br> ");
+        echo ("数据库 [{$database}] 不存在 <br> <a href='/data/create.php'>创建数据库</a> <br> ");
         die();
     }
     //只有create为true的状态下能够继续执行
@@ -94,27 +96,21 @@ if (mysqli_select_db($con, $database)) {
 
 //-----------------------------------基础参数
 if (empty($create)) {
-	//合并数组
-	$_GP = array_merge($_GET, $_POST);
-	$_gp = $m -> ihtmlspecialchars($_GP);
-	//公用参数
-	$_df=[
-	'logo'=> DF . "favicon.png",
-	'author'=> "谷雨陈",
-	'qq'=> "3504725309",
-	'time'=> getTime(TIMESTAMP),
-	'admin'=>boolval(showFirst('dt', ['key'=>'admin'])['val'])
-];
+    //合并数组
+    $_GP = array_merge($_GET, $_POST);
+    $_gp = $common->ihtmlspecialchars($_GP);
+    //公用参数
+    $_df = [
+        'logo' => DF . "favicon.png",
+        'author' => "谷雨陈",
+        'qq' => "3504725309",
+        'time' => $common->getTime(TIMESTAMP),
+        'admin' => boolval(showFirst('dt', ['key' => 'admin'])['val'])
+    ];
 
-$m->phpVerNotice();
-//mail
-if (EMAIL_ENABLE) {
-    $mail = m('PHPMailer');
+    phpVerNotice();
+    //mail
+    if (EMAIL_ENABLE) {
+        $mail = m('PHPMailer');
+    }
 }
-
-
-}
-
-
-
-

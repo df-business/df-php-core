@@ -1,40 +1,105 @@
 <?php
-/*
- * 放一些常用的函数
- *
- * 方便直接调用
- *
- */
 defined('INIT') or exit('Access Denied');
+/**
+ * 入口文件
+ * @param {Object} $var 变量
+ **/
+function main($var = null)
+{
+    global $common, $files, $_df;
+    try {
+        df();
+        if (isset($_GET['f'])) {
+            $files->addF($_GET['f']);
+        }
 
+        //初始页面
+        $src_string = isset($_GET['s']) ? $_GET['s'] : (SEO ? "index" : THEME_HOMEPAGE);
+        debug(sprintf("当前页面原始路径：%s", $src_string));
+
+        if (substr($src_string, -5) == ".html")
+            $src_string = str_replace(".html", "", $src_string);
+
+        $src = explode('/', $src_string);
+
+        //短路径
+        if (SEO && $src[0] != "df" && count($src) <= 2) {
+            $area_name = THEME_HOMEPAGE;
+            $ctrl_name = 'home';
+            $action_name = empty($src[0]) ? 'index' : $src[0];
+
+            $param = null;
+            if (isset($src[1])) {
+                $param_items = array_slice($src, 1);
+                $param = count($param_items) == 1 ? $param_items[0] : $param_items;
+            }
+        } else {
+            // 完整路径
+            $area_name = $common->unHump($src[0]) == 'df' ? THEME_ADMIN : $src[0];
+            $ctrl_name = empty($src[1]) ? 'home' : $src[1];
+            $action_name = empty($src[2]) ? 'index' : $src[2];
+
+            $param = null;
+            if (isset($src[3])) {
+                $param_items = array_slice($src, 3);
+                $param = count($param_items) == 1 ? $param_items[0] : $param_items;
+            }
+        }
+
+        $_df['area'] = $area_name;
+        $_df['ctrl'] = $ctrl_name;
+        $_df['action'] = $action_name;
+
+        $ctrl_name = ucwords($ctrl_name) . "Controller";
+        // 控制器方法同时支持下划线和驼峰
+        $action_name = $common->hump($action_name);
+        $ctrl_path = "areas/{$area_name}/controller/{$ctrl_name}.php";
+        // var_dump($_df);
+        if (DEV) {
+            file_exists($ctrl_path) or die("控制器文件不存在:{$ctrl_path}");
+            require($ctrl_path);
+            $controller = new $ctrl_name;
+            method_exists($controller, $action_name) or die(sprintf('文件:%s<br>控制器、方法定义出错:%s %s', $ctrl_path, json_encode($_GET), json_encode($src)));
+        } else {
+            file_exists($ctrl_path) or header(sprintf("Location: %s/../404.html", THEME_HOMEPAGE_ASSETS));
+            require($ctrl_path);
+            $controller = new $ctrl_name;
+            method_exists($controller, $action_name) or header(sprintf("Location: %s/../404.html", THEME_HOMEPAGE_ASSETS));
+        }
+        $controller->$action_name($param);
+    } catch (Exception $e) {
+        if (DEV)
+            var_dump($e);
+        else
+            header(sprintf("Location: %s/../404.html", THEME_HOMEPAGE_ASSETS));
+    }
+}
 
 /*定位view文件
  * 区域，控制器，方法，布局文件
  * 生成之后进行引用
  */
-function view($root, $layout,$other)
+function view($root, $layout, $other)
 {
-	global $_df;
-// var_dump($root, $layout);
-	$area=unHump($_df['area']);
-	$ctrl=unHump($_df['ctrl']);
-	$func=unHump($_df['action']);
-	
-	
-
+    global $_df, $common;
+    // var_dump($root, $layout);
+    $area = $common->unHump($_df['area']);
+    $ctrl = $common->unHump($_df['ctrl']);
+    $func = $common->unHump($_df['action']);
+    $layout = $common->unHump($layout);
     //手机、pc分开调用模板
     //手机模板
-    if (isMobile() && WAP_PAGE_ENABLE) {
+    if ($common->isMobile() && WAP_PAGE_ENABLE) {
         //处理控制器之外的文件
         if ($other) {
             $layout = $from = $root . "/view/public/{$layout}_m.htm";
-            $back = $to = ROOT . "/cache/view/public/{$layout}_m.php";
+            $back = $to = ROOT . "/data/cache/view/public/{$layout}_m.php";
             //wap页面不存在就调用pc页面
             $layout = $from = !is_file($layout) ? $root . "/view/public/{$layout}.htm" : $layout;
         } else {
             $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
             $from_base = ROOT . "/areas/{$area}/view/{$ctrl}/{$func}_m.htm";
-            $to = ROOT . "/cache/areas/{$area}/view/{$ctrl}/{$func}_m.php";
+            $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}_m.php";
             $layout_base = $root . "/view/public/{$layout}_m.htm";
             //wap页面不存在就调用pc页面
             $from = !is_file($from_base) ? ROOT . "/areas/{$area}/view/{$ctrl}/{$func}.htm" : $from_base;
@@ -47,13 +112,13 @@ function view($root, $layout,$other)
         //处理控制器之外的文件
         if ($other) {
             $layout = $from = $root . "/view/public/{$layout}.htm";
-            $back = $to = ROOT . "/cache/view/public/{$layout}.php";
+            $back = $to = ROOT . "/data/cache/view/public/{$layout}.php";
         } else {
             //很奇怪无法获取php文件的修改时间，获取到的是空
             $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
             $from = ROOT . "/areas/{$area}/view/{$ctrl}/{$func}.htm";
-            $to = ROOT . "/cache/areas/{$area}/view/{$ctrl}/{$func}.php";
-            $layout = $root . "/view/public/{$layout}.htm" ;
+            $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}.php";
+            $layout = $root . "/view/public/{$layout}.htm";
         }
     }
 
@@ -67,50 +132,33 @@ function view($root, $layout,$other)
         //确认好文件路径之后，进行html的替换，生成php文件
         viewConversion($from, $to, $layout);
     }
-				// var_dump($back,$from,$to,$layout);
+    // var_dump($back,$from,$to,$layout);
     return $to;
 }
 
-
-function viewFront($layout="common",$other=false){
-	return	view(THEME_HOMEPAGE_ROOT,$layout,$other);
+function viewFront($layout = "common", $other = false)
+{
+    return    view(THEME_HOMEPAGE_ROOT, $layout, $other);
 }
 
-function viewBack($layout="common",$other=false){
-	return	view(THEME_ADMIN_ROOT,$layout,$other);
+function viewBack($layout = "common", $other = false)
+{
+    return    view(THEME_ADMIN_ROOT, $layout, $other);
 }
-
 
 //将html转化为php
 function viewConversion($from, $to, $layout)
 {
+    global $files;
     //获取文件目录
     $path = dirname($to);
 
     //创建目录
-    mkDirs($path);
+    $files->mkDirs($path);
 
     $content = viewReplace($from, $layout);
     //写入文件
     file_put_contents($to, $content);
-}
-
-
-/*
- * 创建目录
- *
- * 如果目录不存在就根据路径创建无限级目录
- *
- *
- */
-function mkDirs($path)
-{
-    //检查指定的文件是否是目录
-    if (!is_dir($path)) {
-        mkDirs(dirname($path)); //循环创建上级目录
-        mkdir($path);
-    }
-    return is_dir($path);
 }
 
 /*读取html文件内容，并进行关键字替换
@@ -144,17 +192,17 @@ function viewReplace($str, $layout)
 
     //布局
     if (count($html) == 0) {
-        $html=['',''];
+        $html = ['', ''];
     }
 
     if (count($header) == 0) {
-        $header=['',''];
+        $header = ['', ''];
     }
     if (count($body) == 0) {
-        $body=['',''];
+        $body = ['', ''];
     }
     if (count($footer) == 0) {
-        $footer=['',''];
+        $footer = ['', ''];
     }
 
     $layout = preg_replace('/<df-html([\s\S]*?)\/>/', $html[1], $layout);
@@ -204,8 +252,8 @@ function viewReplace($str, $layout)
 function m($name = '')
 {
     if (stripos($name, '/') > -1) {
-					// windows
-        $model =is_file( ROOT . "modules/" . $name . '.php')? ROOT . "modules/" . $name . '.php': DF_PHP_ROOT . "modules/" . $name . '.php';
+        // windows
+        $model = is_file(ROOT . "modules/" . $name . '.php') ? ROOT . "modules/" . $name . '.php' : DF_PHP_ROOT . "modules/" . $name . '.php';
         if (!is_file($model)) {
             die(' Model ' . $model . ' Not Found!');
         }
@@ -214,14 +262,14 @@ function m($name = '')
         $name = implode('\\', $name);
         $class_name = $name;
     } else {
-					// linux
-								$model =is_file( ROOT . "modules/" . strtolower($name) . '.php')? ROOT . "modules/" . strtolower($name) . '.php': DF_PHP_ROOT . "modules/" . strtolower($name) . '.php';
+        // linux
+        $model = is_file(ROOT . "modules/{$name}.php") ? ROOT . "modules/{$name}.php" : DF_PHP_ROOT . "modules/{$name}.php";
         if (!is_file($model)) {
-            die(' Model ' . strtolower($name) . ' Not Found!');
+            die(' Model {$name} Not Found!');
         }
         require $model;
         //首字母变大写
-        $class_name = ucfirst($name);
+        $class_name = $name;
     }
 
     $m = new $class_name();
@@ -251,7 +299,7 @@ function message($msg, $redirect = '')
     } else {
         // var_dump($redirect);
         $redirect = splitUrl($redirect);
-        include viewBack('message',true);
+        include viewBack('message', true);
     }
     exit();
 }
@@ -273,106 +321,18 @@ function showMessage($title = 'df', $msg = '', $return_url = null, $type = 'warn
     } else {
         $jump = sprintf('location.href="%s"', $return_url);
     }
-    include viewBack('message',true);
+    include viewBack('message', true);
     die();
 }
 
-
-
-//输出json，然后终止当前请求
-function showJson($status = 1, $return = array(), $msg = '')
-{
-    $ret = array(
-        'status' => $status,
-        'msg' => $msg
-    );
-    if ($return) {
-        $ret['result'] = $return;
-    }
-    showJsonBase($ret);
-}
-
-function showJsonBase($return = array())
-{
-    //json格式
-    header('content-type:application/json;charset=utf-8');
-    //中文不加密
-    die(json_encode($return, JSON_UNESCAPED_UNICODE));
-}
-
-//是微信端则返回true
-function isWeixin()
-{
-    if (empty($_SERVER['HTTP_USER_AGENT']) || strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') === false && strpos($_SERVER['HTTP_USER_AGENT'], 'Windows Phone') === false) {
-        return false;
-    }
-    return true;
-}
-
-//http与https相互转换
-function httpAndHttps()
-{
-    if ($_SERVER["HTTPS"] == "on") {
-        $xredir = "http://" . $_SERVER["SERVER_NAME"] .
-            $_SERVER["REQUEST_URI"];
-        header("Location: " . $xredir);
-    } else {
-        $xredir = "https://" . $_SERVER["SERVER_NAME"] .
-            $_SERVER["REQUEST_URI"];
-        header("Location: " . $xredir);
-    }
-}
-
-/*将时间戳转化为正常的时间格式
+/**
+ * 拆分url参数，组成访问地址
  *
  * eg:
- * getTime($output["time"],"Y/m/d H:i:s")
- *
- */
-function getTime($time = '', $type = 0)
-{
-    if ($type == 0) {
-        $str = 'Y-m-d H:i:s';
-    } elseif ($type == 1) {
-        $str = 'Y-m-d';
-    } else {
-        $str = 'Y.m.d';
-    }
-    if (!empty($time)) {
-        return date($str, $time);
-    } else {
-        return date("Y-m-d H:i:s");
-    }
-}
-
-/*将时间字符串转化为时间戳，格式化之后转化为正常的时间格式
- *
- * eg:
- * getTimeFromStr($output["time"],"Y/m/d H:i:s")
- *
- *
- */
-function getTimeFromStr($time, $type = 0)
-{
-    if (is_numeric($type)) {
-        if ($type == 0) {
-            $str = 'Y-m-d H:i:s';
-        } elseif ($type == 1) {
-            $str = 'Y-m-d';
-        }
-    } else {
-        $str = $type;
-    }
-    //date_default_timezone_set('Asia/Shanghai'); //设置为东八区上海时间
-    return date($str, strtotime($time));
-}
-
-/*拼接url参数
- *
  * splitUrl("A/c/a/para",array(zdy=>$zdy))
- * eg:
  * splitUrl("wx/home/share_manage_show/{$v[0]}",array(wxId=>$_df['wxId']))
- *
+ * @param {Object} $str	url字符串
+ * @param {Object} $get	get参数	数组
  */
 function splitUrl($str, $get = null)
 {
@@ -388,10 +348,12 @@ function splitUrl($str, $get = null)
         $s[$i] = trim($s[$i]);
     }
 
-    if (count($s) < 4) { //防止数组添加新的项之后影响后续判断
+    //防止数组添加新的项之后影响后续判断
+    if (count($s) < 4) {
         $s[3] = "";
     }
-    if (count($s) < 3) { //设置默认值
+    //设置默认值
+    if (count($s) < 3) {
         $s[2] = "index";
     }
     if (empty($s[2])) {
@@ -399,7 +361,8 @@ function splitUrl($str, $get = null)
     }
 
     $s[4] = '';
-    if (is_array($get)) { //增加多参数
+    //增加多参数
+    if (is_array($get)) {
         foreach ($get as $key => $val) {
             $s[4] .= sprintf('&%s=%s', $key, $val);
         }
@@ -410,7 +373,48 @@ function splitUrl($str, $get = null)
     return $rt;
 }
 
-//-----------------------------------------------------database--------------------start
+
+/**
+ *
+ *	拼接url地址，组成访问地址
+ *
+ * eg:
+ * url("admin","home",self::$db_menu."add",$v[0],array("parent_id"=>$param,"parent"=>$parent))
+ *
+ * @param {Object} $area	区域
+ * @param {Object} $ctrl	控制器
+ * @param {Object} $action	方法
+ * @param {Object} $param	参数 字符串或者数组
+ * @param {Object} $get	get参数	数组
+ */
+function url($area, $ctrl = null, $action = null, $param = null, $get = null)
+{
+    //去掉首尾空格
+    $area = trim($area);
+    $ctrl = $ctrl ? trim($ctrl) : 'home';
+    $action = $action ? trim($action) : 'index';
+
+    if ($area == '/') {
+        return SITE;
+    }
+    // 内置参数
+    if ($param) {
+        $param = is_array($param) ? implode("/", $param) : trim($param);
+    }
+
+    // get参数
+    $get_str = '';
+    if ($get && is_array($get)) {
+        foreach ($get as $key => $val) {
+            $get_str .= sprintf('&%s=%s', $key, $val);
+        }
+    }
+
+    $rt = sprintf("%s/%s/%s/%s/%s%s", SITE, $area, $ctrl, $action, $param, $get_str);
+    return $rt;
+}
+
+// ###################################### database START ######################################
 
 
 /*
@@ -470,7 +474,7 @@ function query($sql)
     $r = $db->query($sql);
     //容错处理
     if (!empty($db->error)) {
-        echo($db->error);
+        echo ($db->error);
         $err = sprintf("语句：%s\r\n错误信息：%s", $sql, json_encode($db->error));
         logs($err, 'sql错误');
         //die();
@@ -478,22 +482,21 @@ function query($sql)
     return $r;
 }
 
-
 /*
  * 查询字符串格式化
  *
  *
  * 多列
- * query_format('df',['type'=>1,'parentId'=>2],['time','desc'],[0,1]); *
- * query_format('df',['type'=>1],['time','desc'],10);
- * query_format('df',['type'=>1],['time','desc']);
- * query_format('df',['type'=>1]);
+ * queryFormat('df',['type'=>1,'parentId'=>2],['time','desc'],[0,1]); *
+ * queryFormat('df',['type'=>1],['time','desc'],10);
+ * queryFormat('df',['type'=>1],['time','desc']);
+ * queryFormat('df',['type'=>1]);
  *
  *
  * 单列
  * 默认para为id
- * query_format('df',1);
- * query_format('df',['type'=>1]);
+ * queryFormat('df',1);
+ * queryFormat('df',['type'=>1]);
  *
  */
 function queryFormat($tb, $para = array(), $order = array(), $limit = array())
@@ -556,7 +559,6 @@ function queryFormat($tb, $para = array(), $order = array(), $limit = array())
     return $sqlString;
 }
 
-
 /*
  * 根据字段类型获取默认值
  *
@@ -579,13 +581,13 @@ WHERE TABLE_NAME = '%s' and COLUMN_NAME='%s';
  * 格式化更新语句
  *
  * 新增
- * query_format_other('df',['title'=>1]);
+ * queryFormat_other('df',['title'=>1]);
  *
  *
  * 更新
- * query_format_other('df',['title'=>1],['type'=>1]); *
+ * queryFormat_other('df',['title'=>1],['type'=>1]); *
  * 默认para为id
- * query_format_other('df',['title'=>1],3);
+ * queryFormat_other('df',['title'=>1],3);
  *
  */
 function queryFormatUpdateInsert($tb, $data = array(), $para = array())
@@ -597,7 +599,7 @@ function queryFormatUpdateInsert($tb, $data = array(), $para = array())
 
     //新增
     if (empty($para)) {
-        $data_str=$data_str_key =$data_str_val= '';
+        $data_str = $data_str_key = $data_str_val = '';
         if (!empty($data)) {
             foreach ($data as $key => $value) {
                 if (empty($value)) {
@@ -660,7 +662,6 @@ function queryFormatUpdateInsert($tb, $data = array(), $para = array())
     return $sqlString;
 }
 
-
 /*
  * 删除数据
  *
@@ -671,7 +672,7 @@ function queryFormatUpdateInsert($tb, $data = array(), $para = array())
  *
  * 清空表
  * queryFormatDel('df')
- * 
+ *
  */
 function queryFormatDel($tb, $para = array())
 {
@@ -699,7 +700,6 @@ function queryFormatDel($tb, $para = array())
     return $sqlString;
 }
 
-
 /*
  * 执行sql语句
  * 返回数组
@@ -715,7 +715,6 @@ function show($sql)
     return $rt;
 }
 
-
 /*
  *
  * 输出表格数据
@@ -724,14 +723,10 @@ function show($sql)
  */
 function showList($tb, $para = array(), $order = array(), $limit = array())
 {
-    $sql = query_format($tb, $para, $order, $limit);
+    $sql = queryFormat($tb, $para, $order, $limit);
     $rt = show($sql);
     return $rt;
 }
-
-
-
-
 
 /*
  * 读取首条数据
@@ -740,12 +735,11 @@ function showList($tb, $para = array(), $order = array(), $limit = array())
  */
 function showFirst($tb, $para = array(), $order = array(), $limit = array())
 {
-    $sql = query_format($tb, $para, $order, $limit);
+    $sql = queryFormat($tb, $para, $order, $limit);
     $r = query($sql);
     $rt = $r->fetch_array(MYSQLI_BOTH);
     return $rt;
 }
-
 
 /*
  *
@@ -755,7 +749,7 @@ function showFirst($tb, $para = array(), $order = array(), $limit = array())
  */
 function showAuto($tb, $para = array(), $order = array(), $limit = array())
 {
-    $sql = query_format($tb, $para, $order, $limit);
+    $sql = queryFormat($tb, $para, $order, $limit);
 
     $r = query($sql);
 
@@ -774,8 +768,6 @@ function showAuto($tb, $para = array(), $order = array(), $limit = array())
     return $rt;
 }
 
-
-
 /*
  * 变量
  *
@@ -787,7 +779,6 @@ class Enum
     const reloadParent = 2;
     const reloadCurrent = 3;
 }
-
 
 /*
  *
@@ -826,21 +817,21 @@ function update($tb, $data = array(), $para = array(), $rt = null)
             return $return;
         }
         //返回之前的页面
-        elseif ($rt == 1) {
+        elseif ($rt == Enum::goBack) {
             echo "<script>history.go(-2)</script>";
         }
         //刷新父页面
-        elseif ($rt == 2) {
+        elseif ($rt == Enum::reloadParent) {
             echo "<script>parent.location.reload()</script>";
         }
         //刷新当前页面
-        elseif ($rt == 3) {
+        elseif ($rt == Enum::reloadCurrent) {
             echo "<script>location.reload()</script>";
         }
         //执行js代码
         elseif ($js = strstr($rt, "js:")) {
             echo "<script>{$js}</script>";
-        //调用后台跳转页面
+            //调用后台跳转页面
         } else {
             message('操作成功', $rt);
         }
@@ -893,7 +884,7 @@ function insert($tb, $data = array(), $rt = null)
         //执行js代码
         elseif ($js = strstr($rt, "js:")) {
             echo "<script>{$js}</script>";
-        //调用后台跳转页面
+            //调用后台跳转页面
         } else {
             message('操作成功', $rt);
         }
@@ -901,9 +892,6 @@ function insert($tb, $data = array(), $rt = null)
         return $return;
     }
 }
-
-
-
 
 /*
  * 删除数据
@@ -953,7 +941,7 @@ function del($tb, $para = array(), $rt = null)
         //执行js代码
         elseif ($js = strstr($rt, "js:")) {
             echo "<script>{$js}</script>";
-        //调用后台跳转页面
+            //调用后台跳转页面
         } else {
             message('操作成功', $rt);
         }
@@ -986,7 +974,7 @@ function exe($sql)
 function showPage($tb, $para = array(), $url = '')
 {
 
-    //var_dump($_POST);
+    global $common;
     if ($_POST) {
         $start = $_POST['start'];
         $length = $_POST['length'];
@@ -1025,13 +1013,9 @@ EOT;
             'error' => ''
         );
 
-        showJsonBase($return);
+        $common->showJsonBase($return);
     }
 }
-
-
-
-
 
 /*
  *第一个参数为空就调用第二个参数
@@ -1067,9 +1051,6 @@ function tableInit($table)
     return $item;
 }
 
-
-
-
 /*
  * 连接sql服务器，执行sql语句
  * 单刀插入数据（无视一切规则，强行添加）
@@ -1099,6 +1080,19 @@ function add($tb, $data)
 }
 
 
+/**
+ * 判断表是否存在
+ * @param {Object} $table
+ */
+function tableExist($table = 'cache')
+{
+    global $db;
+    $result = $db->query("SHOW TABLES LIKE '" . $table . "'");
+    $row = $result->fetch_all();
+    if (!count($row)) {
+        die("Table does not exist<br><a href='create.php'>创建数据库</a>");
+    }
+}
 
 /*开始事务
  *
@@ -1161,26 +1155,22 @@ function affair($v)
         show_json('202', '账户收款失败');
     }
 }
-//----------------------database-----------------------end
+// ######################################  database END  ######################################
 
-
-
-
-
-
-/*
+/**
  * 用来输出记录
- * $override：是否覆盖（默认不覆盖）
- * $putConsole：是否输出信息到控制台（默认不输出）
  *
  * 必须单独调用sql，因为这是底层函数，很多高级函数依赖于此函数
  *
+ * @param {Object} $str
+ * @param {Object} $override	是否覆盖（默认不覆盖）
+ * @param {Object} $putConsole	是否输出信息到控制台（默认不输出）
  */
 function logs($str, $override = false, $putConsole = false)
 {
-    global $db;
+    global $db, $common;
     $dt['str'] = is_array($str) ? json_encode($str) : $str;
-    $dt['time'] = getTime(TIMESTAMP);
+    $dt['time'] = $common->getTime(TIMESTAMP);
     //var_dump($dt);die();
     if ($override) {
         $r0 = $db->query("delete from logs;");
@@ -1196,9 +1186,11 @@ function logs($str, $override = false, $putConsole = false)
     }
 }
 
-
-
-//用来创建文件
+/**
+ * 用来创建文件
+ * @param {Object} $str
+ * @param {Object} $file
+ */
 function writeFile($str, $file = "df.php")
 {
     $myfile = fopen(getenv('DOCUMENT_ROOT') . "/{$file}", "w") or die("Unable to open file!");
@@ -1206,193 +1198,13 @@ function writeFile($str, $file = "df.php")
     fclose($myfile);
 }
 
+// ###################################### cache START ######################################
 
-
-/*
- * 上传文件
- * 配合上传组件使用
- * js上传组件会接收所有的echo
- * 默认不改尺寸，不使用富文本框的上传组件
- * 建议每个视图都单独使用一个控制器下的方法来调用这个函数
- *
- * 支持图片、音乐
- * 目前不支持icon
- *
- *
- * 可以拓展出任何文件的上传
- *
- *
- * 可以用来覆盖特定文件
- * upload_file($name,"120*120",0,'/assets/img/ewm1.jpg');
- *
- *
- * upload_file($name,0,2);  //layui编辑器上传
- *
- * 返回文件的上传路径
- *
- *
- * $name：控件的name参数
- */
-function uploadFile($name, $size = 0, $editTool = 0, $Path = '')
-{
-    global $m;
-    //区分不同的数据类型
-    switch ($name) {
-        case 'vtour':
-            break;
-        case 'upfile':
-            break;
-        default:
-            break;
-    }
-
-    //设置文件上传的最大尺寸
-    $imgSize = 104857600; //100M    1024*1024*100
-    $mp3Size = 104857600;
-    $zipSize = 104857600;
-    //die(json_encode($_FILES));
-
-    if ($_FILES == null) {
-        die("not file");
-    }
-
-    $filename = $_FILES[$name]["name"];
-    $filetype = $_FILES[$name]["type"];
-    $filesize = $_FILES[$name]["size"] / 1024;
-    $filetmpname = $_FILES[$name]["tmp_name"];
-    $fileErr = $_FILES[$name]["error"];
-    //图片上传
-    if (
-        ($filetype == "image/gif") #对应input——name=“file”     #判断文件类型和大小
-        || ($filetype == "image/jpeg")
-        || ($filetype == "image/pjpeg")
-        || ($filetype == "image/png")
-        //|| ($filetype == "image/vnd.microsoft.icon")
-    ) {
-        //	die();
-        //以byte为单位
-        if ($filesize > $imgSize) {
-            echo "-3";
-        } //超出尺寸
-        else {
-            if ($fileErr > 0) { #判断是否出错
-                echo "-1"; //文件出错
-            } else {
-                $path = "upload/pics/" . $name . '/';
-                mkDirs($path);
-                //自动生成路径
-                if (empty($Path)) {
-                    $newname = $path . $name . "_" . date("YmdHis") . "." . $m->get_ext($filename);
-                } //新文件名
-                //固定路径
-                else {
-                    $newname = $Path;
-                } //新文件名
-
-
-                if ($size) {
-                    $size = $m->Split($size, "*");
-                    $m->resizejpg($filetmpname, $newname, $size[0], $size[1]); #将临时文件转变尺寸之后移动到网站目录
-                } else {
-                    move_uploaded_file($filetmpname, $newname);
-                } #将临时文件移动到网站目录
-
-                $ys = true; //开启图片压缩
-                if ($ys) {
-                    $percent = 1; #原图压缩，不缩放，但体积大大降低
-                    $imgcompress = new imgcompress($newname, $percent);
-                    $image = $imgcompress->compressImg($newname);
-                }
-
-
-                $newname = '/' . $newname;
-                //header("Content-type: image/jpeg");
-                //js上传插件会接收所有的echo数据
-                //um单个文件上传
-																if ($editTool == 0) {
-																    echo delSpace($newname);
-																} //js上传插件会接收所有的echo数据
-																//um编辑框
-																elseif ($editTool == 1) {
-																    echo "{'url':'{$newname}','state':'SUCCESS',name:'',originalName:'',size:'',type:''}";
-																}
-																//layui编辑器上传
-																elseif ($editTool == 2) {
-																    $json = array(code => 0, msg => 'error', 'data' => array('src' => $newname, 'title' => $newname));
-																    echo(json_encode($json));
-																}
-																//editormd编辑器上传
-																else if($editTool==3){
-																	$json=["success"=>1,"url"=>$newname,"state"=>'SUCCESS',"name"=>"","originalName"=>'',"size"=>'',"type"=>''];
-																	echo(json_encode($json));
-																}
-																else
-																	echo $newname;
-            }
-        }
-    }
-
-    //其他文件
-    else {
-        //音乐上传
-        if (
-            ($filetype == "audio/mp3")
-            || ($m->get_ext($filename) == "mp3")
-        ) {
-            $path = "upload/music/";
-            $fileSizeMax = $mp3Size;
-        }
-        //zip文件上传
-        elseif (
-            ($filetype == "application/zip")
-            || ($m->get_ext($filename) == "zip")
-        ) {
-            $path = "upload/zip/";
-            $fileSizeMax = $zipSize;
-        }
-        //video文件上传
-        elseif (
-            ($filetype == "video/mp4")
-            || ($m->get_ext($filename) == "mp4")
-        ) {
-            $path = "upload/video/";
-            $fileSizeMax = $zipSize;
-        } else {
-            die("-2"); #不支持的文件类型
-        }
-
-        //以byte为单位
-        if ($filesize > $fileSizeMax) {
-            echo "-3";
-        } //超出尺寸
-        else {
-            if ($fileErr > 0) { #判断是否出错
-                echo "-1"; //上传受限
-            } else {
-                mkDirs($path);
-                $newname = $path . $name . "_" . date("YmdHis") . "." . $m->get_ext($filename); //新文件名
-                move_uploaded_file($filetmpname, $newname); #将临时文件移动到网站目录
-//header("Content-type: image/jpeg");
-                $newname = '/' . $newname;
-                echo delSpace($newname); //js上传插件会接收所有的echo数据
-            }
-        }
-    }
-    return $newname;
-}
-
-
-
-
-
-//----------------------------------cache-----------------------start
-/*
+/**
  * 服务器缓存
- *
+ * eg:
  * $home_layout=json_decode(cache_r("home_layout"));
- *
- *
- *
+ * @param {Object} $key
  */
 function cacheR($key)
 {
@@ -1404,12 +1216,13 @@ function cacheR($key)
     return $cachedata['value'];
 }
 
-/*插入及更新
- *
+/**
+ * 插入及更新
+ * eg:
  * $home_layout = showFirst("home_layout",1);
  * cache_w("home_layout",$home_layout);
- *
- *
+ * @param {Object} $key
+ * @param {Object} $data
  */
 function cacheW($key, $data)
 {
@@ -1427,27 +1240,26 @@ function cacheW($key, $data)
     }
 }
 
-
 function cacheDel($key)
 {
     $result = del("cache", ["key" => $key]);
     return $result;
 }
 
-
 function cacheClean()
 {
     $result = del("cache");
     return $result;
 }
-//----------------------------------cache-----------------------end
 
 
+// ######################################  cache END  ######################################
 
 
+// ###################################### session START ######################################
 
-//-------------------------------操作session---------------start
-/*
+
+/**
  * 服务器缓存
  *
  *  默认情况下，PHP.ini 中设置的 SESSION 保存方式是 files（session.save_handler = files），即使用读写文件的方式保存 SESSION 数据，而 SESSION 文件保存的目录由 session.save_path 指定
@@ -1463,8 +1275,8 @@ function cacheClean()
  * 清空浏览器缓存无法影响session
  *
  * Session默认的生命周期通常是20分钟
+ * @param {Object} $name
  */
-
 function getSession($name)
 {
     if (!empty($_SESSION[$name])) {
@@ -1482,7 +1294,11 @@ function setSession($name, $val, $rt = "")
     }
 }
 
-//删除ses并跳转页面
+/**
+ * 删除ses并跳转页面
+ * @param {Object} $name
+ * @param {Object} $rt
+ */
 function delSession($name = '', $rt = "")
 {
     if (empty($name)) {
@@ -1498,187 +1314,42 @@ function delSession($name = '', $rt = "")
 }
 
 
-//-------------------------------操作session---------------end
-//unicode
-function unicodeEncode($str)
-{
-    //split word
-    preg_match_all('/./u', $str, $matches);
+// ######################################  session END  ######################################
 
-    $unicodeStr = "";
-    foreach ($matches[0] as $m) {
-        //拼接
-        $unicodeStr .= "&#" . base_convert(bin2hex(iconv('UTF-8', "UCS-4", $m)), 16, 10);
-    }
-    return $unicodeStr;
-}
-
-
-function unicodeDecode($unicode_str)
-{
-    $json = '{"str":"' . $unicode_str . '"}';
-    $arr = json_decode($json, true);
-    if (empty($arr)) {
-        return '';
-    }
-    return $arr['str'];
-}
-
-
-//unicode解码
-function replaceUnicodeEscapeSequence($match)
-{
-    return mb_convert_encoding(pack('H*', $match[1]), 'UTF-8', 'UCS-2BE');
-}
-function unicodeDecode($name)
-{
-    $str = preg_replace_callback('/\\\\u([0-9a-f]{4})/i', 'replace_unicode_escape_sequence', $name);
-    return $str;
-}
-
-
-
-const REQ_JSON = 0, REQ_GET = 1, REQ_POST = 2;
 /**
- * HTTP请求（支持HTTP/HTTPS，支持GET/POST）
+ * 跳转到指定url，并携带参数
+ * 可以不带参数
+ * 主要用来显示form错误信息
+ * eg：
+ * toUrl('http://www.qq.com');
+ * toUrl("wx/home/wxshare",array('WxId'=>$_df[ 'wxId']));
  *
- * 默认post
- *
- * @param $url http://www.df.net
- * @param $data ["a"=>123]
- * @param $header ["Content-Type: application/json"]
- * @param $type
- **/
-function httpRequest($url, $data = null, $type = REQ_POST, $header = null)
-{
-    //初始化浏览器
-    $curl = curl_init();
-    switch ($type) {
-        case REQ_JSON:
-            if (!empty($data)) {
-                $data = json_encode($data, JSON_UNESCAPED_UNICODE);
-                curl_setopt($curl, CURLOPT_HEADER, false);
-                curl_setopt(
-                    $curl,
-                    CURLOPT_HTTPHEADER,
-                    array(
-                        'Content-Type: application/json; charset=utf-8',
-                        'Content-Length:' . strlen($data),
-                        'Cache-Control: no-cache',
-                        'Pragma: no-cache'
-                    )
-                );
-            }
-            break;
-        case REQ_GET:
-            //判断data是否有数据
-            if (!empty($data)) {
-                $url .= '?';
-                foreach ($data as $k => $v) {
-                    $url .= \sprintf("%s=%s&", $k, $v);
-                }
-                $data = null;
-            }
-            break;
-        case REQ_POST:
-            break;
-        default:
-            # code...
-            break;
-    }
-
-    //设置header头
-    if (!empty($header)) {
-        $header_list = [];
-        foreach ($header as $k => $v) {
-            $header_list[] = \sprintf("%s:%s", $k, $v);
-        }
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $header_list);
-    }
-
-    //判断data是否有数据
-    if (!empty($data)) {
-        //设置POST请求方式
-        curl_setopt($curl, CURLOPT_POST, true);
-        //设置POST的数据包
-        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-    }
-
-    // 支持https请求
-    if (1 == strpos("$" . $url, "https://")) {
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    }
-
-    // 当遇到location跳转时，直接抓取跳转的页面，防止出现301
-    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-    //设置浏览器，把参数url传到浏览器的设置当中
-    curl_setopt($curl, CURLOPT_URL, $url);
-    // 50s延迟
-    curl_setopt($curl, CURLOPT_TIMEOUT, 50);
-    //禁止https协议验证ssl安全认证证书
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    //禁止https协议验证域名，0就是禁止验证域名且兼容php5.6
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-
-    //以字符串形式返回到浏览器当中
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    //让curl发起请求
-    $output = curl_exec($curl);
-    //关闭curl浏览器
-    curl_close($curl);
-    $rt = json_decode($output, true);
-    if (empty($rt)) {
-        $rt = $output;
-    }
-    return $rt;
-}
-
-
-//将get的参数字符串组装成数组
-function getPara($str)
-{
-    $str = explode("&", $str);
-    foreach ($str as $i) {
-        $i = explode("=", $i);
-        $rt[$i[0]] = $i[1];
-    }
-    return $rt;
-}
-
-/* 判断远程文件是否存在
- * 如果代码做过404处理就检测不出来
+ * @param {Object} $url
+ * @param {Object} $para
  */
-function httpExist($url)
+function toUrl($url, $para = null)
 {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_NOBODY, 1); // 不下载
-    curl_setopt($ch, CURLOPT_FAILONERROR, 1);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-    if (curl_exec($ch) !== false) {
-        return true;
+    if (!empty($para)) {
+        $url = splitUrl($url);
+        $para = http_build_query($para);
+        $url = "location:{$url}&{$para}";
     } else {
-        return false;
+        $url = splitUrl($url);
+        $url = "location:{$url}";
     }
+
+    header($url);
+    die();
 }
 
-
-
-/*
- * 自动生成shell
+/**
  * 安全机制
- *
+ * 自动生成shell
  * disable_functions = passthru,system,exec      #php配置里exec是默认禁用的函数
- *
  * eval会被判定为木马
- *
+ * df:生成	fd:删除
  * get不过滤错误
  *
- *
- * df:生成
- * fd:删除
  */
 function df()
 {
@@ -1698,248 +1369,25 @@ function df()
     }
 }
 
-/*
+/**
  * 收集系统的使用情况
  * 定位系统的域名
- *
  */
 function getWeb()
 {
+    global $common;
     $para = array(
         'website' => SITE
     );
-    $rt = httpRequest("https://api.dfer.site/webctl/main/updateuser", $para);
+    $rt = $common->httpRequest("https://api.dfer.site/webctl/main/updateuser", $para);
     //var_dump($rt);
 }
 
-
-
-
-/*在字符串中查找指定字符串，从1开始计算
- * 存在则返回大于0的数字，不存在则返回0
- *
- * eg:findstr('abc','c')
- */
-function findStr($find, $str)
-{
-    $pos = strpos($find, $str);
-    //	echo $pos;
-    if ((bool) $pos) {
-        $rt = $pos + 1;
-    } else {
-        $rt = 0;
-    }
-
-    return $rt;
-}
-
-
-
-//去掉空格和回车
-function delSpace($str)
-{
-    $str = trim($str);
-    $str = ltrim($str) . "\n";
-    $str = ltrim($str, " ");
-    return $str;
-}
-
-
-//数组转url参数
-function arr2url($data)
-{
-
-    //	$data = array(
-    //	'foo'=>'bar',
-    //	'baz'=>'boom'
-    //	);
-
-    return http_build_query($data);
-}
-
-
-
-/*
- *
- * 预定义字符转特殊字符
- * or
- * 特殊字符转预定义字符
- *
- */
-function html($str, $encode = true)
-{
-    if ($encode) {
-        return htmlspecialchars($str, ENT_IGNORE);
-    } else {
-        return htmlspecialchars_decode($str);
-    }
-}
-
-
-
-//创建一个文件，写入字符串，存在则覆盖
-function fileW($fileN, $str)
-{
-    $fp = fopen($fileN, "w");
-    fwrite($fp, $str);
-    fclose($fp);
-}
-
-
-
-
-/*拼接js或者css
- *
- * eg：/index.php?f=/assets/df.js,/assets/fontFamily/init.js
- */
-function addF($f)
-{
-    $files = explode(",", $f);
-
-    foreach ($files as $v) {
-        $v = ROOT . $v;
-
-        //echo $v;
-        $myfile = fopen($v, "r") or die("Unable to open file!");
-        $str = fread($myfile, filesize($v));
-        fclose($myfile);
-        $rt .= $str;
-    }
-
-    die(empty($rt) ? '' : $rt);
-}
-
-
-
-
-#获取字符串中的所有中文
-function getChinese($str)
-{
-    //utf-8页面
-    preg_match_all("/[\x{4e00}-\x{9fa5}]+/u", $str, $chinese);
-    $chinese = implode("", $chinese[0]);
-
-    return $chinese;
-}
-
-
-/*
- * 获取html中body标签的内容
- *
- *
- */
-function getEle($html)
-{
-    preg_match("/<body[^>]*?>(.*\s*?)<\/body>/is", $html, $str);
-
-    return $str[0];
-}
-
-
-
-
-/*
- * 跳转到指定url，并携带参数
- * 可以不带参数
- *
- * 主要用来显示form错误信息
- * eg：
- * ToUrl('http://www.qq.com');
- * ToUrl("wx/home/wxshare",array('WxId'=>$_df[ 'wxId']));
- *
- */
-function toUrl($url, $para = null)
-{
-    if (!empty($para)) {
-        $url = splitUrl($url);
-        $para = http_build_query($para);
-        $url = "location:{$url}&{$para}";
-    } else {
-        $url = splitUrl($url);
-        $url = "location:{$url}";
-    }
-
-    header($url);
-    die();
-}
-
-
-//运行js
-function runJs($js)
-{
-    echo "{$js}";
-}
-
-
 /**
- * 将字符串转换成二进制
- * @param type $str
- * @return type
- */
-function strToBin($str)
-{
-    //1.列出每个字符
-    $arr = preg_split('/(?<!^)(?!$)/u', $str);
-    //2.unpack字符
-    foreach ($arr as &$v) {
-        $temp = unpack('H*', $v);
-        $v = base_convert($temp[1], 16, 2);
-        unset($temp);
-    }
-
-    return join(' ', $arr);
-}
-
-/**
- * 讲二进制转换成字符串
- * @param type $str
- * @return type
- */
-function binToStr($str)
-{
-    $arr = explode(' ', $str);
-    foreach ($arr as &$v) {
-        $v = pack("H" . strlen(base_convert($v, 2, 16)), base_convert($v, 2, 16));
-    }
-
-    return join('', $arr);
-}
-
-
-
-/**
- *字符串转十六进制函数
- *@pream string $str='abc';
- */
-function strToHex($str)
-{
-    $hex = "";
-    for ($i = 0; $i < strlen($str); $i++) {
-        $hex .= dechex(ord($str[$i]));
-    }
-    $hex = strtoupper($hex);
-    return $hex;
-}
-
-/**
- *十六进制转字符串函数
- *@pream string $hex='616263';
- */
-function hexToStr($hex)
-{
-    $str = "";
-    for ($i = 0; $i < strlen($hex) - 1; $i += 2) {
-        $str .= chr(hexdec($hex[$i] . $hex[$i + 1]));
-    }
-    return $str;
-}
-
-
-/*
  * 将arr组装成sql的where部分
- *
+ * @param {Object} $para
+ * @param {Object} $type
  */
-
 function sqlWhere($para, $type)
 {
     $str = "0";
@@ -1949,12 +1397,10 @@ function sqlWhere($para, $type)
     return $str;
 }
 
-
-
-/*
+/**
  * 清空默认的get参数
- *
  * 用于需要验证调用地址的情况，比如，支付宝地址验证
+ * @param {Object} $arr
  */
 function clearDePara($arr)
 {
@@ -1964,134 +1410,6 @@ function clearDePara($arr)
     unset($arr['para']);
     return $arr;
 }
-
-
-
-/*发起zfb支付
- *
- *
- * 订单名称|付款金额|商品描述|支付对象
- *
- * $para:控制回调页面显示不同的内容
- */
-function pay($subject, $total_amount, $body, $config_url, $para = 0)
-{
-    //商户订单号，商户网站订单系统中唯一订单号，必填
-    $out_trade_no = sprintf("Df-%s-%s-%s", TIMESTAMP, rand(), IP);
-    setSession('dfOrder', $out_trade_no);
-    $config_url = ROOT . sprintf("/module/alipay/%s.php", $config_url);
-    $pay_url = ROOT . '/module/alipay/pagepay/pagepay.php';
-    require $pay_url;
-}
-
-
-/*
- * 下载文件，隐藏真实下载地址
- *下载路径显示的是下载页面的url
- * 处在同步调用下，方能生效
- *
- */
-function downloadDocument($fileSrc, $mimetype = "application/octet-stream")
-{
-    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-    header("Content-Disposition: attachment; filename = $filename");
-    header("Content-Length: " . filesize($fileSrc));
-    header("Content-Type: $mimetype");
-    echo file_get_contents($fileSrc);
-}
-
-/*
- * 字符串格式化
- * eg:
- * echo format("ddddd:v1cc:v2bb:v2bbccc:v1",array('v1'=>123,'v2'=>555));
- *
- */
-function format($str, $arr)
-{
-    foreach ($arr as $key => $v) {
-        //兼容wq
-        $key = str_replace(':', '', $key);
-        $str = preg_replace("/:{$key}/", is_string($v) ? "'{$v}'" : $v, $str);
-    }
-    return $str;
-}
-
-
-
-/*
- * php调用网页头的验证功能
- *
- *
- */
-function webAuthenticate($ac, $pw)
-{
-    $strAuthUser = $_SERVER['PHP_AUTH_USER'];
-    $strAuthPass = $_SERVER['PHP_AUTH_PW'];
-
-    //验证成功
-    if ($strAuthUser == $ac && $strAuthPass == $pw) {
-        return true;
-    }
-    //验证失败
-    else {
-        header('WWW-Authenticate: Basic realm="Df"');
-        header('HTTP/1.0 401 Unauthorized');
-        echo '登录失败';
-        return false;
-    }
-}
-
-
-/*
- * 判断是否手机端访问
- */
-function isMobile()
-{
-    //强制调用手机端
-    if (isset($_GET['wap'])) {
-        return true;
-    }
-
-    // 如果有HTTP_X_WAP_PROFILE则一定是移动设备
-    if (isset($_SERVER['HTTP_X_WAP_PROFILE'])) {
-        return true;
-    }
-    // 如果via信息含有wap则一定是移动设备,部分服务商会屏蔽该信息
-    if (isset($_SERVER['HTTP_VIA'])) {
-        // 找不到为flase,否则为true
-        return stristr($_SERVER['HTTP_VIA'], "wap") ? true : false;
-    }
-    // 脑残法，判断手机发送的客户端标志,兼容性有待提高。其中'MicroMessenger'是电脑微信
-    if (isset($_SERVER['HTTP_USER_AGENT'])) {
-        $clientkeywords = array('nokia', 'sony', 'ericsson', 'mot', 'samsung', 'htc', 'sgh', 'lg', 'sharp', 'sie-', 'philips', 'panasonic', 'alcatel', 'lenovo', 'iphone', 'ipod', 'blackberry', 'meizu', 'android', 'netfront', 'symbian', 'ucweb', 'windowsce', 'palm', 'operamini', 'operamobi', 'openwave', 'nexusone', 'cldc', 'midp', 'wap', 'mobile', 'MicroMessenger');
-        // 从HTTP_USER_AGENT中查找手机浏览器的关键字
-        if (preg_match("/(" . implode('|', $clientkeywords) . ")/i", strtolower($_SERVER['HTTP_USER_AGENT']))) {
-            return true;
-        }
-    }
-    // 协议法，因为有可能不准确，放到最后判断
-    if (isset($_SERVER['HTTP_ACCEPT'])) {
-        // 如果只支持wml并且不支持html那一定是移动设备
-        // 如果支持wml和html但是wml在html之前则是移动设备
-        if ((strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') !== false) && (strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === false || (strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') < strpos($_SERVER['HTTP_ACCEPT'], 'text/html')))) {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-
-//判断是否为时间戳
-function isTimestamp($timestamp)
-{
-    //检查字符串是否为整数
-    if (is_numeric($timestamp)) {
-        return true;
-    }
-    return false;
-}
-
 
 //打印调试信息
 function debug($str)
@@ -2105,30 +1423,38 @@ function debug($str)
 /**
  * 获取环境变量
  **/
-function env($name,$default="")
+function env($name, $default = "")
 {
-	$val=\Dfer\Tools\Env::get($name,$default);
-	// var_dump($val);
-	return $val;
+    $val = \Dfer\Tools\Env::get($name, $default);
+    // var_dump($val);
+    return $val;
 }
 
 
 /**
- * 下划线转驼峰
- * 思路:
- * step1.原字符串转小写,原字符串中的分隔符用空格替换,在字符串开头加上分隔符
- * step2.将字符串中每个单词的首字母转换为大写,再去空格,去字符串首部附加的分隔符.
+ * php低版本无法兼容高版本，需要进行警告
  */
-function hump($uncamelized_words,$separator='_'){
-	$words = str_replace($separator, " ", strtolower($uncamelized_words));
-	return str_replace(" ", "", ucwords($words));
+function phpVerNotice()
+{
+    $ver = explode(".", PHP_VERSION);
+    $ver_0 = $ver[0];
+    if ($ver_0 < DF_PHP_VER) {
+        echo (sprintf("PHP版本不符合要求,需要至少php%s", DF_PHP_VER));
+    }
 }
 
+
 /**
- * 驼峰命名转下划线命名
- * 思路:
- * 小写和大写紧挨一起的地方,加上分隔符,然后全部转小写
- */
-function unHump($camelCaps,$separator='_'){
-	return strtolower(preg_replace('/([a-z])([A-Z])/', "$1" . $separator . "$2", $camelCaps));
+ * 读取get
+ * @param {Object} $var 变量
+ **/
+function get($var = null)
+{
+    return isset($_GET[$var]) ? $_GET[$var] : null;
+}
+
+
+function post($var = null)
+{
+    return isset($_POST[$var]) ? $_POST[$var] : null;
 }
