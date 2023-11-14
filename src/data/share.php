@@ -43,7 +43,8 @@ date_default_timezone_set("PRC");
 header("Content-Type:text/html; charset=utf-8");
 //解除跨域限制
 header("Access-Control-Allow-Origin: *");
-
+// 允许加载任何来源的资源。定义所有类型资源默认加载策略，csp规则匹配到的资源都能够正常请求，一旦有非法资源请求，浏览器就会立即阻止
+header("Content-Security-Policy: default-src *");
 
 
 

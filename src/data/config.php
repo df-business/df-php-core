@@ -6,9 +6,10 @@ defined('INIT') or exit('Access Denied');
 define('THEME_HOMEPAGE', env('THEME_HOMEPAGE', 'homepage'));
 define('THEME_ADMIN', env('THEME_ADMIN', 'admin'));
 
+// 后台入口
+define('ADMIN_URL', env('ADMIN_URL', 'df'));
 
-
-#开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
+// 开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
 define('DEV', env('DEV', 1));
 define('SERVER', env('SERVER', 'localhost'));
 define('ACC', env('ACC', 'dfphp_dfer_site'));
@@ -28,24 +29,14 @@ define('SESSION_EXPIRES', env('SESSION_EXPIRES', 3 * 24 * 3600));
 //设置文件上传的最大尺寸(byte)
 define('FILE_SIZE_MAX', env('FILE_SIZE_MAX', 1024 * 1024 * 100));
 
-
-
-/*
- * 自动将页面元素的http升级为https,默认以http方式访问网页无法获取https的数据，加入这个代码之后必须使用https的方式才能正常访问网页
- * 在https下访问http会被认为是不安全的操作，Safari会直接屏蔽该网页
- * 为了防止被屏蔽，应该让http自动升级为https
- */
-define('SSL_STATE', empty($_SERVER['HTTPS']) ? false : $_SERVER['HTTPS']);
-define('SSL', SSL_STATE ? 'https' : 'http');
-$ssl = SSL_STATE;
-if ($ssl) {
+// ssl状态
+define('SSL_STATE', !empty($_SERVER['HTTPS']));
+if (SSL_STATE) {
+	// 自动将页面元素的http升级为https,需要保证页面中所有资源都支持https访问
 	header("Content-Security-Policy: upgrade-insecure-requests");
 	define('SITE', 'https://' . $_SERVER['HTTP_HOST'] . '/');
-	//当前域名
-} else {
-	//header("Content-Security-Policy: img-src *	");
+} else {	
 	define('SITE', 'http://' . $_SERVER['HTTP_HOST'] . '/');
-	//当前域名
 }
 //当前页面完整url
 define('URL', htmlspecialchars_decode(SITE . 'index.php?' . htmlspecialchars($_SERVER['QUERY_STRING'])));
