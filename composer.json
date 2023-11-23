@@ -7,14 +7,17 @@
 		"name": "df",
 		"email": "df_business@qq.com"
 	}],
-	"homepage": "http://www.dfer.top",
+	"homepage": "http://www.dfer.site",
 	"require": {
 		"php": ">=7.0"
 	},
-	"keywords": ["df", "dfer.top"],
+	"keywords": ["df", "dfer.site"],
 	"autoload": {
 		"psr-4": {
-			"Dfer\\Tools\\": "src/"
-		}
+			"Dfer\\DfPhpCore\\": "src/"
+		},
+		"files": [
+			"src/main.php"
+		]
 	}
 }

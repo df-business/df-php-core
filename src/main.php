@@ -1,5 +1,155 @@
 <?php
-defined('INIT') or exit('Access Denied');
+
+/**
+ * +----------------------------------------------------------------------
+ * | 框架内核
+ * +----------------------------------------------------------------------
+ *                                            ...     .............          
+ *                                          ..   .:!o&*&&&&&ooooo&; .        
+ *                                        ..  .!*%*o!;.                      
+ *                                      ..  !*%*!.      ...                  
+ *                                     .  ;$$!.   .....                      
+ *                          ........... .*#&   ...                           
+ *                                     :$$: ...                              
+ *                          .;;;;;;;:::#%      ...                           
+ *                        . *@ooooo&&&#@***&&;.   .                          
+ *                        . *@       .@%.::;&%$*!. . .                       
+ *          ................!@;......$@:      :@@$.                          
+ *                          .@!   ..!@&.:::::::*@@*.:..............          
+ *        . :!!!!!!!!!!ooooo&@$*%%%*#@&*&&&&&&&*@@$&&&oooooooooooo.          
+ *        . :!!!!!!!!;;!;;:::@#;::.;@*         *@@o                          
+ *                           @$    &@!.....  .*@@&................           
+ *          ................:@* .  ##.     .o#@%;                            
+ *                        . &@%..:;@$:;!o&*$#*;  ..                          
+ *                        . ;@@#$$$@#**&o!;:   ..                            
+ *                           :;:: !@;        ..                              
+ *                               ;@*........                                 
+ *                       ....   !@* ..                                       
+ *                 ......    .!%$! ..        | AUTHOR: dfer                             
+ *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com                             
+ *                .:;;o&***o;.   .           | QQ: 3504725309                             
+ *        .;;!o&****&&o;:.    ..        
+ * +----------------------------------------------------------------------
+ *
+ */
+
+
+// ********************** 常量 START **********************
+
+//当前时间
+define('TIMESTAMP', time());
+//访问者ip
+define('IP', $_SERVER['REMOTE_ADDR']);
+//网站根目录
+define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/');
+//内核根目录
+define('DF_PHP_ROOT', ROOT . '/vendor/dfer/df-php-core/src/');
+
+// 默认模板
+define('THEME_HOMEPAGE', env('THEME_HOMEPAGE', 'homepage'));
+define('THEME_ADMIN', env('THEME_ADMIN', 'admin'));
+
+// 后台入口
+define('ADMIN_URL', env('ADMIN_URL', 'df'));
+
+// 开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
+define('DEV', env('DEV', 1));
+define('SERVER', env('SERVER', 'localhost'));
+define('ACC', env('ACC', 'dfphp_dfer_site'));
+define('PWD', env('PWD', 'mMHBCAimbKKjPP67'));
+define('DATABASE', env('DATABASE', 'dfphp_dfer_site'));
+
+//email模块的开关
+define('EMAIL_ENABLE', false);
+//当前框架需要的最低php版本
+define('DF_PHP_VER', env('DF_PHP_VER', 8));
+//seo优化模式
+define('SEO', env('SEO', 1));
+//PC页面、手机页面分离开关
+define('WAP_PAGE_ENABLE', env('WAP_PAGE_ENABLE', 1));
+// 3*24小时
+define('SESSION_EXPIRES', env('SESSION_EXPIRES', 3 * 24 * 3600));
+//设置文件上传的最大尺寸(byte)
+define('FILE_SIZE_MAX', env('FILE_SIZE_MAX', 1024 * 1024 * 100));
+
+// ssl状态
+define('SSL_STATE', !empty($_SERVER['HTTPS']));
+if (SSL_STATE) {
+	// 自动将页面元素的http升级为https,需要保证页面中所有资源都支持https访问
+	header("Content-Security-Policy: upgrade-insecure-requests");
+	define('SITE', 'https://' . $_SERVER['HTTP_HOST'] . '/');
+} else {	
+	define('SITE', 'http://' . $_SERVER['HTTP_HOST'] . '/');
+}
+//当前页面完整url
+define('URL', htmlspecialchars_decode(SITE . 'index.php?' . htmlspecialchars($_SERVER['QUERY_STRING'])));
+
+
+define('THEME_HOMEPAGE_ROOT', ROOT . 'areas/' . THEME_HOMEPAGE . '/');
+define('THEME_ADMIN_ROOT', ROOT . 'areas/' . THEME_ADMIN . '/');
+
+define('THEME_HOMEPAGE_ASSETS', '/areas/' . THEME_HOMEPAGE . '/' . 'view/public/assets');
+define('THEME_ADMIN_ASSETS', '/areas/' . THEME_ADMIN . '/' . 'view/public/assets');
+
+// **********************  常量 END  **********************
+
+
+
+// ********************** 错误信息的控制 START **********************
+// http://www.w3school.com.cn/php/php_error.asp
+switch(DEV){
+	case true:
+		//显示所有错误
+		ini_set('display_errors', '1');
+		error_reporting(E_ALL);
+		break;
+	case false:
+		//屏蔽所有错误信息,主要用于美化界面，治标不治本
+		error_reporting(0);		
+		break;
+	default:
+		//屏蔽提示和警告信息
+		ini_set('display_errors', '1');
+		error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+		break;
+}
+
+// **********************  错误信息的控制 END  **********************
+
+
+// ********************** 框架初始化 START **********************
+
+phpVerNotice();
+
+//使html内容可以擦除
+ob_start();
+//开启缓存
+session_start();
+//设置时区
+date_default_timezone_set("PRC");
+//编码为utf-8
+header("Content-Type:text/html; charset=utf-8");
+//解除跨域限制
+header("Access-Control-Allow-Origin: *");
+
+$common = new \Dfer\Tools\Common;
+$files = new \Dfer\Tools\Files;
+$upload = new \Dfer\Tools\Upload;
+$other = new \Dfer\DfPhpCore\Modules\Other;
+
+
+$db=dbInit();
+
+$_GP = array_merge($_GET, $_POST);
+$_gp = $common->ihtmlspecialchars($_GP);
+$_df = [
+	'logo' => DF . "favicon.png",
+	'author' => "谷雨陈",
+	'qq' => "3504725309",
+	'time' => $common->getTime(TIMESTAMP),
+	'admin' => boolval(showFirst('dt', ['key' => 'admin'])['val'])
+];
+// **********************  框架初始化 END  **********************
 
 /*
  * 枚举常量
@@ -152,7 +302,7 @@ function view($root, $layout, $other)
 
 function viewFront($layout = "common", $other = false)
 {
-    return    view(THEME_HOMEPAGE_ROOT, $layout, $other);
+    return view(THEME_HOMEPAGE_ROOT, $layout, $other);
 }
 
 function viewBack($layout = "common", $other = false)
@@ -460,6 +610,35 @@ function url($area, $ctrl = null, $action = null, $param = null, $get = null)
 
 // ###################################### database START ######################################
 
+
+/**
+ * 数据库连接初始化
+ * @param {Object} $var 变量
+ **/
+function dbInit()
+{	
+	global $other;
+	$con = mysqli_connect(SERVER, ACC, PWD);
+	if (!$con) {
+	    echo "服务器 [" . SERVER . "] 连接失败";
+	    echo "<br>";
+	    die();
+	}
+	$database = DATABASE;
+	if (mysqli_select_db($con, $database)) {
+	    //数据库存在
+	    @$db = new MySQLi(SERVER, ACC, PWD, $database);
+	    //连接数据库，忽略错误
+	    //当bool1为false就会执行bool2，当数据库出错就会输出字符并终止程序
+	    !mysqli_connect_error() or die("数据库 [{$database}] 错误");
+	    //防止乱码
+	    $db->query('set names utf8');
+	} else {
+	      $other->createDb($con, $database);
+		  die;
+	}	
+	return $db;	
+}
 
 /*
  * 简洁执行sql语句
@@ -1423,7 +1602,7 @@ function phpVerNotice()
     $ver = explode(".", PHP_VERSION);
     $ver_0 = $ver[0];
     if ($ver_0 < DF_PHP_VER) {
-        echo (sprintf("PHP版本不符合要求,需要至少php%s", DF_PHP_VER));
+        die(sprintf("PHP版本不符合要求,需要至少php%s", DF_PHP_VER));
     }
 }
 
