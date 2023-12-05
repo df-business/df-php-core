@@ -3,7 +3,7 @@ namespace Dfer\DfPhpCore\Modules;
 
 /**
  * +----------------------------------------------------------------------
- * | 内置模块
+ * | 其他方法
  * +----------------------------------------------------------------------
  *                                            ...     .............
  *                                          ..   .:!o&*&&&&&ooooo&; .
@@ -35,18 +35,6 @@ namespace Dfer\DfPhpCore\Modules;
  */
 class Other
 {
-    public function __construct()
-    {
-    }
-
-    //数据集
-    public $data = array('ses' => 'df-ac-pw', 'qq' => 'login');
-    //获取数组内容
-    public function getData($key)
-    {
-        return $this->data[$key];
-    }
-
     /**
      *
      * 验证登陆
@@ -57,7 +45,7 @@ class Other
     {
         global $common;
 
-        $login = getSession($this->data["ses"]);
+        $login = getSession(\Enum::sesName);
 
         if (!empty($login)) {
             $id = $login[0];

@@ -1,7 +1,7 @@
 {
 	"name": "dfer/df-php-core",
 	"type": "library",
-	"description": "df-php内核",
+	"description": "DfPHP的内核",
 	"license": "MIT",
 	"authors": [{
 		"name": "df",
@@ -9,7 +9,8 @@
 	}],
 	"homepage": "http://www.dfer.site",
 	"require": {
-		"php": ">=7.0"
+		"php": ">=7.0",
+		"dfer/tools": "^1.0.0"
 	},
 	"keywords": ["df", "dfer.site"],
 	"autoload": {
@@ -17,7 +18,7 @@
 			"Dfer\\DfPhpCore\\": "src/"
 		},
 		"files": [
-			"src/main.php"
+			"src/functions.php"
 		]
 	}
 }

@@ -1,10 +1,10 @@
 # df-php 内核
 
 ### 简介
-包含了很多常用的方法
+包含了DfPHP框架的核心源码
 
 ### 发布
-- [package地址](https://packagist.org/packages/dfer/tools)
+- [package地址](https://packagist.org/packages/dfer/df-php-core)
  
 	
 
@@ -20,4 +20,4 @@ composer update dfer/df-php-core
 
 
 ---
-©2017~2023 Dfer.Site
+©2023 Dfer.Site
