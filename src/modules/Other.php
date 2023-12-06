@@ -480,11 +480,18 @@ class Other
 
 		//数据结构更新
 		$sql_update = "";
+		$dbPath=ROOT.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'db'.DIRECTORY_SEPARATOR;
+		if (is_dir($dbPath)) {
+		    $files = glob($dbPath . '*.sql');
+		    foreach ($files as $file) {
+										$sql_update=$sql_update.file_get_contents($file);
+		    }
+		}
 		if (!empty($sql_update)) {
 		    if ($db->query($sql_update)) {
-		        echo "数据结构 更新成功";
+		        echo "数据结构 [更新成功]";
 		    } else {
-		        echo "数据结构 更新失败";
+		        echo str("数据结构 [更新失败: {0}]",[$db->error]);
 		    }
 		} else {
 		    echo "数据结构 不需要更新";

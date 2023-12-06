@@ -74,6 +74,7 @@ DfPHP {ver}
   version                     查看DfPHP的当前版本
  dev
   dev:root                    同步`df-php-root`
+  dev:core                    同步`df-php-core`
 
 STR;
 if($argc==1){
@@ -88,6 +89,9 @@ if($argc==1){
       case 'dev:root':
 						$this->devRoot();
        break;
+						case 'dev:core':
+						$this->devCore();
+						 break;
       default:
        $this->print("命令不存在");
        break;
@@ -129,10 +133,46 @@ if($argc==1){
 									$this->files->copy($projectRootDir.$value, $moduleRootDir.$value,QUIET);
 								}
         $this->print("//////////////////////////////////////////////////  文件复制 END  //////////////////////////////////////////////////".PHP_EOL);
+								sleep(1.5);
+								$this->print(PHP_EOL);
+								$this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////".PHP_EOL);
+								system("cd ../df-php-root/ && p.bat");
+								$this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////".PHP_EOL);
     }else{
 						$this->print("此功能为框架开发者使用");
 				}
     }
+
+				/**
+				  * 将框架里的最新内容同步到`df-php-core`
+				  * @param {Object} $var 变量
+				  **/
+				 function devCore($var = null)
+				 {
+
+				 $projectModuleRootDir = ROOT. DIRECTORY_SEPARATOR .'vendor'. DIRECTORY_SEPARATOR.'dfer'. DIRECTORY_SEPARATOR .'df-php-core' . DIRECTORY_SEPARATOR . 'src'.DIRECTORY_SEPARATOR;;
+				 // 模块项目所在的目录，非开发者无法使用该功能
+				 $moduleRootDir    = dirname(ROOT) . DIRECTORY_SEPARATOR .'df-php-core' . DIRECTORY_SEPARATOR . 'src'.DIRECTORY_SEPARATOR;
+
+				 if (is_dir(dirname($moduleRootDir))) {
+				     $this->print($projectModuleRootDir . ">>>".$moduleRootDir.PHP_EOL);
+				     $this->print("////////////////////////////////////////////////// 文件删除 START //////////////////////////////////////////////////".PHP_EOL);
+				     $this->files->deleteDir($moduleRootDir,QUIET);
+				     $this->print("//////////////////////////////////////////////////  文件删除 END  //////////////////////////////////////////////////".PHP_EOL);
+				     sleep(1.5);
+				     $this->print(PHP_EOL);
+				     $this->print("////////////////////////////////////////////////// 文件复制 START //////////////////////////////////////////////////".PHP_EOL);
+				     $this->files->copy($projectModuleRootDir, $moduleRootDir,QUIET);
+				     $this->print("//////////////////////////////////////////////////  文件复制 END  //////////////////////////////////////////////////".PHP_EOL);
+									sleep(1.5);
+									$this->print(PHP_EOL);
+									$this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////".PHP_EOL);
+									system("cd ../df-php-core/ && p.bat");
+									$this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////".PHP_EOL);
+				 }else{
+							$this->print("此功能为框架开发者使用");
+					}
+				 }
 
 
 				/**

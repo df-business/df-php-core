@@ -46,11 +46,11 @@ class Web
         //访问者ip
         define('IP', $_SERVER['REMOTE_ADDR']);
 								//项目根目录
-								define('ROOT', dirname(__DIR__,5) . DIRECTORY_SEPARATOR);
+								define('ROOT', dirname(__DIR__,5));
         // 网站运行目录
         define('WEB_ROOT', $_SERVER['DOCUMENT_ROOT']);
         //内核根目录
-        define('DF_PHP_ROOT', ROOT . 'vendor/dfer/df-php-core/src/');
+        define('DF_PHP_ROOT', ROOT . DIRECTORY_SEPARATOR. 'vendor/dfer/df-php-core/src/');
         // 默认模板
         define('THEME_HOMEPAGE', env('THEME_HOMEPAGE', 'homepage'));
         define('THEME_ADMIN', env('THEME_ADMIN', 'admin'));
@@ -66,7 +66,7 @@ class Web
         //email模块的开关
         define('EMAIL_ENABLE', false);
         // 当前框架的版本
-        define('VERSION', file_get_contents(ROOT.'VERSION'));
+        define('VERSION', file_get_contents(ROOT. DIRECTORY_SEPARATOR.'VERSION'));
         //当前框架需要的最低php版本
         define('PHP_VERSION_MIN', env('PHP_VERSION_MIN', getComposerJson()));
         //seo优化模式
