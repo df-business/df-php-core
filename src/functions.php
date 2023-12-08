@@ -457,27 +457,47 @@ function dbInit()
 	    die();
 	}
 	$database = DATABASE;
-	if (mysqli_select_db($con, $database)) {
-	    //数据库存在
-	    @$db = new MySQLi(SERVER, ACC, PWD, $database);
-	    //连接数据库，忽略错误
-	    //当bool1为false就会执行bool2，当数据库出错就会输出字符并终止程序
-	    !mysqli_connect_error() or die("数据库 [{$database}] 错误");
-	    //防止乱码
-	    $db->query('set names utf8');
-	} else {
-		//数据库不存在
+	try{
+		// ###################################### 连接数据库 START ######################################
+		if (mysqli_select_db($con, $database)) {
+		    //数据库存在
+		    @$db = new MySQLi(SERVER, ACC, PWD, $database);
+		    //连接数据库，忽略错误
+		    //当bool1为false就会执行bool2，当数据库出错就会输出字符并终止程序
+		    !mysqli_connect_error() or die("数据库 [{$database}] 错误");
+		    //防止乱码
+		    $db->query('set names utf8');
+		} else {
+				throw new \mysqli_sql_exception;
+		}
+		// ######################################  连接数据库 END  ######################################
+	}
+	catch(\Exception $exc){
+		// ###################################### 创建数据库 START ######################################
 		if (mysqli_query($con, "CREATE DATABASE {$database}")) {
-		    echo ("数据库 {$database} 创建成功");
-						@$db = new MySQLi(SERVER, ACC, PWD, $database);
+		    echo str("数据库 {0} 创建成功 <br /> {1}",[$database,PHP_EOL]);
+						@$db = new \MySQLi(SERVER, ACC, PWD, $database);
 						!mysqli_connect_error() or die("数据库 [{$database}] 错误");
 						$db->query('set names utf8');
-						$other->createDb($db);
+						if($other->createDb($db)){
+							die(
+							<<<STR
+							<br />
+							<a target='' href='/'>进入主页</a>
+							<br />
+							<a href='javascript:location.reload()'>刷新...</a>
+							<script>
+							setTimeout(()=>{location.reload()},3000);
+							</script>
+							STR
+									);
+						}
 		} else {
-		    die("{$database} 创建失败: " . mysqli_error($con));
+		    die(str("{0} 创建失败: {1}",[$database,mysqli_error($con)]));
 		}
+		// ######################################  创建数据库 END  ######################################
 	}
-
+	
 	return $db;
 }
 
@@ -1471,7 +1491,7 @@ function post($var = null)
  */
 function str($string, $params)
 {
-				global $common;    
+				global $common;
     return $common->str($string, $params);
 }
 

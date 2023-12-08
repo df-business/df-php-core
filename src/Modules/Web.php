@@ -129,12 +129,12 @@ class Web
         header("Access-Control-Allow-Origin: *");
 
         global $db,$common, $files,$other,$_param, $_df;
+								$common = new \Dfer\Tools\Common;
+								$files = new \Dfer\Tools\Files;
+								$other = new \Dfer\DfPhpCore\Modules\Other;
 
         $db=dbInit();
-
-        $common = new \Dfer\Tools\Common;
-        $files = new \Dfer\Tools\Files;
-        $other = new \Dfer\DfPhpCore\Modules\Other;
+								
         $_param = $common->ihtmlspecialchars(array_merge($_GET, $_POST));
         $_df = [
         	'logo' => "https://oss.dfer.site/df_icon/81x81.png",

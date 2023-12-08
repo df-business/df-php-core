@@ -75,8 +75,8 @@ class Other
     /**
      * 将文件保存在根目录下
      * eg:
-     * $this->log("{$url}<br>");
-     * $this->log(json_encode($this->message)."<br>",7);    //写入数组
+     * $this->log("{$url}<br />");
+     * $this->log(json_encode($this->message)."<br />",7);    //写入数组
      * @param {Object} $str
      * @param {Object} $file
      */
@@ -150,14 +150,19 @@ class Other
 
 
 	/**
-	 * 创建数据库
+	 * 创建表
 	 * @param {Object} $con 数据库连接对象
 	 * @param {Object} $database 数据库名称
 	 **/
-	public function createDb($db, $database)
+	public function createDb($db)
 	{
 
-  		//————————————————————核心库
+		echo "###################################### 创建表 START ######################################";
+		echo "<br />".PHP_EOL;
+
+
+  // ********************** 核心库 START **********************
+
 		//后台登陆账号，不要删
 		$sql[] = "CREATE TABLE `df`  (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
@@ -168,7 +173,7 @@ class Other
   `createtime` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `lastlogintime` datetime NULL DEFAULT NULL COMMENT '上次访问',
   PRIMARY KEY (`Id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 		";
 		//账号权限，不要删
 		$sql[] = "CREATE TABLE `roles`
@@ -229,7 +234,10 @@ class Other
 		time datetime
 		)DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 		";
-		//————————————————————基础库
+		// **********************  核心库 END  **********************
+
+		// ********************** 基础库 START **********************
+
 
 		//用户信息收集
 		$sql[] = "CREATE TABLE home_user_info
@@ -255,7 +263,7 @@ class Other
   `musicPlay` tinyint(4) NULL DEFAULT 0 COMMENT '音乐自动播放',
   `sceneId` int(11) NULL DEFAULT 0 COMMENT '模板id',
   PRIMARY KEY (`Id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;";
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;";
 
 		//背景图片列表
 		$sql[] = "CREATE TABLE home_layout_img
@@ -329,9 +337,9 @@ class Other
 		content longtext
 		)DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 		";
+		// **********************  基础库 END  **********************
 
-		//————————————————————拓展库
-
+		// ********************** 拓展库 START **********************
 		$sql[] = "CREATE TABLE `test`
 		(
 		Id int NOT NULL AUTO_INCREMENT,
@@ -340,22 +348,31 @@ class Other
 		)ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 		";
 
-		//创建表
 		$num = 0;
-		foreach ($sql as $val) {
-		    $num++;
-		    echo $num . ".";
+		foreach ($sql as $key=>$val) {
+		    echo str("{0}.",[$key+1]);
 		    $str = explode("(", $val);
 		    $str = $str[0];
+						try{
 		    if ($db->query($val)) {
-		        echo $str . " [成功]";
+		        echo str("{0} [成功]",[$str]);
 		    } else {
-		        echo $str . " [失败: " . $db->error . "]";
+										throw new \mysqli_sql_exception;
 		    }
-		    echo "<br>";
+						}
+						catch(\Exception $exc){
+								echo str("{0} [失败: {1}]",[$str,$db->error]);
+						}
+		    echo "<br />".PHP_EOL;
 		}
+		// **********************  拓展库 END  **********************
+		echo "######################################  创建表 END  ######################################";
+		echo "<br />".PHP_EOL;
 
-		//————————————————————————————————————————添加初始数据
+
+		echo "###################################### 添加初始数据 START ######################################";
+		echo "<br />".PHP_EOL;
+
 		//添加登陆账号
 		//echo $db->query("SELECT * FROM `df`")->fetch_array()[1];   //读取首条数据
 		$query = $db->query("SELECT COUNT(*) AS count FROM `df`")->fetch_array();
@@ -368,7 +385,7 @@ class Other
 		} else {
 		    echo "数据 [df] 已存在";
 		}
-		echo '<br>';
+		echo "<br />".PHP_EOL;
 		//添加账号权限
 		$query = $db->query("SELECT COUNT(*) AS count FROM `roles`")->fetch_array();
 		if ($query[0] < 1) {
@@ -380,7 +397,7 @@ class Other
 		} else {
 		    echo "数据 [roles] 已存在";
 		}
-		echo '<br>';
+		echo "<br />".PHP_EOL;
 		//添加默认布局
 		$query = $db->query("SELECT COUNT(*) AS count FROM `home_layout`")->fetch_array();
 		if ($query[0] < 1) {
@@ -392,17 +409,19 @@ class Other
 		} else {
 		    echo "数据 [home_layout] 已存在";
 		}
-		echo '<br>';
+		echo "<br />".PHP_EOL;
 
 		//添加默认栏目
 		$query = $db->query("SELECT COUNT(*) AS count FROM `home_column`")->fetch_array();
 		if ($query[0] < 1) {
-		    if ($db->query('INSERT INTO `home_column` (`Id`, `menu`, `title`, `describe`, `content`) VALUES
-			(1, "", "关键字说明", "", "<p>									</p><p>									</p><p>									</p><p><span style=\"white-space: nowrap;\">//布局</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#header()</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#body()</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#footer()&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#header{}#</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#body{}#</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#footer{}#</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//打印参数</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!!$str!!</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//执行php代码</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{}!</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//遍历数组，来循环显示多条数据</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{each $arr}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!``</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{/each}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">//这里放关键字，防止整理代码格式的时候关键字被破坏</span></p><p><span style=\"white-space: nowrap;\">/*d<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">d*/</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//if语句</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{if true}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{elif false}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{else}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{/else}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><br></p><p>								</p><p>								</p><p>								</p>"),
-			(2, "", "数据库操作", "", "<p><span style=\"white-space: nowrap;\">#查询#</span></p><p><span style=\"white-space: nowrap;\">//有多行就输出数组，否则返回单个list（有些情况必须返回数组，就添加order）</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",1,\"type\",\" \");&nbsp; &nbsp;&nbsp;</span></p><p><span style=\"white-space: nowrap;\">// 根据字符串进行查询</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",\"谷雨光影\",\"subs\");&nbsp;</span></p><p><span style=\"white-space: nowrap;\">// 按id降序输出全表&nbsp;&nbsp;</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",-1,\"id\",\"desc\");<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">//输出type为1的特定数目的数据</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",1,\"type\",\"limit 0,5\");<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">//输出type为1的数据并进行排序</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",1,\"type\",\"order by id desc\");</span></p><p><span style=\"white-space: nowrap;\">//执行sql语句<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">show(\"select * from df\",0);<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">//按条件输出全表</span></p><p><span style=\"white-space: nowrap;\">show(\"menu\",$param,\"parent\",\"order by oderNum desc\");</span></p><p><span style=\"white-space: nowrap;\">//分页查询(页数,行数)</span></p><p><span style=\"white-space: nowrap;\">show_page(self::$db_d,$page,$rows);</span></p><p><span style=\"white-space: nowrap;\"><br></span></p><p><span style=\"white-space: nowrap;\">##新增、修改##</span></p><p><span style=\"white-space: nowrap;\">//新增数据，之后不进行任何操作</span></p><p><span style=\"white-space: nowrap;\">update(\"df\",$arr)<span style=\"white-space:pre\">		</span></span></p><p><span style=\"white-space: nowrap;\">//根据id新增、修改数据，之后进行页面跳转</span></p><p><span style=\"white-space: nowrap;\">update(self::$db_hc,$dt,$id,(\"homepage/column/\".self::$db_hc));<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\"><br></span></p><p><span style=\"white-space: nowrap;\"><br></span></p><p><span style=\"white-space: nowrap;\">##删除##</span></p><p><span style=\"white-space: nowrap;\">//根据id进行删除</span></p><p><span style=\"white-space: nowrap;\">del(\"db\",3);</span></p><p><span style=\"white-space: nowrap;\">//清空表</span></p><p><span style=\"white-space: nowrap;\">clear(\"db\")</span></p><p><br></p>"),
-			(3, "", "数据库操作返回json", "", "<p><span style=\"white-space: nowrap;\"><br></span></p><p><span style=\"white-space: nowrap;\">#查询返回json数据</span></p><p><span style=\"white-space: nowrap;\">//根据id查询</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"df\",\"id\",\"desc\",1);</span></p><p><span style=\"white-space: nowrap;\">//根据time降序排列&nbsp;</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"df\",\"time\");&nbsp;</span></p><p><span style=\"white-space: nowrap;\">//根据time升序排列</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"df\",\"time\",\"asc\");</span></p><p><span style=\"white-space: nowrap;\">//自定义sql查询</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"sql\",\"select * from df\");</span></p><p><span style=\"white-space: nowrap;\">#更新返回json</span></p><p><span style=\"white-space: nowrap;\">jsonUpdate(\"db\",array(\"nm\"=&gt;\"123\"),3);</span></p><p><span style=\"white-space: nowrap;\">#清空</span></p><p><span style=\"white-space: nowrap;\">jsonClear(\"db\")</span></p><p><br></p>"),
-			(4, "", "框架介绍", "", "<p>									</p><ul><li><p>- 由Df打造的php版的Mvc框架，结构简洁，使用方便</p></li><li><p>- 可以在此框架的基础上开发出各种各样的网站</p></li><li><p>- 有很好的拓展性，可以不断增加新的功能</p></li><li><p>- 由df提供技术支持</p></li><li><p>- 此项目将不断完善</p></li><li><p>- 工作QQ：3504725309&nbsp; &nbsp; &nbsp;&nbsp;</p></li><li><p>- 个人网站：www.dfer.site</p></li><li><p>- 论坛：www.szswz.cc&nbsp;</p></li><li><p>- QQ群：76673820</p></li></ul><p>&nbsp;</p><p><br></p><p>								</p>");
-		')) {
+		    if ($db->query(
+<<<STR
+INSERT INTO `home_column` (`Id`, `menu`, `title`, `describe`, `content`) VALUES
+(1, "", "关键字说明", "", "<p>									</p><p>									</p><p>									</p><p><span style=\"white-space: nowrap;\">//布局</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#header()</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#body()</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#footer()&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#header{}#</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#body{}#</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#footer{}#</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//打印参数</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!!$str!!</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//执行php代码</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{}!</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//遍历数组，来循环显示多条数据</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{each $arr}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!``</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{/each}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">//这里放关键字，防止整理代码格式的时候关键字被破坏</span></p><p><span style=\"white-space: nowrap;\">/*d<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">d*/</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//if语句</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{if true}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{elif false}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{else}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{/else}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><br /></p><p>								</p><p>								</p><p>								</p>"),
+(2, "", "数据库操作", "", "<p><span style=\"white-space: nowrap;\">#查询#</span></p><p><span style=\"white-space: nowrap;\">//有多行就输出数组，否则返回单个list（有些情况必须返回数组，就添加order）</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",1,\"type\",\" \");&nbsp; &nbsp;&nbsp;</span></p><p><span style=\"white-space: nowrap;\">// 根据字符串进行查询</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",\"谷雨光影\",\"subs\");&nbsp;</span></p><p><span style=\"white-space: nowrap;\">// 按id降序输出全表&nbsp;&nbsp;</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",-1,\"id\",\"desc\");<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">//输出type为1的特定数目的数据</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",1,\"type\",\"limit 0,5\");<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">//输出type为1的数据并进行排序</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",1,\"type\",\"order by id desc\");</span></p><p><span style=\"white-space: nowrap;\">//执行sql语句<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">show(\"select * from df\",0);<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">//按条件输出全表</span></p><p><span style=\"white-space: nowrap;\">show(\"menu\",$param,\"parent\",\"order by oderNum desc\");</span></p><p><span style=\"white-space: nowrap;\">//分页查询(页数,行数)</span></p><p><span style=\"white-space: nowrap;\">show_page(self::$db_d,$page,$rows);</span></p><p><span style=\"white-space: nowrap;\"><br /></span></p><p><span style=\"white-space: nowrap;\">##新增、修改##</span></p><p><span style=\"white-space: nowrap;\">//新增数据，之后不进行任何操作</span></p><p><span style=\"white-space: nowrap;\">update(\"df\",$arr)<span style=\"white-space:pre\">		</span></span></p><p><span style=\"white-space: nowrap;\">//根据id新增、修改数据，之后进行页面跳转</span></p><p><span style=\"white-space: nowrap;\">update(self::$db_hc,$dt,$id,(\"homepage/column/\".self::$db_hc));<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\"><br /></span></p><p><span style=\"white-space: nowrap;\"><br /></span></p><p><span style=\"white-space: nowrap;\">##删除##</span></p><p><span style=\"white-space: nowrap;\">//根据id进行删除</span></p><p><span style=\"white-space: nowrap;\">del(\"db\",3);</span></p><p><span style=\"white-space: nowrap;\">//清空表</span></p><p><span style=\"white-space: nowrap;\">clear(\"db\")</span></p><p><br /></p>"),
+(3, "", "数据库操作返回json", "", "<p><span style=\"white-space: nowrap;\"><br /></span></p><p><span style=\"white-space: nowrap;\">#查询返回json数据</span></p><p><span style=\"white-space: nowrap;\">//根据id查询</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"df\",\"id\",\"desc\",1);</span></p><p><span style=\"white-space: nowrap;\">//根据time降序排列&nbsp;</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"df\",\"time\");&nbsp;</span></p><p><span style=\"white-space: nowrap;\">//根据time升序排列</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"df\",\"time\",\"asc\");</span></p><p><span style=\"white-space: nowrap;\">//自定义sql查询</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"sql\",\"select * from df\");</span></p><p><span style=\"white-space: nowrap;\">#更新返回json</span></p><p><span style=\"white-space: nowrap;\">jsonUpdate(\"db\",array(\"nm\"=&gt;\"123\"),3);</span></p><p><span style=\"white-space: nowrap;\">#清空</span></p><p><span style=\"white-space: nowrap;\">jsonClear(\"db\")</span></p><p><br /></p>"),
+(4, "", "框架介绍", "", "<p>									</p><ul><li><p>- 由Df打造的php版的Mvc框架，结构简洁，使用方便</p></li><li><p>- 可以在此框架的基础上开发出各种各样的网站</p></li><li><p>- 有很好的拓展性，可以不断增加新的功能</p></li><li><p>- 由df提供技术支持</p></li><li><p>- 此项目将不断完善</p></li><li><p>- 工作QQ：3504725309&nbsp; &nbsp; &nbsp;&nbsp;</p></li><li><p>- 个人网站：www.dfer.site</p></li><li><p>- 论坛：www.szswz.cc&nbsp;</p></li><li><p>- QQ群：76673820</p></li></ul><p>&nbsp;</p><p><br /></p><p>								</p>");
+STR)) {
 		        echo "添加数据 [home_column] 成功";
 		    } else {
 		        echo "添加数据 [home_column] 失败";
@@ -410,7 +429,7 @@ class Other
 		} else {
 		    echo "数据 [home_column] 已存在";
 		}
-		echo '<br>';
+		echo "<br />".PHP_EOL;
 		//添加通用参数
 		$query = $db->query("SELECT COUNT(*) AS count FROM `dt`")->fetch_array();
 		if ($query[0] < 1) {
@@ -422,7 +441,7 @@ class Other
 		} else {
 		    echo "数据 [dt] 已存在";
 		}
-		echo '<br>';
+		echo "<br />".PHP_EOL;
 		//添加静态页面
 		$query = $db->query("SELECT COUNT(*) AS count FROM `html`")->fetch_array();
 		if ($query[0] < 1) {
@@ -434,7 +453,7 @@ class Other
 		} else {
 		    echo "数据 [html] 已存在";
 		}
-		echo '<br>';
+		echo "<br />".PHP_EOL;
 
 		//添加基础菜单
 		$query = $db->query("SELECT COUNT(*) AS count FROM `menu`")->fetch_array();
@@ -445,7 +464,7 @@ class Other
 		('用户管理', '', 'user', 0, 2),
 		('生成静态页面', '', 'folder', 0, 8888),
 
-		('记事本', 'admin%2Fhome%2Fnotepad', 'book', 0, 100),
+		('记事本', 'admin%2Fcolumn%2Fnotepad', 'book', 0, 100),
 		('记事本 服务器端处理', 'admin%2Fcolumn%2Fnotepad_ss', 'book', 0, 101),
 		('关于此站点', 'admin%2Fcolumn%2Fcolumn	', 'info', 0, 110),
 		('刷新数据', 'js%3Arefresh_data%28%29%3B', 'refresh', 0, 120),
@@ -455,17 +474,17 @@ class Other
 		('日志', 'admin%2Fhome%2Flog', 'history', 0, 160),
 		('使用说明', 'admin%2Fcolumn%2Freadme', 'bug', 0, 170),
 
-		('布局', 'homepage%2Fcolumn%2Fhome_layout%2F1', 'file', 2, 0),
-		('栏目管理', 'homepage%2Fcolumn%2Fhome_column', 'file', 2, 0),
-		('链接管理', 'homepage%2Fcolumn%2Fhome_link', 'link', 2, 0),
-		('音乐管理', 'homepage%2Fcolumn%2Fhome_music', 'music', 2, 0),
-		('留言管理', 'homepage%2Fcolumn%2Fmessage+', 'comments', 2, 0),
+		('布局', 'admin%2Fcolumn%2Fhome_layout%2F1', 'file', 2, 0),
+		('栏目管理', 'admin%2Fcolumn%2Fhome_column', 'file', 2, 0),
+		('链接管理', 'admin%2Fcolumn%2Fhome_link', 'link', 2, 0),
+		('音乐管理', 'admin%2Fcolumn%2Fhome_music', 'music', 2, 0),
+		('留言管理', 'admin%2Fcolumn%2Fmessage', 'comments', 2, 0),
 
 		('列表', 'admin%2Fhome%2Fdf', 'file', 3, 0),
 		('权限', 'admin%2Fhome%2Froles', 'file', 3, 0),
 		('访问者信息', 'admin%2Fhome%2Fguests', 'file', 3, 0),
 
-		('查看字体', 'url%3A%2Fdata%2Fcache%2Ffont.html', 'file', 4, 8880),
+		('查看字体', 'url%3A%2Fstatic_pages%2Ffont.html', 'file', 4, 8880),
 		('页面管理', 'admin%2Fhome%2Fhtml', 'file', 4, 8881),
 		('生成', 'admin%2Fhome%2FcreateStaticPage', 'file', 4, 8882)
 		;")) {
@@ -476,9 +495,16 @@ class Other
 		} else {
 		    echo "数据 [menu] 已存在";
 		}
-		echo '<br>';
+		echo "<br />".PHP_EOL;
 
-		//数据结构更新
+		echo "######################################  添加初始数据 END  ######################################";
+		echo "<br />".PHP_EOL;
+
+
+
+		echo "###################################### 更新数据库 START ######################################";
+		echo "<br />".PHP_EOL;
+
 		$sql_update = "";
 		$dbPath=ROOT.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'db'.DIRECTORY_SEPARATOR;
 		if (is_dir($dbPath)) {
@@ -488,19 +514,26 @@ class Other
 		    }
 		}
 		if (!empty($sql_update)) {
+			try{
 		    if ($db->query($sql_update)) {
 		        echo "数据结构 [更新成功]";
 		    } else {
-		        echo str("数据结构 [更新失败: {0}]",[$db->error]);
+										throw new \mysqli_sql_exception;
 		    }
+			}
+			catch(\Exception $exc){
+		        echo str("数据结构 [更新失败: {0}]",[$db->error]);
+			}
 		} else {
 		    echo "数据结构 不需要更新";
 		}
-		echo '<br>';
+		echo "<br />".PHP_EOL;
+
+		echo "######################################  更新数据库 END  ######################################";
+		echo "<br />".PHP_EOL;
 
 		$db->close();
 
-		echo ("<br> <a target='' href='/'>进入主页</a><br> <a href='javascript:location.reload()'>刷新...</a>");
-
+		return true;
 	}
 }
