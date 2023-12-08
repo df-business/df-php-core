@@ -95,8 +95,8 @@ class Other
      */
     public function wxAc($id = '')
     {
-        if (isset($_GET['WxId'])) {
-            return $_GET['WxId'];
+        if (isset($_GET['wx_id'])) {
+            return $_GET['wx_id'];
         }
         if ($id != '') {
             setSession('wx', $id);
@@ -122,7 +122,7 @@ class Other
         $user = showFirst($db, ['ip' => IP]);
         if ($user) {
             $dt = array('browser' => $_SERVER['HTTP_USER_AGENT']??null, 'hits' => $user['hits'] + 1, 'time' => $_df['time']);
-            update($db, $dt, $user['Id']);
+            update($db, $dt, $user['id']);
         } else {
             $dt = array('ip' => IP, 'browser' => $_SERVER['HTTP_USER_AGENT'], 'hits' => 0, 'first_time' => $_df['time'], 'time' => $_df['time']);
             update($db, $dt);
@@ -165,21 +165,21 @@ class Other
 
 		//后台登陆账号，不要删
 		$sql[] = "CREATE TABLE `df`  (
-  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `nm` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT 'df' COMMENT '账号名',
   `pw` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT 'df',
   `pic` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '/favicon.png',
   `role` int(11) NOT NULL DEFAULT 0 COMMENT '权限',
-  `createtime` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  `lastlogintime` datetime NULL DEFAULT NULL COMMENT '上次访问',
-  PRIMARY KEY (`Id`) USING BTREE
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `last_login_time` datetime NULL DEFAULT NULL COMMENT '上次访问',
+  PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 		";
 		//账号权限，不要删
 		$sql[] = "CREATE TABLE `roles`
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		nm varchar(50) DEFAULT '普通用户' COMMENT '权限名',
 		roles varchar(100) DEFAULT '1|2' COMMENT '权限内容'
 		)DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -187,8 +187,8 @@ class Other
 		//常用数据，不要删
 		$sql[] = "CREATE TABLE `dt`
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		`key` varchar(15) DEFAULT '' COMMENT '参数名',
 		`val` varchar(150) DEFAULT '0' COMMENT '值',
 		subs varchar(100) DEFAULT '' COMMENT '描述'
@@ -198,22 +198,22 @@ class Other
 		//后台菜单，不要删
 		$sql[] = "CREATE TABLE menu
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		title varchar(50) COMMENT '标题',
 		src varchar(100) COMMENT '路径',
-		type varchar(30) COMMENT '类型',
-		parent int DEFAULT 0 COMMENT '上级Id',
-		orderNum int DEFAULT 0 COMMENT '排序编号'
+		`type` varchar(30) COMMENT '类型',
+		parent int DEFAULT 0 COMMENT '上级id',
+		order_num int DEFAULT 0 COMMENT '排序编号'
 		)DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 		";
 
 		//html页面，不要删
 		$sql[] = "CREATE TABLE html
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
-		fileN varchar(50) COMMENT 'htm文件名',
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
+		file_n varchar(50) COMMENT 'htm文件名',
 		src varchar(100) COMMENT '动态路径',
 		comment varchar(30) COMMENT '备注'
 		)DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -228,8 +228,8 @@ class Other
 		//日志，不要删
 		$sql[] = "CREATE TABLE logs
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		str longtext COMMENT '记录内容',
 		time datetime
 		)DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
@@ -242,8 +242,8 @@ class Other
 		//用户信息收集
 		$sql[] = "CREATE TABLE home_user_info
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		ip varchar(55) DEFAULT '' COMMENT '访问者ip',
 		browser varchar(500) DEFAULT '' COMMENT '访问者使用的浏览器',
 		hits int DEFAULT 0 COMMENT '访问总次数',
@@ -253,23 +253,23 @@ class Other
 
 		//主页布局
 		$sql[] = "CREATE TABLE `home_layout`  (
-  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '',
   `keywords` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '关键字',
   `description` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '网页简介',
-  `Inscribe` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '',
+  `inscribe` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '',
   `img1` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '背景图像',
   `color` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '主体字体颜色',
-  `musicPlay` tinyint(4) NULL DEFAULT 0 COMMENT '音乐自动播放',
-  `sceneId` int(11) NULL DEFAULT 0 COMMENT '模板id',
-  PRIMARY KEY (`Id`) USING BTREE
+  `music_play` tinyint(4) NULL DEFAULT 0 COMMENT '音乐自动播放',
+  `scene_id` int(11) NULL DEFAULT 0 COMMENT '模板id',
+  PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;";
 
 		//背景图片列表
 		$sql[] = "CREATE TABLE home_layout_img
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		title varchar(100) DEFAULT '' COMMENT '',
 		img varchar(100) DEFAULT '' COMMENT '背景图像'
 		)DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
@@ -277,8 +277,8 @@ class Other
 		//栏目
 		$sql[] = "CREATE TABLE home_column
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		menu varchar(100) DEFAULT '' COMMENT '',
 		title varchar(100) DEFAULT '' COMMENT '',
 		`describe` varchar(100) DEFAULT '' COMMENT '',
@@ -288,8 +288,8 @@ class Other
 		//链接
 		$sql[] = "CREATE TABLE home_link
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		title varchar(100) DEFAULT '' COMMENT '',
 		`src` varchar(100) DEFAULT '' COMMENT ''
 		)DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
@@ -297,8 +297,8 @@ class Other
 		//音乐
 		$sql[] = "CREATE TABLE home_music
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		title varchar(100) DEFAULT '' COMMENT '',
 		`src` varchar(100) DEFAULT '' COMMENT ''
 		)DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
@@ -306,10 +306,10 @@ class Other
 		//留言
 		$sql[] = "CREATE TABLE message
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		name varchar(100) DEFAULT '' COMMENT '',
-		E_mail varchar(100) DEFAULT '' COMMENT '',
+		e_mail varchar(100) DEFAULT '' COMMENT '',
 		`content` longtext COMMENT '内容',
 		`status` tinyint DEFAULT 0 COMMENT '阅读状态',
 		time varchar(50)
@@ -318,8 +318,8 @@ class Other
 		//记事本
 		$sql[] = "CREATE TABLE notepad
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		title varchar(50) COMMENT '标题',
 		content longtext COMMENT '内容',
 		time varchar(50)
@@ -329,8 +329,8 @@ class Other
 		//站点介绍
 		$sql[] = "CREATE TABLE `column`
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		menu varchar(50),
 		title varchar(55),
 		pic varchar(100),
@@ -342,11 +342,12 @@ class Other
 		// ********************** 拓展库 START **********************
 		$sql[] = "CREATE TABLE `test`
 		(
-		Id int NOT NULL AUTO_INCREMENT,
-		PRIMARY KEY(Id),
+		id int NOT NULL AUTO_INCREMENT,
+		PRIMARY KEY(id),
 		title varchar(50) COMMENT '标题'
 		)ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 		";
+		// **********************  拓展库 END  **********************
 
 		$num = 0;
 		foreach ($sql as $key=>$val) {
@@ -365,7 +366,6 @@ class Other
 						}
 		    echo "<br />".PHP_EOL;
 		}
-		// **********************  拓展库 END  **********************
 		echo "######################################  创建表 END  ######################################";
 		echo "<br />".PHP_EOL;
 
@@ -416,7 +416,7 @@ class Other
 		if ($query[0] < 1) {
 		    if ($db->query(
 <<<STR
-INSERT INTO `home_column` (`Id`, `menu`, `title`, `describe`, `content`) VALUES
+INSERT INTO `home_column` (`id`, `menu`, `title`, `describe`, `content`) VALUES
 (1, "", "关键字说明", "", "<p>									</p><p>									</p><p>									</p><p><span style=\"white-space: nowrap;\">//布局</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#header()</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#body()</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#footer()&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#header{}#</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#body{}#</span></p><p><span style=\"white-space: nowrap;\">&nbsp;#footer{}#</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//打印参数</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!!$str!!</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//执行php代码</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{}!</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//遍历数组，来循环显示多条数据</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{each $arr}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!``</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{/each}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">//这里放关键字，防止整理代码格式的时候关键字被破坏</span></p><p><span style=\"white-space: nowrap;\">/*d<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">d*/</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><span style=\"white-space: nowrap;\">&nbsp;//if语句</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{if true}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{elif false}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{else}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;!{/else}</span></p><p><span style=\"white-space: nowrap;\">&nbsp;</span></p><p><br /></p><p>								</p><p>								</p><p>								</p>"),
 (2, "", "数据库操作", "", "<p><span style=\"white-space: nowrap;\">#查询#</span></p><p><span style=\"white-space: nowrap;\">//有多行就输出数组，否则返回单个list（有些情况必须返回数组，就添加order）</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",1,\"type\",\" \");&nbsp; &nbsp;&nbsp;</span></p><p><span style=\"white-space: nowrap;\">// 根据字符串进行查询</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",\"谷雨光影\",\"subs\");&nbsp;</span></p><p><span style=\"white-space: nowrap;\">// 按id降序输出全表&nbsp;&nbsp;</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",-1,\"id\",\"desc\");<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">//输出type为1的特定数目的数据</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",1,\"type\",\"limit 0,5\");<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">//输出type为1的数据并进行排序</span></p><p><span style=\"white-space: nowrap;\">show(\"df\",1,\"type\",\"order by id desc\");</span></p><p><span style=\"white-space: nowrap;\">//执行sql语句<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">show(\"select * from df\",0);<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\">//按条件输出全表</span></p><p><span style=\"white-space: nowrap;\">show(\"menu\",$param,\"parent\",\"order by oderNum desc\");</span></p><p><span style=\"white-space: nowrap;\">//分页查询(页数,行数)</span></p><p><span style=\"white-space: nowrap;\">show_page(self::$db_d,$page,$rows);</span></p><p><span style=\"white-space: nowrap;\"><br /></span></p><p><span style=\"white-space: nowrap;\">##新增、修改##</span></p><p><span style=\"white-space: nowrap;\">//新增数据，之后不进行任何操作</span></p><p><span style=\"white-space: nowrap;\">update(\"df\",$arr)<span style=\"white-space:pre\">		</span></span></p><p><span style=\"white-space: nowrap;\">//根据id新增、修改数据，之后进行页面跳转</span></p><p><span style=\"white-space: nowrap;\">update(self::$db_hc,$dt,$id,(\"homepage/column/\".self::$db_hc));<span style=\"white-space:pre\">	</span></span></p><p><span style=\"white-space: nowrap;\"><br /></span></p><p><span style=\"white-space: nowrap;\"><br /></span></p><p><span style=\"white-space: nowrap;\">##删除##</span></p><p><span style=\"white-space: nowrap;\">//根据id进行删除</span></p><p><span style=\"white-space: nowrap;\">del(\"db\",3);</span></p><p><span style=\"white-space: nowrap;\">//清空表</span></p><p><span style=\"white-space: nowrap;\">clear(\"db\")</span></p><p><br /></p>"),
 (3, "", "数据库操作返回json", "", "<p><span style=\"white-space: nowrap;\"><br /></span></p><p><span style=\"white-space: nowrap;\">#查询返回json数据</span></p><p><span style=\"white-space: nowrap;\">//根据id查询</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"df\",\"id\",\"desc\",1);</span></p><p><span style=\"white-space: nowrap;\">//根据time降序排列&nbsp;</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"df\",\"time\");&nbsp;</span></p><p><span style=\"white-space: nowrap;\">//根据time升序排列</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"df\",\"time\",\"asc\");</span></p><p><span style=\"white-space: nowrap;\">//自定义sql查询</span></p><p><span style=\"white-space: nowrap;\">tableToJson(\"sql\",\"select * from df\");</span></p><p><span style=\"white-space: nowrap;\">#更新返回json</span></p><p><span style=\"white-space: nowrap;\">jsonUpdate(\"db\",array(\"nm\"=&gt;\"123\"),3);</span></p><p><span style=\"white-space: nowrap;\">#清空</span></p><p><span style=\"white-space: nowrap;\">jsonClear(\"db\")</span></p><p><br /></p>"),

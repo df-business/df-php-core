@@ -356,7 +356,7 @@ function showMessage($title = 'df', $msg = '', $return_url = null, $type = 'warn
  *
  * eg:
  * splitUrl("A/c/a/para",array(zdy=>$zdy))
- * splitUrl("wx/home/share_manage_show/{$v[0]}",array(wxId=>$_df['wxId']))
+ * splitUrl("wx/home/share_manage_show/{$v[0]}",array(wx_id=>$_df['wx_id']))
  * @param {Object} $str	url字符串
  * @param {Object} $get	get参数	数组
  */
@@ -497,7 +497,7 @@ function dbInit()
 		}
 		// ######################################  创建数据库 END  ######################################
 	}
-	
+
 	return $db;
 }
 
@@ -571,7 +571,7 @@ function query($sql)
  *
  *
  * 多列
- * queryFormat('df',['type'=>1,'parentId'=>2],['time','desc'],[0,1]); *
+ * queryFormat('df',['type'=>1,'parent_id'=>2],['time','desc'],[0,1]); *
  * queryFormat('df',['type'=>1],['time','desc'],10);
  * queryFormat('df',['type'=>1],['time','desc']);
  * queryFormat('df',['type'=>1]);
@@ -593,7 +593,7 @@ function queryFormat($tb, $para = array(), $order = array(), $limit = array())
     if (empty($para)) {
         $where = '';
     } elseif (is_numeric($para)) {
-        $where = 'where Id=' . $para;
+        $where = 'where id=' . $para;
     } elseif (is_string($para)) {
         $where = 'where ' . $para;
     } elseif (is_array($para)) {
@@ -614,7 +614,7 @@ function queryFormat($tb, $para = array(), $order = array(), $limit = array())
     if (empty($order)) {
         $order = '';
     } elseif (is_string($order)) {
-        $order = 'order by Id ' . $order;
+        $order = 'order by id ' . $order;
     } elseif (is_array($order)) {
         if (count($order) == 2) {
             $order = sprintf('order by %s %s', $order[0], $order[1]);
@@ -727,7 +727,7 @@ function queryFormatUpdateInsert($tb, $data = array(), $para = array())
 
         //拼接where
         if (is_numeric($para)) {
-            $where = 'where Id=' . $para;
+            $where = 'where id=' . $para;
         } elseif (is_string($para)) {
             $where = 'where ' . $para;
         } else {
@@ -751,7 +751,7 @@ function queryFormatUpdateInsert($tb, $data = array(), $para = array())
  *
  * queryFormatDel('df',['type'=>3])
  *
- * 根据Id删除
+ * 根据id删除
  * queryFormatDel('df',5)
  *
  * 清空表
@@ -767,7 +767,7 @@ function queryFormatDel($tb, $para = array())
 
     //拼接where
     if (is_numeric($para)) {
-        $where = 'where Id=' . $para;
+        $where = 'where id=' . $para;
     } elseif (is_string($para)) {
         $where = 'where ' . $para;
     } else {
@@ -857,7 +857,7 @@ function showAuto($tb, $para = array(), $order = array(), $limit = array())
  *
  *
  * 编辑
- * $rt=update('df',['key'=>'xxx'],['Id'=>3])
+ * $rt=update('df',['key'=>'xxx'],['id'=>3])
  * $rt=update('df',['key'=>'xxx'],3)
  *
  * update('df',['key'=>'xxx'],3,"homepage/column/".$db_hc)
@@ -869,7 +869,7 @@ function update($tb, $data = array(), $para = array(), $redirect = null)
     $sql = queryFormatUpdateInsert($tb, $data, $para);
     $return = 0;
     //新增
-    if (empty($para) || (isset($para["Id"]) && $para["Id"] == 0) || (isset($para["id"]) && $para["id"] == 0) || (isset($para["ID"]) && $para["ID"] == 0)) {
+    if (empty($para) || (isset($para["id"]) && $para["id"] == 0) || (isset($para["id"]) && $para["id"] == 0) || (isset($para["ID"]) && $para["ID"] == 0)) {
         $return = insert($tb, $data, $redirect);
     }
     //编辑
@@ -937,7 +937,7 @@ function insert($tb, $data = array(), $redirect = null)
  * 根据条件删除
  * del('df',['type'=>3])
  *
- * 默认根据Id删除
+ * 默认根据id删除
  * del('df',5)
  *
  * 清空表
@@ -1350,7 +1350,7 @@ function delSession($name = '', $redirect = null)
  * 主要用来显示form错误信息
  * eg：
  * toUrl('http://www.qq.com');
- * toUrl("wx/home/wxshare",array('WxId'=>$_df[ 'wxId']));
+ * toUrl("wx/home/wxshare",array('wx_id'=>$_df[ 'wx_id']));
  *
  * @param {Object} $url
  * @param {Object} $para
