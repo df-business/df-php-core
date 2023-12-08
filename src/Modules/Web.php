@@ -66,7 +66,7 @@ class Web
         //email模块的开关
         define('EMAIL_ENABLE', false);
         // 当前框架的版本
-        define('VERSION', file_get_contents(ROOT. DIRECTORY_SEPARATOR.'VERSION'));
+        define('VERSION', file_get_contents(ROOT. DIRECTORY_SEPARATOR.'version'));
         //当前框架需要的最低php版本
         define('PHP_VERSION_MIN', env('PHP_VERSION_MIN', getComposerJson()));
         //seo优化模式

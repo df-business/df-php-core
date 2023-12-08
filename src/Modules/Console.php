@@ -73,8 +73,8 @@ DfPHP {ver}
 命令:
   version                     查看DfPHP的当前版本
  dev
-  dev:root                    同步`df-php-root`
-  dev:core                    同步`df-php-core`
+  dev:root                    将项目里的`df-php-root`同步至组件库
+  dev:core                    将项目里的`df-php-core`同步至组件库
 
 STR;
 if($argc==1){
