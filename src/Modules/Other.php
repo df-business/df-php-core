@@ -401,7 +401,7 @@ class Other
 		//添加默认布局
 		$query = $db->query("SELECT COUNT(*) AS count FROM `home_layout`")->fetch_array();
 		if ($query[0] < 1) {
-		    if ($db->query("insert into `home_layout`(`title`,keywords,description,Inscribe,img1,color) values('DfPHP','DfPHP,轻量级php框架','DfPHP——简洁的php框架','© 2023 Dfer.Site','/view/admin/public/assets/img/bg.jpg','#ffffff')")) {
+		    if ($db->query("insert into `home_layout`(`title`,keywords,description,inscribe,img1,color) values('DfPHP','DfPHP,轻量级php框架','DfPHP——简洁的php框架','© 2023 Dfer.Site','/view/admin/public/assets/img/bg.jpg','#ffffff')")) {
 		        echo "添加数据 [home_layout] 成功";
 		    } else {
 		        echo "添加数据 [home_layout] 失败";
@@ -445,7 +445,7 @@ STR)) {
 		//添加静态页面
 		$query = $db->query("SELECT COUNT(*) AS count FROM `html`")->fetch_array();
 		if ($query[0] < 1) {
-		    if ($db->query("insert into `html` (`fileN`,`src`) values('index','homepage/home/')")) {
+		    if ($db->query("insert into `html` (`file_n`,`src`) values('index','homepage/home/')")) {
 		        echo "添加数据 [html] 成功";
 		    } else {
 		        echo "添加数据 [html] 失败";
