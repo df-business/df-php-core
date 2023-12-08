@@ -458,7 +458,7 @@ STR)) {
 		//添加基础菜单
 		$query = $db->query("SELECT COUNT(*) AS count FROM `menu`")->fetch_array();
 		if ($query[0] < 1) {
-		    if ($db->query("INSERT INTO `menu` (`title`, `src`, `type`, `parent`, `orderNum`) VALUES
+		    if ($db->query("INSERT INTO `menu` (`title`, `src`, `type`, `parent`, `order_num`) VALUES
 		('动态首页', 'homepage%2Fhome%2F', 'home', 0, 0),
 		('主页管理', '', 'folder', 0, 1),
 		('用户管理', '', 'user', 0, 2),
@@ -512,25 +512,25 @@ STR)) {
 										$sql_update=$sql_update.PHP_EOL.file_get_contents($file);
 		    }
 		}
-		echo <<<STR
-<pre>		
-{$sql_update}
-</pre>
-STR;
 		echo "<br />".PHP_EOL;
 		if (!empty($sql_update)) {
-			try{
-		    if ($db->multi_query($sql_update)) {
-		        echo "数据结构 [更新成功]";
-		    } else {
-										throw new \mysqli_sql_exception;
-		    }
-			}
-			catch(\Exception $exc){
-		        echo str("数据结构 [更新失败: {0}]",[$db->error]);
+			foreach(explode(';',$sql_update) as $key=>$value){
+				if(empty(trim($value)))
+						continue;
+				try{
+				   if ($db->multi_query($value)) {
+				       echo str("<pre>{0} [更新成功]</pre>",[$value]);
+				   } else {
+											throw new \mysqli_sql_exception;
+				   }
+				}
+				catch(\Exception $exc){
+				       echo str("<pre>{0} [更新失败: {1}]</pre>",[$value,$db->error]);
+				}
+				echo "<br />".PHP_EOL;
 			}
 		} else {
-		    echo "数据结构 不需要更新";
+		    echo "不需要更新";
 		}
 		echo "<br />".PHP_EOL;
 
