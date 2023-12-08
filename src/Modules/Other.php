@@ -504,18 +504,23 @@ STR)) {
 
 		echo "###################################### 更新数据库 START ######################################";
 		echo "<br />".PHP_EOL;
-
 		$sql_update = "";
 		$dbPath=ROOT.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'db'.DIRECTORY_SEPARATOR;
 		if (is_dir($dbPath)) {
 		    $files = glob($dbPath . '*.sql');
 		    foreach ($files as $file) {
-										$sql_update=$sql_update.file_get_contents($file);
+										$sql_update=$sql_update.PHP_EOL.file_get_contents($file);
 		    }
 		}
+		echo <<<STR
+<pre>		
+{$sql_update}
+</pre>
+STR;
+		echo "<br />".PHP_EOL;
 		if (!empty($sql_update)) {
 			try{
-		    if ($db->query($sql_update)) {
+		    if ($db->multi_query($sql_update)) {
 		        echo "数据结构 [更新成功]";
 		    } else {
 										throw new \mysqli_sql_exception;
