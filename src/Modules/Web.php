@@ -70,7 +70,7 @@ class Web
         //当前框架需要的最低php版本
         define('PHP_VERSION_MIN', env('PHP_VERSION_MIN', getComposerJson()));
         //seo优化模式
-        define('SEO', env('SEO', 1));
+        define('SEO', env('SEO', 0));
         //PC页面、手机页面分离开关
         define('WAP_PAGE_ENABLE', env('WAP_PAGE_ENABLE', 1));
         // 3*24小时
@@ -134,7 +134,7 @@ class Web
 								$other = new \Dfer\DfPhpCore\Modules\Other;
 
         $db=dbInit();
-								
+
         $_param = $common->ihtmlspecialchars(array_merge($_GET, $_POST));
         $_df = [
         	'logo' => "https://oss.dfer.site/df_icon/81x81.png",
@@ -171,11 +171,11 @@ class Web
 
 				        $src = explode('/', $src_string);
 
-				        //短路径
-				        if (SEO && $src[0] != "df" && count($src) <= 2) {
+				        //短路径。只影响前端页面
+				        if (SEO && $src[0] != ADMIN_URL) {
 				            $area_name = THEME_HOMEPAGE;
 				            $ctrl_name = 'home';
-				            $action_name = empty($src[0]) ? 'index' : $src[0];
+				            $action_name = $src[0]??'index';
 
 				            $param = null;
 				            if (isset($src[1])) {
@@ -185,8 +185,8 @@ class Web
 				        } else {
 				            // 完整路径
 				            $area_name = $common->unHump($src[0]) == ADMIN_URL ? THEME_ADMIN : $src[0];
-				            $ctrl_name = empty($src[1]) ? 'home' : $src[1];
-				            $action_name = empty($src[2]) ? 'index' : $src[2];
+				            $ctrl_name = $src[1]??'home';
+				            $action_name =$src[2]??'index';
 
 				            $param = null;
 				            if (isset($src[3])) {
@@ -199,6 +199,8 @@ class Web
 				        $_df['ctrl'] = $ctrl_name;
 				        $_df['action'] = $action_name;
 
+												debug($_df,$param);
+
 				        $ctrl_name = ucwords($ctrl_name) . "Controller";
 				        // 控制器方法同时支持下划线和驼峰
 				        $action_name = $common->hump($action_name);
@@ -209,18 +211,18 @@ class Web
 				        if (DEV) {
 				            class_exists($ctrl_path) or die("控制器不存在:{$ctrl_path}");
 																$controller=new $ctrl_path;
-				            method_exists($controller, $action_name) or die(sprintf('文件:%s<br>控制器、方法定义出错:%s %s', $ctrl_path, json_encode($_GET), json_encode($src)));
+				            method_exists($controller, $action_name) or die(str('文件:{0}<br>控制器、方法定义出错:{1} {2}', [$ctrl_path, json_encode($_GET), json_encode($src)]));
 				        } else {
-				            class_exists($ctrl_path) or header(sprintf("Location: %s/../404.html", VIEW_ASSETS));
+				            class_exists($ctrl_path) or header(str("Location: {0}/../404.html", [VIEW_ASSETS]));
 				            $controller=new $ctrl_path;
-				            method_exists($controller, $action_name) or header(sprintf("Location: %s/../404.html", VIEW_ASSETS));
+				            method_exists($controller, $action_name) or header(str("Location: {0}/../404.html", [VIEW_ASSETS]));
 				        }
 				        $controller->$action_name($param);
 				    } catch (Exception $e) {
 				        if (DEV)
-				            var_dump($e);
+				            echo str($e);
 				        else
-				            header(sprintf("Location: %s/../404.html", VIEW_ASSETS));
+				            header(str("Location: {0}/../404.html", [VIEW_ASSETS]));
 				    }
 				}
 

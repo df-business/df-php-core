@@ -1444,14 +1444,15 @@ function clearDePara($arr)
 
 // **********************  TITLE END  **********************
 //打印调试信息
-function debug($str)
+function debug()
 {
     if (DEV) {
+								$args=func_get_args();
         logs(str(<<<STR
 								********************** DEBUG START **********************
 								{0}
 								**********************  DEBUG END  **********************
-								STR, [$str]));
+								STR, str($args)));
     }
 }
 
@@ -1489,7 +1490,7 @@ function post($var = null)
  * @param {Object} $string	字符串
  * @param {Object} $params	参数
  */
-function str($string, $params)
+function str($string, $params=[])
 {
 				global $common;
     return $common->str($string, $params);
