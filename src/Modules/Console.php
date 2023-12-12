@@ -114,9 +114,10 @@ if($argc==1){
    // 需要同步的目录
     $dir=[
      'areas',
+					'data'.DIRECTORY_SEPARATOR.'db',
+					'extend',
      'public'.DIRECTORY_SEPARATOR.'view',
 					'public'.DIRECTORY_SEPARATOR.'index.php',
-					'data'.DIRECTORY_SEPARATOR.'db',
 					'.example.env',
 					'df',
 					'version'
