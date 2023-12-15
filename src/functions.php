@@ -429,7 +429,7 @@ function url($area, $ctrl = null, $action = null, $param = null, $get = null)
     }
 
     // get参数
-    $get_str = '';
+    $get_str = '?';
     if ($get && is_array($get)) {
         foreach ($get as $key => $val) {
             $get_str .= sprintf('&%s=%s', $key, $val);
