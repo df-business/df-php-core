@@ -80,7 +80,7 @@ class Web
 		define('FILE_SIZE_MAX', env('FILE_SIZE_MAX', 1024 * 1024 * 100));
 
 		// ssl状态
-		define('SSL_STATE', !empty($_SERVER['HTTPS']));
+		define('SSL_STATE', !empty($_SERVER['HTTPS'])||$_SERVER['HTTP_X_CLIENT_SCHEME']=='https');
 		if (SSL_STATE) {
 			// 自动将页面元素的http升级为https,需要保证页面中所有资源都支持https访问
 			header("Content-Security-Policy: upgrade-insecure-requests");
