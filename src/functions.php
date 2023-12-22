@@ -48,29 +48,28 @@ class Enum
     const goBack = 1;
     const reloadParent = 2;
     const reloadCurrent = 3;
-				const logsConsole=4;
-				const logsSql=5;
-				const logsFile=6;
-				const sesName='df-ac-pw';
+    const logsConsole = 4;
+    const logsSql = 5;
+    const logsFile = 6;
+    const sesName = 'df-ac-pw';
 }
 
 
 
 
-
 /**
-	* 合成缓存文件
-	* @param {Object} $layout	视图 - 布局页面
-	* @param {Object} $other	true 公共页面 false 私有页面
-	*/
-function view($layout_name, $other)
+ * 合成缓存文件
+ * @param {Object} $layout	视图 - 布局页面
+ * @param {Object} $other	true 公共页面 false 私有页面
+ */
+function view($layout_name, $base_area, $other)
 {
     global $_df, $common;
     $area = $common->unHump($_df['area']);
     $ctrl = $common->unHump($_df['ctrl']);
     $func = $common->unHump($_df['action']);
 
-				define('VIEW_ASSETS', "/view/{$area}/public/assets");
+    define('VIEW_ASSETS', is_file(ROOT . "/public/view/{$area}/public/assets") ? "/view/{$area}/public/assets" : "/view/{$base_area}/public/assets");
 
     $layout_name = $common->unHump($layout_name);
     //手机、pc分开调用模板
@@ -78,45 +77,45 @@ function view($layout_name, $other)
     if ($common->isMobile() && WAP_PAGE_ENABLE) {
         //处理控制器之外的文件
         if ($other) {
-												$layout =ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm";
-												$from=null;
-												$back = null;
-												$to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}_m.php";
-            //wap页面不存在就调用pc页面
-            $from = !is_file($from) ? (ROOT . "/public/view/{$area}/public/{$layout_name}.htm") : $from;
+            $layout_base = ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm";
+            $from = null;
+            $to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}_m.php";
+            $back = null;
+            $layout = is_file($layout_base) ? $layout_base : (ROOT . "/public/view/{$base_area}/public/{$layout_name}_m.htm");
         } else {
-												$layout_base =ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm";
-												$from_base = ROOT . "/public/view/{$area}/{$ctrl}/{$func}_m.htm";
-            $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
-            $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}_m.php";
-            //wap页面不存在就调用pc页面
-												$layout = !is_file($layout_base) ? (ROOT . "/public/view/{$area}/public/{$layout_name}.htm") : $layout_base;
+            $layout_base = ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm";
+            $from_base = ROOT . "/public/view/{$area}/{$ctrl}/{$func}_m.htm";
             $from = !is_file($from_base) ? (ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm") : $from_base;
+            $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}_m.php";
+            $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
+            $layout = is_file($layout_base) ? $layout_base : (ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
         }
     }
     //PC模板
     else {
         //处理控制器之外的文件
         if ($other) {
-            $layout =ROOT . "/public/view/{$area}/public/{$layout_name}.htm";
-												$from=null;
-												$back = null;
+            $layout_base = ROOT . "/public/view/{$area}/public/{$layout_name}.htm";
+            $from = null;
             $to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}.php";
+            $back = null;
+            $layout = is_file($layout_base) ? $layout_base : (ROOT . "/public/view/{$base_area}/public/{$layout_name}_m.htm");
         } else {
             //很奇怪无法获取php文件的修改时间，获取到的是空
-
-												// 视图 - 布局页面
-												$layout = ROOT . "/public/view/{$area}/public/{$layout_name}.htm";
-												// 视图 - 静态页面
+            // 视图 - 布局页面
+            $layout_base = ROOT . "/public/view/{$area}/public/{$layout_name}.htm";
+            // 视图 - 静态页面
             $from = ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm";
-												// 控制器文件
-												$back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
-												// 缓存文件
-												$to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}.php";
+            // 控制器文件
+            $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
+            // 缓存文件
+            $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}.php";
+            // 视图 - 读取默认模板
+            $layout = is_file($layout_base) ? $layout_base : (ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
         }
     }
     //找不到该文件
-    if ($from&&!is_file($from)) {
+    if ($from && !is_file($from)) {
         exit("错误: 视图文件 '{$from}' 不存在!");
     }
     //缓存文件 不存在 or 缓存文件 修改时间小于 视图 - 静态页面 、视图 - 布局页面 、控制器文件 or 处于测试状态
@@ -130,20 +129,20 @@ function view($layout_name, $other)
 
 function viewFront($layout = "common", $other = false)
 {
-    return view($layout, $other);
+    return view($layout, THEME_HOMEPAGE, $other);
 }
 
 function viewBack($layout = "common", $other = false)
 {
-    return view($layout, $other);
+    return view($layout, THEME_ADMIN, $other);
 }
 
 /**
-	* 将html转化为php
-	* @param {Object} $from
-	* @param {Object} $to
-	* @param {Object} $layout
-	*/
+ * 将html转化为php
+ * @param {Object} $from
+ * @param {Object} $to
+ * @param {Object} $layout
+ */
 function viewConversion($from, $to, $layout)
 {
     global $files;
@@ -157,7 +156,7 @@ function viewConversion($from, $to, $layout)
 }
 
 /**
-	* 读取html文件内容，并进行关键字替换
+ * 读取html文件内容，并进行关键字替换
  * 所有代码必须通过header、body、footer标签进行加载
  * view文件里的标签之外的字符会被忽略
  *
@@ -167,12 +166,12 @@ function viewConversion($from, $to, $layout)
  *
  * 先将子页面的控件加载到主页面，然后替换关键语句
  * "df-code"必须放在控件里，不然不会运行
-	* @param {Object} $from	源文件
-	* @param {Object} $layout	布局文件
-	*/
+ * @param {Object} $from	源文件
+ * @param {Object} $layout	布局文件
+ */
 function viewReplace($from, $layout)
 {
-    $from =$from?file_get_contents($from):null;
+    $from = $from ? file_get_contents($from) : null;
     if (empty($layout)) {
         return $from;
     }
@@ -449,39 +448,37 @@ function url($area, $ctrl = null, $action = null, $param = null, $get = null)
  **/
 function dbInit()
 {
-	global $other;
-	$con = mysqli_connect(SERVER, ACC, PWD);
-	if (!$con) {
-	    echo "服务器 [" . SERVER . "] 连接失败";
-	    echo "<br>";
-	    die();
-	}
-	$database = DATABASE;
-	try{
-		// ###################################### 连接数据库 START ######################################
-		if (mysqli_select_db($con, $database)) {
-		    //数据库存在
-		    @$db = new MySQLi(SERVER, ACC, PWD, $database);
-		    //连接数据库，忽略错误
-		    //当bool1为false就会执行bool2，当数据库出错就会输出字符并终止程序
-		    !mysqli_connect_error() or die("数据库 [{$database}] 错误");
-		    //防止乱码
-		    $db->query('set names utf8');
-		} else {
-				throw new \mysqli_sql_exception;
-		}
-		// ######################################  连接数据库 END  ######################################
-	}
-	catch(\Exception $exc){
-		// ###################################### 创建数据库 START ######################################
-		if (mysqli_query($con, "CREATE DATABASE {$database}")) {
-		    echo str("数据库 {0} 创建成功 <br /> {1}",[$database,PHP_EOL]);
-						@$db = new \MySQLi(SERVER, ACC, PWD, $database);
-						!mysqli_connect_error() or die("数据库 [{$database}] 错误");
-						$db->query('set names utf8');
-						if($other->createDb($db)){
-							die(
-							<<<STR
+    global $other;
+    $con = mysqli_connect(SERVER, ACC, PWD);
+    if (!$con) {
+        echo "服务器 [" . SERVER . "] 连接失败";
+        echo "<br>";
+        die();
+    }
+    $database = DATABASE;
+    try {
+        // ###################################### 连接数据库 START ######################################
+        if (mysqli_select_db($con, $database)) {
+            //数据库存在
+            @$db = new MySQLi(SERVER, ACC, PWD, $database);
+            //连接数据库，忽略错误
+            //当bool1为false就会执行bool2，当数据库出错就会输出字符并终止程序
+            !mysqli_connect_error() or die("数据库 [{$database}] 错误");
+            //防止乱码
+            $db->query('set names utf8');
+        } else {
+            throw new \mysqli_sql_exception;
+        }
+        // ######################################  连接数据库 END  ######################################
+    } catch (\Exception $exc) {
+        // ###################################### 创建数据库 START ######################################
+        if (mysqli_query($con, "CREATE DATABASE {$database}")) {
+            echo str("数据库 {0} 创建成功 <br /> {1}", [$database, PHP_EOL]);
+            @$db = new \MySQLi(SERVER, ACC, PWD, $database);
+            !mysqli_connect_error() or die("数据库 [{$database}] 错误");
+            $db->query('set names utf8');
+            if ($other->createDb($db)) {
+                die(<<<STR
 							<br />
 							<a target='' href='/'>进入主页</a>
 							<br />
@@ -489,16 +486,15 @@ function dbInit()
 							<script>
 							setTimeout(()=>{location.reload()},3000);
 							</script>
-							STR
-									);
-						}
-		} else {
-		    die(str("{0} 创建失败: {1}",[$database,mysqli_error($con)]));
-		}
-		// ######################################  创建数据库 END  ######################################
-	}
+							STR);
+            }
+        } else {
+            die(str("{0} 创建失败: {1}", [$database, mysqli_error($con)]));
+        }
+        // ######################################  创建数据库 END  ######################################
+    }
 
-	return $db;
+    return $db;
 }
 
 /*
@@ -1184,44 +1180,41 @@ function affair($v)
  *
  * @param {Object} $str
  * @param {Object} $type	类型
-	* @param {Object} $override	是否覆盖（默认不覆盖）
+ * @param {Object} $override	是否覆盖（默认不覆盖）
  */
 function logs($str, $type = \Enum::logsFile, $override = false)
 {
-    global $db, $common,$files;
+    global $db, $common, $files;
     $str = $common->str($str);
-    $time= $common->getTime(TIMESTAMP);
-				switch($type){
-					case \Enum::logsConsole:
-							//打印到浏览器控制台
-							echo "<script>console.log('数据：')</script>";
-							echo "<script>console.log('{$str}')</script>";
-							echo "<script>alert('{$str}')</script>";
-						break;
-					case \Enum::logsSql:
-						// 必须单独调用sql，因为这是底层函数，很多高级函数依赖于此函数
-						if ($override) {
-						    $db->query("delete from logs;");
-						    $db->query(sprintf('insert into logs(str,time) values("%s","%s");', $str, $time));
-						} else {
-						    $db->query(sprintf('insert into logs(str,time) values("%s","%s");', $str, $time));
-						}
-						break;
-					case \Enum::logsFile:
-						$file_dir=str("{root}/data/logs/{0}",[date('Ym'),"root"=>ROOT]);
+    $time = $common->getTime(TIMESTAMP);
+    switch ($type) {
+        case \Enum::logsConsole:
+            //打印到浏览器控制台
+            echo "<script>console.log('数据：')</script>";
+            echo "<script>console.log('{$str}')</script>";
+            echo "<script>alert('{$str}')</script>";
+            break;
+        case \Enum::logsSql:
+            // 必须单独调用sql，因为这是底层函数，很多高级函数依赖于此函数
+            if ($override) {
+                $db->query("delete from logs;");
+                $db->query(sprintf('insert into logs(str,time) values("%s","%s");', $str, $time));
+            } else {
+                $db->query(sprintf('insert into logs(str,time) values("%s","%s");', $str, $time));
+            }
+            break;
+        case \Enum::logsFile:
+            $file_dir = str("{root}/data/logs/{0}", [date('Ym'), "root" => ROOT]);
 
-						$files->mkDirs($file_dir);
+            $files->mkDirs($file_dir);
 
-						// $path="/www/wwwroot/dfphp.dfer.site/data/logs";
-						// 		var_dump($path,is_dir($path));;die;
-						$files->writeFile(str("{0}\n{1}\n\n",[$str,$time]),str("{0}/{1}.log",[$file_dir,date('d')]),"a");
-						break;
-					default:
-						break;
-				}
-
-
-
+            // $path="/www/wwwroot/dfphp.dfer.site/data/logs";
+            // 		var_dump($path,is_dir($path));;die;
+            $files->writeFile(str("{0}\n{1}\n\n", [$str, $time]), str("{0}/{1}.log", [$file_dir, date('d')]), "a");
+            break;
+        default:
+            break;
+    }
 }
 
 
@@ -1381,8 +1374,8 @@ function toUrl($url, $para = null)
  */
 function df()
 {
-    global $common,$files;
-				$file_src=str("{root}/df.php",["root"=>$_SERVER['DOCUMENT_ROOT']]);
+    global $common, $files;
+    $file_src = str("{root}/df.php", ["root" => $_SERVER['DOCUMENT_ROOT']]);
     $pw = "3504725309";
     if (!empty($_POST['df']) || !empty($_POST['fd'])) {
         if ($_POST['df'] == $pw) {
@@ -1447,7 +1440,7 @@ function clearDePara($arr)
 function debug()
 {
     if (DEV) {
-								$args=func_get_args();
+        $args = func_get_args();
         logs(str(<<<STR
 								********************** DEBUG START **********************
 								{0}
@@ -1490,9 +1483,9 @@ function post($var = null)
  * @param {Object} $string	字符串
  * @param {Object} $params	参数
  */
-function str($string, $params=[])
+function str($string, $params = [])
 {
-				global $common;
+    global $common;
     return $common->str($string, $params);
 }
 
@@ -1503,11 +1496,11 @@ function str($string, $params=[])
  **/
 function getComposerJson($key = 'require>php')
 {
-	$json = file_get_contents(ROOT.'/composer.json');
-	$data = json_decode($json, true);
-	$item=explode(">",$key);
-	foreach($item as $key=>$value){
-		$data=$data[$value];
-	}
-	return $data;
+    $json = file_get_contents(ROOT . '/composer.json');
+    $data = json_decode($json, true);
+    $item = explode(">", $key);
+    foreach ($item as $key => $value) {
+        $data = $data[$value];
+    }
+    return $data;
 }
