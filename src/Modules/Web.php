@@ -80,7 +80,7 @@ class Web
 		define('FILE_SIZE_MAX', env('FILE_SIZE_MAX', 1024 * 1024 * 100));
 
 		// ssl状态
-		define('SSL_STATE', !empty($_SERVER['HTTPS'])||$_SERVER['HTTP_X_CLIENT_SCHEME']=='https');
+		define('SSL_STATE', !empty($_SERVER['HTTPS']) || (isset($_SERVER['HTTP_X_CLIENT_SCHEME']) && $_SERVER['HTTP_X_CLIENT_SCHEME'] == 'https'));
 		if (SSL_STATE) {
 			// 自动将页面元素的http升级为https,需要保证页面中所有资源都支持https访问
 			header("Content-Security-Policy: upgrade-insecure-requests");
@@ -164,7 +164,7 @@ class Web
 			}
 
 			//初始页面
-			$src_string = $_GET['s']??(SEO ? "index" : THEME_HOMEPAGE);
+			$src_string = $_GET['s'] ?? (SEO ? "index" : THEME_HOMEPAGE);
 			debug(sprintf("当前页面原始路径：%s", $src_string));
 
 			if (substr($src_string, -5) == ".html")
@@ -176,7 +176,7 @@ class Web
 			if (SEO && $src[0] != ADMIN_URL) {
 				$area_name = THEME_HOMEPAGE;
 				$ctrl_name = 'home';
-				$action_name = $src[0] ?? $src[0]?:'index';
+				$action_name = $src[0] ?? $src[0] ?: 'index';
 
 				$param = null;
 				if (isset($src[1])) {
