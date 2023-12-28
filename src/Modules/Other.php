@@ -256,7 +256,7 @@ class Other
   `keywords` varchar(100) CHARACTER SET utf8 DEFAULT '' COMMENT '关键字',
   `description` varchar(100) CHARACTER SET utf8 DEFAULT '' COMMENT '网页简介',
   `inscribe` varchar(100) CHARACTER SET utf8 DEFAULT '',
-  `img1` varchar(200) CHARACTER SET utf8 DEFAULT '' COMMENT '背景图像',
+  `bg_img` varchar(200) CHARACTER SET utf8 DEFAULT '' COMMENT '背景图像',
   `color` varchar(10) CHARACTER SET utf8 DEFAULT '' COMMENT '主体字体颜色',
   `music_play` tinyint(4) DEFAULT '0' COMMENT '音乐自动播放',
   `scene_id` int(11) DEFAULT '0' COMMENT '模板id',
