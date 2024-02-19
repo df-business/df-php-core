@@ -34,8 +34,21 @@ namespace Dfer\DfPhpCore\Modules;
  * +----------------------------------------------------------------------
  *
  */
+
+use Dfer\DfPhpCore\Modules\{Mysql, Lang};
+use areas\admin\model\ConfigModel;
+
 class Web
 {
+
+	/**
+	 * 容器绑定标识
+	 * @var array
+	 */
+	protected $bind = [
+		'mysql'  => Mysql::class,
+		'lang'  => Lang::class
+	];
 
 	/**
 	 * 初始化
@@ -66,10 +79,12 @@ class Web
 
 		//email模块的开关
 		define('EMAIL_ENABLE', false);
+		// 自动检测语言
+		define('LANG_DETECT', env('LANG_DETECT', 0));
 		// 当前框架的版本
 		define('VERSION', file_get_contents(ROOT . DIRECTORY_SEPARATOR . 'version'));
 		//当前框架需要的最低php版本
-		define('PHP_VERSION_MIN', env('PHP_VERSION_MIN', getComposerJson()));
+		define('PHP_VERSION_MIN', env('PHP_VERSION_MIN', get_composer_json()));
 		//seo优化模式
 		define('SEO', env('SEO', 0));
 		//PC页面、手机页面分离开关
@@ -91,8 +106,6 @@ class Web
 		//当前页面完整url
 		define('URL', htmlspecialchars_decode(SITE . 'index.php?' . htmlspecialchars($_SERVER['QUERY_STRING'])));
 		// **********************  常量 END  **********************
-
-
 
 		// ********************** 错误信息的控制 START **********************
 		// http://www.w3school.com.cn/php/php_error.asp
@@ -129,12 +142,15 @@ class Web
 		//解除跨域限制
 		header("Access-Control-Allow-Origin: *");
 
-		global $db, $common, $files, $other, $_param, $_df;
+		global $db, $common, $files, $_param, $_df;
 		$common = new \Dfer\Tools\Common;
 		$files = new \Dfer\Tools\Files;
-		$other = new \Dfer\DfPhpCore\Modules\Other;
 
-		$db = dbInit();
+		$db = $this->mysql->init();
+
+		// 加载默认语言包
+		// $this->lang->switchLangSet($this->lang->defaultLangSet());
+
 
 		$_param = $common->ihtmlspecialchars(array_merge($_GET, $_POST));
 		$_df = [
@@ -142,10 +158,9 @@ class Web
 			'author' => "谷雨陈",
 			'qq' => "3504725309",
 			'time' => $common->getTime(TIMESTAMP),
-			'admin' => boolval(showFirst('dt', ['key' => 'admin'])['val'])
+			'admin' => boolval(ConfigModel::first())
 		];
 		// **********************  框架初始化 END  **********************
-
 		$this->index();
 	}
 
@@ -225,5 +240,11 @@ class Web
 			else
 				header(str("Location: {0}/../404.html", [VIEW_ASSETS]));
 		}
+	}
+
+	public function __get($name)
+	{
+		$bind = $this->bind[$name];
+		return new $bind;
 	}
 }
