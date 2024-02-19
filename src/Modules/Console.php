@@ -115,6 +115,7 @@ STR;
     $dir = [
       'areas',
       'data' . DIRECTORY_SEPARATOR . 'db',
+						'data' . DIRECTORY_SEPARATOR . 'lang',
       'extend',
       'public' . DIRECTORY_SEPARATOR . 'view',
       'public' . DIRECTORY_SEPARATOR . 'index.php',
