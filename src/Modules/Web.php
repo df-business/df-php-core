@@ -36,7 +36,6 @@ namespace Dfer\DfPhpCore\Modules;
  */
 
 use Dfer\DfPhpCore\Modules\{Mysql, Lang};
-use areas\admin\model\ConfigModel;
 
 class Web
 {
@@ -157,8 +156,7 @@ class Web
 			'logo' => "https://oss.dfer.site/df_icon/81x81.png",
 			'author' => "谷雨陈",
 			'qq' => "3504725309",
-			'time' => $common->getTime(TIMESTAMP),
-			'admin' => boolval(ConfigModel::first())
+			'time' => $common->getTime(TIMESTAMP)
 		];
 		// **********************  框架初始化 END  **********************
 		$this->index();

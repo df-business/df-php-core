@@ -126,7 +126,7 @@ class Lang
 	 */
 	protected function saveToCookie(string $langSet)
 	{
-		set_one_cookie($this->config['cookie_var'], $langSet, SESSION_EXPIRES);
+		cookie_set($this->config['cookie_var'], $langSet, SESSION_EXPIRES);
 	}
 
 	/**
@@ -257,7 +257,7 @@ class Lang
 	 * @param string      $range 语言作用域
 	 * @return mixed
 	 */
-	public function getOrigin(string $name = null, array $vars = [], string $range = '')
+	public function get(string $name = null, array $vars = [], string $range = '')
 	{
 		$range = $range ?: $this->range;
 
@@ -303,7 +303,7 @@ class Lang
 	 * @param string      $range 语言作用域
 	 * @return bool
 	 */
-	public function hasOrigin(string $name, string $range = ''): bool
+	public function has(string $name, string $range = ''): bool
 	{
 		$range = $range ?: $this->range;
 
@@ -315,16 +315,4 @@ class Lang
 		return isset($this->lang[$range][strtolower($name)]);
 	}
 
-
-	/**
-	 * 调用不存在的静态方法
-	 * @param {Object} $method
-	 * @param {Object} $args
-	 */
-	public static function __callStatic($method, $args)
-	{
-		// 实例化`Model`类，触发`__construct`方法
-		$model = new static();
-		return call_user_func_array([$model, "{$method}Origin"], $args);
-	}
 }

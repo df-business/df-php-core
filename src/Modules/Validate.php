@@ -2,7 +2,7 @@
 
 namespace Dfer\DfPhpCore\Modules;
 
-use Dfer\Tools\Common;
+use Dfer\Tools\Static\Common;
 
 
 /**

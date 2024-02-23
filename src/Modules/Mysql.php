@@ -207,7 +207,7 @@ class Mysql
 		$this->query("COMMIT");
 		$return = 0;
 		if ($r) {
-			$return = $this->sql('SELECT LAST_INSERT_ID()');
+			$return = $this->run('SELECT LAST_INSERT_ID()');
 			$return = $return[0][0]; //返回新增的id
 		}
 		return $return;
@@ -267,7 +267,7 @@ class Mysql
 			$limit = [$start, $length];
 			//var_dump($order_column,$_POST['order'][0]['column'],$_POST['columns']);
 
-			$total_count = $this->sql(sprintf("select count(*) from %s", $table_name))[0][0];
+			$total_count = $this->run(sprintf("select count(*) from %s", $table_name))[0][0];
 			// $data = showList($tb, $para, $order, [$start, $length]);
 			$data = $this->order($order)->limit($limit)->select();
 			$data_rt = array();
@@ -309,7 +309,7 @@ class Mysql
 		$database = DATABASE;
 		$table_name = $this->name;
 		//获取表字段名、类型、备注
-		$r = $this->sql(sprintf("select column_name,data_type,column_comment from information_schema.COLUMNS where table_name = '%s' and table_schema = '%s'", $table_name, $database));
+		$r = $this->run(sprintf("select column_name,data_type,column_comment from information_schema.COLUMNS where table_name = '%s' and table_schema = '%s'", $table_name, $database));
 		//unset($r[0]);
 
 		$item = [];
@@ -334,7 +334,7 @@ class Mysql
 	 */
 	public function tableExist($table = 'cache')
 	{
-		$row =  $this->sql("SHOW TABLES LIKE '" . $table . "'");
+		$row =  $this->run("SHOW TABLES LIKE '" . $table . "'");
 		if (!count($row)) {
 			return false;
 		}
@@ -552,7 +552,7 @@ class Mysql
 				    information_schema. COLUMNS
 				WHERE TABLE_NAME = '%s' and COLUMN_NAME='%s';
 				", $tb, $column);
-		$dt = $this->sql($sql);
+		$dt = $this->run($sql);
 		$value = $dt[0][0];
 		return $value;
 	}
@@ -562,7 +562,7 @@ class Mysql
 	/**
 	 * 简洁执行sql语句
 	 */
-	public function sql($sql)
+	public function run($sql)
 	{
 		global $db;
 		$sql = trim($sql);
@@ -611,15 +611,12 @@ class Mysql
 	{
 		global $db;
 		debug($sql);
-		// if(!$sql)
-		// 	return null;
 		$r = $db->query($sql);
 		//容错处理
 		if (!empty($db->error)) {
-			echo ($db->error);
-			$err = sprintf("语句：%s\r\n错误信息：%s", $sql, json_encode($db->error));
-			logs($err, 'sql错误');
-			//die();
+			$err = sprintf("语句：%s %s 错误信息：%s", $sql,PHP_EOL,json_encode($db->error));
+			echo $err;
+			debug($err);
 		}
 		return $r;
 	}
@@ -758,7 +755,7 @@ class Mysql
 				@$db = new \MySQLi(SERVER, ACC, PWD, $database);
 				!mysqli_connect_error() or die("数据库 [{$database}] 错误");
 				$db->query('set names utf8');
-				if ($other->createDb($db)) {
+				if ($this->create($db)) {
 					die(<<<STR
 										<br />
 										<a target='' href='/'>进入主页</a>

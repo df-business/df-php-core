@@ -130,11 +130,6 @@ function view_front($layout = "common", $special_tmpl = false)
     return view($layout, THEME_HOMEPAGE, $special_tmpl);
 }
 
-function view_back($layout = "common", $special_tmpl = false)
-{
-    return view($layout, THEME_ADMIN, $special_tmpl);
-}
-
 /**
  * 将html转化为php
  * @param {Object} $from
@@ -315,7 +310,7 @@ function cache_clean()
  * session默认的生命周期通常是20分钟
  * @param {Object} $name
  */
-function get_session($name)
+function session_get($name)
 {
     if (!empty($_SESSION[$name])) {
         $redirect = $_SESSION[$name];
@@ -324,7 +319,7 @@ function get_session($name)
     }
     return $redirect;
 }
-function set_session($name, $val)
+function session_set($name, $val)
 {
     $_SESSION[$name] = $val;
 }
@@ -332,7 +327,7 @@ function set_session($name, $val)
  * 删除ses
  * @param {Object} $name
  */
-function del_session($name = '')
+function session_del($name = '')
 {
     if (empty($name)) {
         session_destroy();
@@ -349,7 +344,7 @@ function del_session($name = '')
 	* @param {Object} $data	数据
 	* @param {Object} $time 保存时间
 	*/
-function set_one_cookie($name,$data,$time)
+function cookie_set($name,$data,$time)
 {
 	setcookie($name, $data, time() + $time, '/');
 }
@@ -358,16 +353,22 @@ function set_one_cookie($name,$data,$time)
 	* 删除cookie
 	* @param {Object} $name	名称
 	*/
-function del_one_cookie($name)
+function cookie_del($name)
 {
 	setcookie($name, null, time() - 1, '/');
 }
 // ######################################  cookie END  ######################################
 
+
 /**
 	* 网页跳转的提示页面
+	* @param {Object} $layout 布局页面
+	* @param {Object} $status	状态。true 成功 false 失败
+	* @param {Object} $redirect 跳转方式
+	* @param {Object} $success_msg 成功信息
+	* @param {Object} $fail_msg 失败信息
 	*/
-function message($status=true,$redirect=null,$success_msg = null,$fail_msg = null)
+function message($layout,$status=true,$redirect=null,$success_msg = null,$fail_msg = null)
 {
     if ($status===null && $redirect) {
 								// 直接跳转
@@ -405,7 +406,7 @@ function message($status=true,$redirect=null,$success_msg = null,$fail_msg = nul
 																break;
         }
         // var_dump($redirect);
-        include view_back('message', true);
+        include $layout;
     }
     exit();
 }
@@ -681,7 +682,10 @@ function env($name, $default = "")
  **/
 function get($var = null)
 {
-    return isset($_GET[$var]) ? $_GET[$var] : null;
+				if($var===null)
+					return $_GET;
+				else
+					return isset($_GET[$var]) ? $_GET[$var] : null;
 }
 
 /**
@@ -689,7 +693,10 @@ function get($var = null)
  */
 function post($var = null)
 {
-    return isset($_POST[$var]) ? $_POST[$var] : null;
+				if($var===null)
+					return $_POST;
+				else
+					return isset($_POST[$var]) ? $_POST[$var] : null;
 }
 
 /**
