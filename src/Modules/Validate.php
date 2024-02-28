@@ -2,8 +2,8 @@
 
 namespace Dfer\DfPhpCore\Modules;
 
-use Dfer\Tools\Static\Common;
-
+use Dfer\Tools\Statics\Common;
+use Dfer\DfPhpCore\Modules\Statics\Lang;
 
 /**
  * +----------------------------------------------------------------------

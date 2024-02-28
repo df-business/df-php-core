@@ -1,7 +1,7 @@
 <?php
 
 namespace Dfer\DfPhpCore\Modules;
-
+use Dfer\Tools\Statics\{Common};
 /**
  * +----------------------------------------------------------------------
  * | mysql数据库驱动
@@ -252,7 +252,6 @@ class Mysql
 	 */
 	public function showPage($url = '')
 	{
-		global $common;
 		if ($_POST) {
 			$table_name = $this->name;
 
@@ -294,7 +293,7 @@ class Mysql
 				'error' => ''
 			);
 
-			$common->showJsonBase($return);
+			Common::showJsonBase($return);
 		}
 	}
 
@@ -512,8 +511,6 @@ class Mysql
 	 */
 	public function queryFormatDel()
 	{
-		global $db;
-
 		$table_name = $this->name;
 		$where = $this->where;
 
@@ -532,7 +529,7 @@ class Mysql
 		}
 
 		// sql语句的表名区分大小写
-		$sqlString = sprintf("delete from `%s` %s", $tb, $where_string);
+		$sqlString = sprintf("delete from `%s` %s", $table_name, $where_string);
 
 		return $sqlString;
 	}
@@ -706,10 +703,9 @@ class Mysql
 			 */
 	public function affair($v)
 	{
-		global $common;
 		if (!$v) {
-			back();
-			$common->showJson('202', '账户收款失败');
+			$this->back();
+			// Common::showJson('202', '账户收款失败');
 		}
 	}
 
@@ -723,7 +719,6 @@ class Mysql
 	 **/
 	public function init()
 	{
-		global $other;
 		$con = mysqli_connect(SERVER, ACC, PWD);
 		if (!$con) {
 			echo "服务器 [" . SERVER . "] 连接失败";
@@ -983,7 +978,7 @@ class Mysql
 		//echo $db->query("SELECT * FROM `user`")->fetch_array()[1];   //读取首条数据
 		$query = $db->query("SELECT COUNT(*) AS `count` FROM `user`")->fetch_array();
 		if ($query[0] < 1) {
-			if ($db->query("insert into `user`(`nm`,`pw`,`pic`) values('df','df','/view/admin/public/assets/img/logo.png')")) {
+			if ($db->query("insert into `user`(`nm`,`pw`,`pic`,`create_time`) values('df','df','/view/admin/public/assets/img/logo.png','2024-02-27 16:01:24')")) {
 				echo "添加数据 [user] 成功";
 			} else {
 				echo "添加数据 [user] 失败";
@@ -1038,15 +1033,15 @@ class Mysql
 		}
 		echo "<br />" . PHP_EOL;
 		//添加通用参数
-		$query = $db->query("SELECT COUNT(*) AS count FROM `dt`")->fetch_array();
+		$query = $db->query("SELECT COUNT(*) AS count FROM `config`")->fetch_array();
 		if ($query[0] < 1) {
-			if ($db->query("insert into `dt`(`key`,`val`,`subs`) values('hits','0','用户访问量'),('admin','0','开启超级权限')")) {
-				echo "添加数据 [dt] 成功";
+			if ($db->query("insert into `config`(`key`,`val`,`subs`) values('hits','0','用户访问量'),('admin','0','开启超级权限')")) {
+				echo "添加数据 [config] 成功";
 			} else {
-				echo "添加数据 [dt] 失败";
+				echo "添加数据 [config] 失败";
 			}
 		} else {
-			echo "数据 [dt] 已存在";
+			echo "数据 [config] 已存在";
 		}
 		echo "<br />" . PHP_EOL;
 		//添加静态页面
@@ -1075,7 +1070,7 @@ class Mysql
 					('记事本 服务器端处理', 'admin%2Fcolumn%2Fnotepad_ss', 'book', 0, 101),
 					('关于此站点', 'admin%2Fcolumn%2Fcolumn	', 'info', 0, 110),
 					('刷新数据', 'js%3Arefresh_data%28%29%3B', 'refresh', 0, 120),
-					('装载数据', 'admin%2Fhome%2Fcreate_db', 'save', 0, 130),
+					('装载数据', 'admin%2Flogin%2Fcreate_db', 'save', 0, 130),
 					('框架信息', 'admin%2Fhome%2Finfo', 'info', 0, 140),
 					('菜单', 'admin%2Fhome%2Fmenu', 'lock', 0, 150),
 					('日志', 'admin%2Fhome%2Flog', 'history', 0, 160),

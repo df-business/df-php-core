@@ -1,6 +1,6 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules\Static;
+namespace Dfer\DfPhpCore\Modules\Statics;
 
 
 /**
@@ -39,7 +39,7 @@ class Lang extends Base
 {
 
 	protected function  originClass($var = null){
-		$class = str_replace("\Static", "", __CLASS__);
+		$class = str_replace("\Statics", "", __CLASS__);
 		return new $class ;
 	}
 }

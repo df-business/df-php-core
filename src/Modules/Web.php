@@ -35,7 +35,8 @@ namespace Dfer\DfPhpCore\Modules;
  *
  */
 
-use Dfer\DfPhpCore\Modules\{Mysql, Lang};
+use Dfer\DfPhpCore\Modules\{Mysql};
+use Dfer\Tools\Statics\{Common};
 
 class Web
 {
@@ -45,8 +46,7 @@ class Web
 	 * @var array
 	 */
 	protected $bind = [
-		'mysql'  => Mysql::class,
-		'lang'  => Lang::class
+		'mysql'  => Mysql::class
 	];
 
 	/**
@@ -141,22 +141,14 @@ class Web
 		//解除跨域限制
 		header("Access-Control-Allow-Origin: *");
 
-		global $db, $common, $files, $_param, $_df;
-		$common = new \Dfer\Tools\Common;
-		$files = new \Dfer\Tools\Files;
-
+		global $db, $_site,$_param;
 		$db = $this->mysql->init();
-
-		// 加载默认语言包
-		// $this->lang->switchLangSet($this->lang->defaultLangSet());
-
-
-		$_param = $common->ihtmlspecialchars(array_merge($_GET, $_POST));
-		$_df = [
+		$_param=param();
+		$_site = [
 			'logo' => "https://oss.dfer.site/df_icon/81x81.png",
 			'author' => "谷雨陈",
 			'qq' => "3504725309",
-			'time' => $common->getTime(TIMESTAMP)
+			'time' => Common::getTime(TIMESTAMP)
 		];
 		// **********************  框架初始化 END  **********************
 		$this->index();
@@ -169,15 +161,15 @@ class Web
 	 **/
 	function index($var = null)
 	{
-		global $common, $files, $_df;
+		global $_param;
 		try {
 			df();
-			if (isset($_GET['f'])) {
-				$files->addFile($_GET['f']);
+			if (get('f')) {
+				$files->addFile(get('f'));
 			}
 
 			//初始页面
-			$src_string = $_GET['s'] ?? (SEO ? "index" : THEME_HOMEPAGE);
+			$src_string = get('s')?? (SEO ? "index" : THEME_HOMEPAGE);
 			debug(sprintf("当前页面原始路径：%s", $src_string));
 
 			if (substr($src_string, -5) == ".html")
@@ -198,7 +190,7 @@ class Web
 				}
 			} else {
 				// 完整路径
-				$area_name = $common->unHump($src[0]) == ADMIN_URL ? THEME_ADMIN : $src[0];
+				$area_name = Common::unHump($src[0]) == ADMIN_URL ? THEME_ADMIN : $src[0];
 				$ctrl_name = $src[1] ?? $src[1] ?: 'home';
 				$action_name = $src[2] ?? $src[2] ?: 'index';
 
@@ -209,15 +201,19 @@ class Web
 				}
 			}
 
-			$_df['area'] = $area_name;
-			$_df['ctrl'] = $ctrl_name;
-			$_df['action'] = $action_name;
+			$_param['area'] = $area_name;
+			$_param['ctrl'] = $ctrl_name;
+			$_param['action'] = $action_name;
 
-			debug($_df, $param);
+			debug($_param, $param);
+
+			$base_area='admin';
+			$area = Common::unHump($_param['area']);
+			define('VIEW_ASSETS', is_dir(ROOT . "/public/view/{$area}/public/assets") ? "/view/{$area}/public/assets" : "/view/{$base_area}/public/assets");
 
 			$ctrl_name = ucwords($ctrl_name) . "Controller";
 			// 控制器方法同时支持下划线和驼峰
-			$action_name = $common->hump($action_name);
+			$action_name = Common::hump($action_name);
 			$ctrl_path = "areas\\{$area_name}\\controller\\{$ctrl_name}";
 
 

@@ -1,12 +1,11 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules;
+namespace Dfer\DfPhpCore\Modules\Statics;
 
-use Dfer\Tools\Statics\{Common};
 
 /**
  * +----------------------------------------------------------------------
- * | 模型类
+ * | 静态调用
  * +----------------------------------------------------------------------
  *                                            ...     .............
  *                                          ..   .:!o&*&&&&&ooooo&; .
@@ -36,72 +35,33 @@ use Dfer\Tools\Statics\{Common};
  * +----------------------------------------------------------------------
  *
  */
-abstract class Model
+abstract class Base
 {
-	/**
-	 * 模型名称
-	 * @var string
-	 */
-	protected $name;
 
-	/**
-	 * 容器绑定标识
-	 * @var array
-	 */
-	protected $bind = [
-		'mysql'  => Mysql::class
-	];
+			abstract protected function originClass($var = null);
 
-	public function __construct(array $data = [])
-	{
-		global $common;
-		// 获取当前模型名称
-		if (empty($this->name)) {
-			// 当前模型名
-			$name       = str_replace('\\', '/', static::class);
-			$name = basename($name);
-			if (substr($name, -5) == 'Model') {
-				$name = substr($name, 0, -5);
+
+			/**
+				* 调用不存在的公共方法
+				* @param {Object} $method
+				* @param {Object} $args
+				*/
+			public  function __call($method, $args)
+			{
+							$class=$this->originClass();
+			    return call_user_func_array([$class,$method], $args);
 			}
-			$this->name = Common::unHump($name);
-		}
-	}
 
-	/**
-	 * 获取当前模型的数据库查询对象
-	 * @param {Object} $var 变量
-	 **/
-	public function db($var = null)
-	{
-		$query = $this->mysql->name($this->name);
-		return $query;
-	}
+			/**
+				* 调用不存在的静态方法
+				* 由于静态函数会保持其状态，因此它们可能会使用更多的内存，这里将调用静态方法改为调用实例方法
+				* @param {Object} $method
+				* @param {Object} $args
+				*/
+			public static function __callStatic($method, $args)
+			{
+						$class=(new static)->originClass();
+						return call_user_func_array([$class,$method], $args);
+			}
 
-	public function __get($name)
-	{
-		$bind = $this->bind[$name];
-		return new $bind;
-	}
-
-	/**
-	 * 调用不存在的公共方法
-	 * @param {Object} $method
-	 * @param {Object} $args
-	 */
-	public function __call($method, $args)
-	{
-		return call_user_func_array([Mysql::class, $method], $args);
-	}
-
-	/**
-	 * 调用不存在的静态方法
-	 * @param {Object} $method
-	 * @param {Object} $args
-	 */
-	public static function __callStatic($method, $args)
-	{
-		// 实例化`Model`类，触发`__construct`方法
-		$model = new static();
-		return call_user_func_array([$model->db(), $method], $args);
-	}
 }

