@@ -74,7 +74,7 @@ DfPHP {ver}
 命令:
   version                     查看DfPHP的当前版本
  dev
-  dev:root                    将项目的核心文件发布至`df-php-root`组件库(用脚本发布项目会自动触发)
+  dev:root                    将项目的核心文件发布至`df-php-root`组件库
   dev:core                    将项目里的`df-php-core`同步至组件库
   dev:tools                   将项目里的`tools`同步至组件库
 
