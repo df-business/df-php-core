@@ -45,6 +45,18 @@ abstract class Model
 	protected $name;
 
 	/**
+	 * JSON数据表字段
+	 * @var array
+	 */
+	protected $json = [];
+
+	/**
+	 * JSON数据取出是否需要转换为数组
+	 * @var bool
+	 */
+	protected $jsonAssoc = false;
+
+	/**
 	 * 容器绑定标识
 	 * @var array
 	 */
@@ -73,7 +85,12 @@ abstract class Model
 	 **/
 	public function db($var = null)
 	{
-		$query = $this->mysql->name($this->name);
+		$setup=[
+			'name'=>$this->name,
+			'json'=>$this->json,
+			'jsonAssoc'=>$this->jsonAssoc
+			];
+		$query = $this->mysql->setup($setup);
 		return $query;
 	}
 

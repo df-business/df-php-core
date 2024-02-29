@@ -1,7 +1,9 @@
 <?php
 
 namespace Dfer\DfPhpCore\Modules;
+
 use Dfer\Tools\Statics\{Common};
+
 /**
  * +----------------------------------------------------------------------
  * | mysql数据库驱动
@@ -41,8 +43,11 @@ class Mysql
 	 * 当前数据表名称（不含前缀）
 	 * @var string
 	 */
-	protected $name = '';
+	protected $name;
+	protected $json;
+	protected $jsonAssoc;
 
+	protected $field = array();
 	protected $where = array();
 	protected $order = array();
 	protected $limit = array();
@@ -53,17 +58,23 @@ class Mysql
 		return $this->name;
 	}
 
-	/**
-	 * 指定当前数据表名（不含前缀）
-	 * @access public
-	 * @param string $name 不含前缀的数据表名字
-	 * @return $this
-	 */
-	public function name(string $name)
+	public function setup(array $item)
 	{
-		$this->name = $name;
+		$this->name = $item['name'] ?? '';
+		$this->json = $item['json'] ?? [];
+		$this->jsonAssoc = $item['jsonAssoc'] ?? false;
 		return $this;
 	}
+
+	/**
+	 * 字段
+	 */
+	public function field($param = array())
+	{
+		$this->field = $param;
+		return $this;
+	}
+
 
 	/**
 	 * 条件
@@ -112,9 +123,22 @@ class Mysql
 		} else {
 			$r = $this->query($this->queryFormat());
 			$rt = $r->fetch_array(MYSQLI_BOTH);
-		}
 
+			foreach ($rt as $key => &$value) {
+				if ($this->jsonAssoc && in_array($key, (array) $this->json)) {
+					$value = json_decode($value, true);
+				}
+			}
+		}
 		return $rt;
+	}
+
+	/**
+	 * 读取第一条数据的某个值
+	 */
+	public function value($field)
+	{
+		return $this->find()[$field];
 	}
 
 	/**
@@ -357,12 +381,30 @@ class Mysql
 	public function queryFormat()
 	{
 		$table_name = $this->name;
+		$field = $this->field;
 		$where = $this->where;
 		$order = $this->order;
 		$limit = $this->limit;
 
 		if (empty($table_name)) {
 			return null;
+		}
+
+
+		//拼接field
+		if (empty($field)) {
+			$field_string = '*';
+		} elseif (is_string($field)) {
+			$field_string = $field;
+		} elseif (is_array($field)) {
+			foreach ($field as $key => &$value) {
+				if ($value !== null) {
+					$value = "`{$value}`";
+				}
+			}
+			$field_string = implode(",", $field);
+		} else {
+			$field_string = '*';
 		}
 
 		//拼接where
@@ -410,7 +452,7 @@ class Mysql
 		}
 
 		//带条件获取整个表的数据
-		$sqlString = sprintf("select * from `%s` %s %s %s", $table_name, $where_string, $order_string, $limit_string); //sql语句的表名区分大小写
+		$sqlString = sprintf("select %s from `%s` %s %s %s", $field_string, $table_name, $where_string, $order_string, $limit_string); //sql语句的表名区分大小写
 		return $sqlString;
 	}
 
@@ -442,6 +484,8 @@ class Mysql
 						$value = $this->getTypeValue($table_name, $key);
 					} elseif (is_int($value)) {
 						$value = intval($value);
+					} elseif (in_array($key, (array) $this->json)) {
+						$value = json_encode($value, JSON_UNESCAPED_UNICODE);
 					} else {
 						$value = mysqli_escape_string($db, $value);
 					}
@@ -467,6 +511,8 @@ class Mysql
 						$value = $this->getTypeValue($table_name, $key);
 					} elseif (is_int($value)) {
 						$value = intval($value);
+					} elseif (in_array($key, (array) $this->json)) {
+						$value = json_encode($value, JSON_UNESCAPED_UNICODE);
 					} else {
 						$value = mysqli_escape_string($db, $value);
 					}
@@ -611,7 +657,7 @@ class Mysql
 		$r = $db->query($sql);
 		//容错处理
 		if (!empty($db->error)) {
-			$err = sprintf("语句：%s %s 错误信息：%s", $sql,PHP_EOL,json_encode($db->error));
+			$err = sprintf("语句：%s %s 错误信息：%s", $sql, PHP_EOL, json_encode($db->error));
 			echo $err;
 			debug($err);
 		}
@@ -710,9 +756,6 @@ class Mysql
 	}
 
 
-
-
-
 	/**
 	 * 数据库连接初始化
 	 * @param {Object} $var 变量
@@ -808,7 +851,7 @@ class Mysql
 		$sql[] = "CREATE TABLE `config` (
 			  `id` int(11) NOT NULL AUTO_INCREMENT,
 			  `key` varchar(15) CHARACTER SET utf8 DEFAULT '' COMMENT '参数名',
-			  `val` varchar(150) CHARACTER SET utf8 DEFAULT '0' COMMENT '值',
+			  `val` longtext CHARACTER SET utf8 COMMENT '值',
 			  `subs` varchar(100) CHARACTER SET utf8 DEFAULT '' COMMENT '描述',
 			  PRIMARY KEY (`id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='基础参数，不要删';
@@ -859,21 +902,6 @@ class Mysql
 			  `time` datetime DEFAULT NULL COMMENT '访问者最近访问的时间',
 			  PRIMARY KEY (`id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户信息收集';
-			";
-
-
-		$sql[] = "CREATE TABLE `home_layout` (
-			  `id` int(11) NOT NULL AUTO_INCREMENT,
-			  `title` varchar(100) CHARACTER SET utf8 DEFAULT '',
-			  `keywords` varchar(100) CHARACTER SET utf8 DEFAULT '' COMMENT '关键字',
-			  `description` varchar(100) CHARACTER SET utf8 DEFAULT '' COMMENT '网页简介',
-			  `inscribe` varchar(100) CHARACTER SET utf8 DEFAULT '',
-			  `bg_img` varchar(200) CHARACTER SET utf8 DEFAULT '' COMMENT '背景图像',
-			  `color` varchar(10) CHARACTER SET utf8 DEFAULT '' COMMENT '主体字体颜色',
-			  `music_play` tinyint(4) DEFAULT '0' COMMENT '音乐自动播放',
-			  `scene_id` int(11) DEFAULT '0' COMMENT '模板id',
-			  PRIMARY KEY (`id`) USING BTREE
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='主页布局';
 			";
 
 		$sql[] = "CREATE TABLE `home_layout_img` (
@@ -999,19 +1027,6 @@ class Mysql
 			echo "数据 [roles] 已存在";
 		}
 		echo "<br />" . PHP_EOL;
-		//添加默认布局
-		$query = $db->query("SELECT COUNT(*) AS count FROM `home_layout`")->fetch_array();
-		if ($query[0] < 1) {
-			if ($db->query("insert into `home_layout`(`title`,`keywords`,`description`,`inscribe`,`bg_img`,`color`) values('DfPHP','DfPHP,轻量级php框架,化繁为简,返璞归真,大道至简','遵循大道至简的php框架','© 2023 Dfer.Site','/view/admin/public/assets/img/bg.jpg','#ffffff')")) {
-				echo "添加数据 [home_layout] 成功";
-			} else {
-				echo "添加数据 [home_layout] 失败";
-			}
-		} else {
-			echo "数据 [home_layout] 已存在";
-		}
-		echo "<br />" . PHP_EOL;
-
 		//添加默认栏目
 		$query = $db->query("SELECT COUNT(*) AS count FROM `home_column`")->fetch_array();
 		if ($query[0] < 1) {
@@ -1035,7 +1050,12 @@ class Mysql
 		//添加通用参数
 		$query = $db->query("SELECT COUNT(*) AS count FROM `config`")->fetch_array();
 		if ($query[0] < 1) {
-			if ($db->query("insert into `config`(`key`,`val`,`subs`) values('hits','0','用户访问量'),('admin','0','开启超级权限')")) {
+			if ($db->query(<<<STR
+			insert into `config`(`key`,`val`,`subs`) values
+			('hits','0','用户访问量'),
+			('admin','0','开启超级权限'),
+			('home_layout','{"bg_img":"/view/admin/public/assets/img/bg.jpg","music_play":"0","color":"#ffffff","title":"DfPHP","keywords":"DfPHP,轻量级php框架,化繁为简,返璞归真,大道至简","description":"遵循大道至简的php框架","inscribe":"© 2023 Dfer.Site"}','主页布局')
+			STR)) {
 				echo "添加数据 [config] 成功";
 			} else {
 				echo "添加数据 [config] 失败";
@@ -1074,7 +1094,6 @@ class Mysql
 					('框架信息', 'admin%2Fhome%2Finfo', 'info', 0, 140),
 					('菜单', 'admin%2Fhome%2Fmenu', 'lock', 0, 150),
 					('日志', 'admin%2Fhome%2Flog', 'history', 0, 160),
-					('使用说明', 'admin%2Fcolumn%2Freadme', 'bug', 0, 170),
 
 					('布局', 'admin%2Fcolumn%2Fhome_layout%2F1', 'file', 2, 0),
 					('栏目管理', 'admin%2Fcolumn%2Fhome_column', 'file', 2, 0),
