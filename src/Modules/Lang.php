@@ -63,7 +63,7 @@ class Lang
 	 */
 	private $range = 'zh-cn';
 
-	public function __construct(array $data = [])
+	public function __construct()
 	{
 		if (LANG_DETECT) {
 			// 自动侦测当前语言

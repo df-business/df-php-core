@@ -3,7 +3,6 @@
 namespace Dfer\DfPhpCore\Modules\Statics;
 
 
-
 /**
  * +----------------------------------------------------------------------
  * | 静态调用
@@ -36,7 +35,7 @@ namespace Dfer\DfPhpCore\Modules\Statics;
  * +----------------------------------------------------------------------
  *
  */
-class Validate extends Base
+class Config extends Base
 {
 
 	protected function originClass($var = null){

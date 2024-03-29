@@ -1,7 +1,7 @@
 <?php
 
 namespace Dfer\DfPhpCore\Modules;
-
+use Dfer\Tools\Common;
 
 /**
  * +----------------------------------------------------------------------
@@ -35,7 +35,7 @@ namespace Dfer\DfPhpCore\Modules;
  * +----------------------------------------------------------------------
  *
  */
-class Console
+class Console extends Common
 {
 
   /**
@@ -50,8 +50,6 @@ class Console
     define('ROOT', dirname(__DIR__, 5) . DIRECTORY_SEPARATOR);
     define('VERSION', file_get_contents(ROOT . 'VERSION'));
     define('QUIET', in_array('-q', $argv));
-    $this->files = new \Dfer\Tools\Files;
-    $this->common = new \Dfer\Tools\Common;
     $this->init();
   }
 
@@ -80,7 +78,7 @@ DfPHP {ver}
 
 STR;
     if ($argc == 1) {
-      $this->print($this->common->str($str, ['ver' => VERSION]));
+      $this->print($this->str($str, ['ver' => VERSION]));
       return;
     }
 
@@ -130,13 +128,13 @@ STR;
     if (is_dir(dirname($moduleRootDir))) {
       $this->print($projectRootDir . ">>>" . $moduleRootDir . PHP_EOL);
       $this->print("////////////////////////////////////////////////// 文件删除 START //////////////////////////////////////////////////" . PHP_EOL);
-      $this->files->deleteDir($moduleRootDir, QUIET);
+      $this->deleteDir($moduleRootDir, QUIET);
       $this->print("//////////////////////////////////////////////////  文件删除 END  //////////////////////////////////////////////////" . PHP_EOL);
       sleep(1.5);
       $this->print(PHP_EOL);
       $this->print("////////////////////////////////////////////////// 文件复制 START //////////////////////////////////////////////////" . PHP_EOL);
       foreach ($dir as $key => $value) {
-        $this->files->copy($projectRootDir . $value, $moduleRootDir . $value, QUIET);
+        $this->copy($projectRootDir . $value, $moduleRootDir . $value, QUIET);
       }
       $this->print("//////////////////////////////////////////////////  文件复制 END  //////////////////////////////////////////////////" . PHP_EOL);
       sleep(1.5);
@@ -163,12 +161,12 @@ STR;
     if (is_dir(dirname($moduleRootDir))) {
       $this->print($projectModuleRootDir . ">>>" . $moduleRootDir . PHP_EOL);
       $this->print("////////////////////////////////////////////////// 文件删除 START //////////////////////////////////////////////////" . PHP_EOL);
-      $this->files->deleteDir($moduleRootDir, QUIET);
+      $this->deleteDir($moduleRootDir, QUIET);
       $this->print("//////////////////////////////////////////////////  文件删除 END  //////////////////////////////////////////////////" . PHP_EOL);
       sleep(1.5);
       $this->print(PHP_EOL);
       $this->print("////////////////////////////////////////////////// 文件复制 START //////////////////////////////////////////////////" . PHP_EOL);
-      $this->files->copy($projectModuleRootDir, $moduleRootDir, QUIET);
+      $this->copy($projectModuleRootDir, $moduleRootDir, QUIET);
       $this->print("//////////////////////////////////////////////////  文件复制 END  //////////////////////////////////////////////////" . PHP_EOL);
       sleep(1.5);
       $this->print(PHP_EOL);
@@ -194,12 +192,12 @@ STR;
 		  if (is_dir(dirname($moduleRootDir))) {
 		    $this->print($projectModuleRootDir . ">>>" . $moduleRootDir . PHP_EOL);
 		    $this->print("////////////////////////////////////////////////// 文件删除 START //////////////////////////////////////////////////" . PHP_EOL);
-		    $this->files->deleteDir($moduleRootDir, QUIET);
+		    $this->deleteDir($moduleRootDir, QUIET);
 		    $this->print("//////////////////////////////////////////////////  文件删除 END  //////////////////////////////////////////////////" . PHP_EOL);
 		    sleep(1.5);
 		    $this->print(PHP_EOL);
 		    $this->print("////////////////////////////////////////////////// 文件复制 START //////////////////////////////////////////////////" . PHP_EOL);
-		    $this->files->copy($projectModuleRootDir, $moduleRootDir, QUIET);
+		    $this->copy($projectModuleRootDir, $moduleRootDir, QUIET);
 		    $this->print("//////////////////////////////////////////////////  文件复制 END  //////////////////////////////////////////////////" . PHP_EOL);
 		    sleep(1.5);
 		    $this->print(PHP_EOL);
@@ -219,6 +217,6 @@ STR;
   function print($var = null)
   {
     if (!QUIET)
-      echo $this->common->str($var);
+      echo $this->str($var);
   }
 }

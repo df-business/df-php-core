@@ -39,7 +39,7 @@ namespace Dfer\DfPhpCore\Modules\Statics;
 class Mysql extends Base
 {
 
-	protected function  originClass($var = null){
+	protected function originClass($var = null){
 		$class = str_replace("\Statics", "", __CLASS__);
 		return new $class ;
 	}

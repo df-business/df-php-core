@@ -2,7 +2,7 @@
 
 namespace Dfer\DfPhpCore\Modules;
 
-use Dfer\Tools\Statics\Common;
+use Dfer\Tools\Common;
 use Dfer\DfPhpCore\Modules\Statics\Lang;
 
 /**
@@ -37,7 +37,7 @@ use Dfer\DfPhpCore\Modules\Statics\Lang;
  * +----------------------------------------------------------------------
  *
  */
-abstract class Validate
+abstract class Validate extends Common
 {
 	/**
 	 * 当前验证规则
@@ -413,7 +413,7 @@ abstract class Validate
 	 */
 	public function is($value, string $rule, array $data = []): bool
 	{
-		switch (Common::camel($rule)) {
+		switch ($this->camel($rule)) {
 			case 'require':
 				// 必须
 				$result = !empty($value) || '0' == $value;

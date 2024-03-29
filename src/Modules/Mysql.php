@@ -2,7 +2,7 @@
 
 namespace Dfer\DfPhpCore\Modules;
 
-use Dfer\Tools\Statics\{Common};
+use Dfer\Tools\{Common};
 
 /**
  * +----------------------------------------------------------------------
@@ -36,7 +36,7 @@ use Dfer\Tools\Statics\{Common};
  * +----------------------------------------------------------------------
  *
  */
-class Mysql
+class Mysql extends Common
 {
 
 	/**
@@ -317,7 +317,7 @@ class Mysql
 				'error' => ''
 			);
 
-			Common::showJsonBase($return);
+			$this->showJsonBase($return);
 		}
 	}
 
@@ -751,7 +751,7 @@ class Mysql
 	{
 		if (!$v) {
 			$this->back();
-			// Common::showJson('202', '账户收款失败');
+			// $this->showJson('202', '账户收款失败');
 		}
 	}
 

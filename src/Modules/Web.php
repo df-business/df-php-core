@@ -36,9 +36,9 @@ namespace Dfer\DfPhpCore\Modules;
  */
 
 use Dfer\DfPhpCore\Modules\{Mysql};
-use Dfer\Tools\Statics\{Common};
+use Dfer\Tools\{Common};
 
-class Web
+class Web extends Common
 {
 
 	/**
@@ -148,7 +148,7 @@ class Web
 			'logo' => "https://oss.dfer.site/df_icon/81x81.png",
 			'author' => "谷雨陈",
 			'qq' => "3504725309",
-			'time' => Common::getTime(TIMESTAMP)
+			'time' => $this->getTime(TIMESTAMP)
 		];
 		// **********************  框架初始化 END  **********************
 		$this->index();
@@ -190,7 +190,7 @@ class Web
 				}
 			} else {
 				// 完整路径
-				$area_name = Common::unHump($src[0]) == ADMIN_URL ? THEME_ADMIN : $src[0];
+				$area_name = $this->unHump($src[0]) == ADMIN_URL ? THEME_ADMIN : $src[0];
 				$ctrl_name = $src[1] ?? $src[1] ?: 'home';
 				$action_name = $src[2] ?? $src[2] ?: 'index';
 
@@ -208,12 +208,12 @@ class Web
 			debug($_param, $param);
 
 			$base_area='admin';
-			$area = Common::unHump($_param['area']);
+			$area = $this->unHump($_param['area']);
 			define('VIEW_ASSETS', is_dir(ROOT . "/public/view/{$area}/public/assets") ? "/view/{$area}/public/assets" : "/view/{$base_area}/public/assets");
 
 			$ctrl_name = ucwords($ctrl_name) . "Controller";
 			// 控制器方法同时支持下划线和驼峰
-			$action_name = Common::hump($action_name);
+			$action_name = $this->hump($action_name);
 			$ctrl_path = "areas\\{$area_name}\\controller\\{$ctrl_name}";
 
 

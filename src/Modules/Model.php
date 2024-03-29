@@ -2,7 +2,7 @@
 
 namespace Dfer\DfPhpCore\Modules;
 
-use Dfer\Tools\Statics\{Common};
+use Dfer\Tools\{Common};
 
 /**
  * +----------------------------------------------------------------------
@@ -36,7 +36,7 @@ use Dfer\Tools\Statics\{Common};
  * +----------------------------------------------------------------------
  *
  */
-abstract class Model
+abstract class Model extends Common
 {
 	/**
 	 * 模型名称
@@ -66,7 +66,6 @@ abstract class Model
 
 	public function __construct(array $data = [])
 	{
-		global $common;
 		// 获取当前模型名称
 		if (empty($this->name)) {
 			// 当前模型名
@@ -75,7 +74,7 @@ abstract class Model
 			if (substr($name, -5) == 'Model') {
 				$name = substr($name, 0, -5);
 			}
-			$this->name = Common::unHump($name);
+			$this->name = $this->unHump($name);
 		}
 	}
 
