@@ -98,9 +98,9 @@ class Web extends Common
 		if (SSL_STATE) {
 			// 自动将页面元素的http升级为https,需要保证页面中所有资源都支持https访问
 			header("Content-Security-Policy: upgrade-insecure-requests");
-			define('SITE', 'https://' . $_SERVER['HTTP_HOST'] . '/');
+			define('SITE', 'https://' . $_SERVER['HTTP_HOST']);
 		} else {
-			define('SITE', 'http://' . $_SERVER['HTTP_HOST'] . '/');
+			define('SITE', 'http://' . $_SERVER['HTTP_HOST']);
 		}
 		//当前页面完整url
 		define('URL', htmlspecialchars_decode(SITE . 'index.php?' . htmlspecialchars($_SERVER['QUERY_STRING'])));

