@@ -170,7 +170,8 @@ class Web extends Common
 
 			//初始页面
 			$src_string = get('s')?? (SEO ? "index" : THEME_HOMEPAGE);
-			debug(sprintf("当前页面原始路径：%s", $src_string));
+			debug(sprintf("当前页面原始路径：%s <br/>", $src_string));
+
 
 			if (substr($src_string, -5) == ".html")
 				$src_string = str_replace(".html", "", $src_string);
@@ -178,7 +179,7 @@ class Web extends Common
 			$src = explode('/', $src_string);
 
 			//短路径。只影响前端页面
-			if (SEO && $src[0] != ADMIN_URL) {
+			if (SEO && !in_array($src[0], [THEME_ADMIN,ADMIN_URL])) {
 				$area_name = THEME_HOMEPAGE;
 				$ctrl_name = 'home';
 				$action_name = $src[0] ?? $src[0] ?: 'index';
@@ -221,7 +222,7 @@ class Web extends Common
 			if (DEV) {
 				class_exists($ctrl_path) or die("控制器不存在:{$ctrl_path}");
 				$controller = new $ctrl_path;
-				method_exists($controller, $action_name) or die(str('文件:{0}<br>控制器、方法定义出错:{1} {2}', [$ctrl_path, json_encode($_GET), json_encode($src)]));
+				method_exists($controller, $action_name) or die(str('文件:{0}<br/>控制器、方法定义出错:{1} {2}', [$ctrl_path, json_encode($_GET), json_encode($src)]));
 			} else {
 				class_exists($ctrl_path) or header(str("Location: {0}/../404.html", [VIEW_ASSETS]));
 				$controller = new $ctrl_path;
