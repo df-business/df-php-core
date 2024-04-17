@@ -63,10 +63,10 @@ class Config extends Common
     /**
      * 加载配置文件
      * @param {Object} $var 变量
-     **/
+     */
     public function init($var = null)
     {
-        $path   = ROOT . DIRECTORY_SEPARATOR . 'data';
+        $path = ROOT . DIRECTORY_SEPARATOR . 'data';
         // 自动读取配置文件
         if (is_dir($path . 'config')) {
             $dir = $path . 'config' . DIRECTORY_SEPARATOR;
@@ -184,9 +184,9 @@ class Config extends Common
             return $this->config[$name] ?? [];
         }
 
-        $name    = explode('.', $name);
+        $name = explode('.', $name);
         $name[0] = strtolower($name[0]);
-        $config  = $this->config;
+        $config = $this->config;
 
         // 按.拆分成多维数组进行判断
         foreach ($name as $val) {

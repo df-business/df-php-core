@@ -158,7 +158,7 @@ class Web extends Common
     /**
      * 入口文件
      * @param {Object} $var 变量
-     **/
+     */
     function index($var = null)
     {
         global $_param;

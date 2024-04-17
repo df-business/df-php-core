@@ -81,7 +81,7 @@ abstract class Model extends Common
     /**
      * 获取当前模型的数据库查询对象
      * @param {Object} $var 变量
-     **/
+     */
     public function db($var = null)
     {
         $setup = [

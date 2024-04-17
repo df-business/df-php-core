@@ -759,7 +759,7 @@ class Mysql extends Common
     /**
      * 数据库连接初始化
      * @param {Object} $var 变量
-     **/
+     */
     public function init()
     {
         $con = mysqli_connect(SERVER, ACC, PWD);
@@ -820,7 +820,7 @@ class Mysql extends Common
      * 创建表
      * @param {Object} $con 数据库连接对象
      * @param {Object} $database 数据库名称
-     **/
+     */
     public function create($db)
     {
 

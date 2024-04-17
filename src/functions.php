@@ -672,7 +672,7 @@ function debug()
 
 /**
  * 获取环境变量
- **/
+ */
 function env($name, $default = "")
 {
     $val = \Dfer\Tools\Env::get($name, $default);
@@ -683,7 +683,7 @@ function env($name, $default = "")
 /**
  * 读取get
  * @param {Object} $var 变量
- **/
+ */
 function get($var = null)
 {
     if ($var === null)
@@ -731,7 +731,7 @@ function str($string, $params = [])
 /**
  * 读取"composer.json"文件内容
  * @param {Object} $key 键值字符串，支持多级
- **/
+ */
 function get_composer_json($key = 'require>php')
 {
     $json = file_get_contents(ROOT . '/composer.json');
@@ -746,7 +746,7 @@ function get_composer_json($key = 'require>php')
 /**
  * 输出json
  * @param {Object} $var 变量
- **/
+ */
 function show_json($status = 1, $data = array(), $success_msg = '', $fail_msg = '')
 {
     global $common;
@@ -757,7 +757,7 @@ function show_json($status = 1, $data = array(), $success_msg = '', $fail_msg = 
 /**
  * 读取表名
  * @param {Object} $var 路径字符串 eg：admin.ConfigModel
- **/
+ */
 function table_name($var = null)
 {
     $src = explode(".", $var);
