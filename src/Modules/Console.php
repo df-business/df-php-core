@@ -108,7 +108,7 @@ STR;
   {
     $projectRootDir = ROOT;
     // 模块项目所在的目录，非开发者无法使用该功能
-    $moduleRootDir    = \dirname(ROOT) . \DIRECTORY_SEPARATOR . 'df-php-root' . \DIRECTORY_SEPARATOR . 'root' . \DIRECTORY_SEPARATOR;
+    $moduleRootDir    = \dirname(ROOT) . \DIRECTORY_SEPARATOR . ' ' . \DIRECTORY_SEPARATOR . 'root' . \DIRECTORY_SEPARATOR;
 
     // 需要同步的目录
     $dir = [
@@ -137,7 +137,7 @@ STR;
       sleep(1.5);
       $this->print(PHP_EOL);
       $this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////" . PHP_EOL);
-      system("cd ../df-php-root/ && p.bat");
+      system("cd ../df-php-root/ && publish.bat");
       $this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////" . PHP_EOL);
     } else {
       $this->print("此功能为框架开发者使用");
@@ -167,7 +167,7 @@ STR;
       sleep(1.5);
       $this->print(PHP_EOL);
       $this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////" . PHP_EOL);
-      system("cd ../df-php-core/ && p.bat");
+      system("cd ../df-php-core/ && publish.bat");
       $this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////" . PHP_EOL);
     } else {
       $this->print("此功能为框架开发者使用");
@@ -198,7 +198,7 @@ STR;
       sleep(1.5);
       $this->print(PHP_EOL);
       $this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////" . PHP_EOL);
-      system("cd ../dfer-tools/ && p.bat");
+      system("cd ../dfer-tools/ && publish.bat");
       $this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////" . PHP_EOL);
     } else {
       $this->print("此功能为框架开发者使用");
