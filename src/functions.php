@@ -41,6 +41,7 @@ use Dfer\Tools\Statics\{Common};
  *
  * \ENUM::RELOAD_PARENT
  */
+
 class ENUM
 {
     const GO_BACK = 1;
@@ -60,16 +61,16 @@ class ENUM
  * @param {Object} $layout	视图 - 布局页面
  * @param {Object} $special_tmpl	true 特殊模板 false 普通模板
  */
-function view($layout_name,$special_tmpl=false)
+function view($layout_name, $special_tmpl = false)
 {
-				global $_param;
+    global $_param;
     $area = Common::unHump($_param['area']);
     $ctrl = Common::unHump($_param['ctrl']);
     $func = Common::unHump($_param['action']);
 
-				// 模板缺失文件则调用admin的文件
-				$base_area='admin';
-				// var_dump(ROOT . "/public/view/{$area}/public/assets",VIEW_ASSETS,$area,$base_area);
+    // 模板缺失文件则调用admin的文件
+    $base_area = 'admin';
+    // var_dump(ROOT . "/public/view/{$area}/public/assets",VIEW_ASSETS,$area,$base_area);
     $layout_name = Common::unHump($layout_name);
     //手机、pc分开调用模板
     //手机模板
@@ -186,7 +187,7 @@ function view_replace($from, $layout)
         $footer = ['', ''];
     }
 
-				// 匹配多行的内容，但尽可能少地匹配
+    // 匹配多行的内容，但尽可能少地匹配
     $layout = preg_replace('/<df-html([\s\S]*?)\/>/', $html[1], $layout);
     $layout = preg_replace('/<df-header([\s\S]*?)\/>/', $header[1], $layout);
     $layout = preg_replace('/<df-body([\s\S]*?)\/>/', $body[1], $layout);
@@ -216,9 +217,9 @@ function view_replace($from, $layout)
     //打印字符串，只能匹配单行
     $layout = preg_replace('/<df-print value=\"([\s\S]*?)\"\/>/', '<?php echo $1 ?>', $layout);
 
-				// 匹配单行的内容，但尽可能少地匹配
-				$layout = preg_replace('/{:([\s\S]*?)}/', '<?php echo $1 ?>', $layout);
-				$layout = preg_replace('/{\$([\s\S]*?)}/', '<?php echo $$1 ?>', $layout);
+    // 匹配单行的内容，但尽可能少地匹配
+    $layout = preg_replace('/{:([\s\S]*?)}/', '<?php echo $1 ?>', $layout);
+    $layout = preg_replace('/{\$([\s\S]*?)}/', '<?php echo $$1 ?>', $layout);
 
     // 通过注释防止js重排代码格式的时候打乱格式，这里解除注释效果
     $layout = preg_replace('/\/\*code([\s\S]*?)code\*\//', '$1', $layout);
@@ -332,54 +333,54 @@ function session_del($name = '')
 
 // ###################################### cookie START ######################################
 /**
-	* 设置cookie
-	* @param {Object} $name	名称
-	* @param {Object} $data	数据
-	* @param {Object} $time 保存时间
-	*/
-function cookie_set($name,$data,$time)
+ * 设置cookie
+ * @param {Object} $name	名称
+ * @param {Object} $data	数据
+ * @param {Object} $time 保存时间
+ */
+function cookie_set($name, $data, $time)
 {
-	setcookie($name, $data, time() + $time, '/');
+    setcookie($name, $data, time() + $time, '/');
 }
 
 /**
-	* 删除cookie
-	* @param {Object} $name	名称
-	*/
+ * 删除cookie
+ * @param {Object} $name	名称
+ */
 function cookie_del($name)
 {
-	setcookie($name, null, time() - 1, '/');
+    setcookie($name, null, time() - 1, '/');
 }
 // ######################################  cookie END  ######################################
 
 
 /**
-	* 网页跳转的提示页面
-	* @param {Object} $layout 布局页面
-	* @param {Object} $status	状态。true 成功 false 失败
-	* @param {Object} $redirect 跳转方式
-	* @param {Object} $success_msg 成功信息
-	* @param {Object} $fail_msg 失败信息
-	*/
-function message($layout,$status=true,$redirect=null,$success_msg = null,$fail_msg = null)
+ * 网页跳转的提示页面
+ * @param {Object} $layout 布局页面
+ * @param {Object} $status	状态。true 成功 false 失败
+ * @param {Object} $redirect 跳转方式
+ * @param {Object} $success_msg 成功信息
+ * @param {Object} $fail_msg 失败信息
+ */
+function message($layout, $status = true, $redirect = null, $success_msg = null, $fail_msg = null)
 {
-				// var_dump(get_defined_vars());die;
-    if ($status===null && $redirect) {
-								// 直接跳转
+    // var_dump(get_defined_vars());die;
+    if ($status === null && $redirect) {
+        // 直接跳转
         header("location: {$redirect}");
     } else {
-								// 通过模板跳转
-								$msg=boolval($status)?($success_msg?:'操作成功'):($fail_msg?:'操作失败');
-								// var_dump($msg);
+        // 通过模板跳转
+        $msg = boolval($status) ? ($success_msg ?: '操作成功') : ($fail_msg ?: '操作失败');
+        // var_dump($msg);
         // 秒
         $delay = 1;
         // js脚本
         $script = "";
         switch ($redirect) {
             case \ENUM::GO_BACK:
-																//返回之前的页面
-																$previous_url=$_SERVER['HTTP_REFERER'];
-                $script = $previous_url?"location.href = '{$previous_url}';":"history.go(-2);";
+                //返回之前的页面
+                $previous_url = $_SERVER['HTTP_REFERER'];
+                $script = $previous_url ? "location.href = '{$previous_url}';" : "history.go(-2);";
                 break;
             case \ENUM::RELOAD_PARENT:
                 //刷新父页面
@@ -389,15 +390,15 @@ function message($layout,$status=true,$redirect=null,$success_msg = null,$fail_m
                 //刷新当前页面
                 $script = "location.reload();";
                 break;
-												default:
-																if ($js = strstr($redirect, "js:")) {
-																    // 执行js代码
-																    $script = "{$js}";
-																} else {
-																    // $redirect = split_url($redirect);
-																    $script = "location.href = '{$redirect}';";
-																}
-																break;
+            default:
+                if ($js = strstr($redirect, "js:")) {
+                    // 执行js代码
+                    $script = "{$js}";
+                } else {
+                    // $redirect = split_url($redirect);
+                    $script = "location.href = '{$redirect}';";
+                }
+                break;
         }
         // var_dump($redirect);
         include $layout;
@@ -406,14 +407,14 @@ function message($layout,$status=true,$redirect=null,$success_msg = null,$fail_m
 }
 
 /**
-	* ie兼容性差，对ie内核进行警告
-	*/
+ * ie兼容性差，对ie内核进行警告
+ */
 function ie_notice()
 {
-	global $common;
-	if (Common:: getBrowserName() == 'ie') {
-			message(0,\ENUM::GO_BACK,null,"不支持IE内核,请检查浏览器");
-	}
+    global $common;
+    if (Common::getBrowserName() == 'ie') {
+        message(0, \ENUM::GO_BACK, null, "不支持IE内核,请检查浏览器");
+    }
 }
 
 /**
@@ -421,53 +422,53 @@ function ie_notice()
  *
  * eg:
  * split_url("A/c/a/para",array(zdy=>$zdy))
-	* split_url("A.c.a.para",array(zdy=>$zdy))
+ * split_url("A.c.a.para",array(zdy=>$zdy))
  * @param {Object} $str	url字符串
  * @param {Object} $get	get参数	数组
  */
 function split_url($str, $get = null)
 {
-				global $_param;
+    global $_param;
 
-				// var_dump(explode("/", "123"));die;
+    // var_dump(explode("/", "123"));die;
     //去掉字符串首尾空格
     $str = trim($str);
 
-				if (strpos($str, "/") !== false) {
-					$urls = explode("/", $str);
-				}else
-					$urls=explode('.',$str);
+    if (strpos($str, "/") !== false) {
+        $urls = explode("/", $str);
+    } else
+        $urls = explode('.', $str);
 
-				//去掉元素的首尾空格
-				for ($i = 0; $i < count($urls); $i++) {
-				    $urls[$i] = trim($urls[$i]);
-				}
+    //去掉元素的首尾空格
+    for ($i = 0; $i < count($urls); $i++) {
+        $urls[$i] = trim($urls[$i]);
+    }
 
-				$url[0]=$_param['area'];
-				$url[1]=$_param['ctrl'];
-				$url[2]=$_param['action'];
-				$url[3] =$url[3]??"";
-				//增加多参数
-				$url[4] = '';
-				if (is_array($get)) {
-				    foreach ($get as $key => $val) {
-				        $url[4] .= sprintf('&%s=%s', $key, $val);
-				    }
-				}
+    $url[0] = $_param['area'];
+    $url[1] = $_param['ctrl'];
+    $url[2] = $_param['action'];
+    $url[3] = $url[3] ?? "";
+    //增加多参数
+    $url[4] = '';
+    if (is_array($get)) {
+        foreach ($get as $key => $val) {
+            $url[4] .= sprintf('&%s=%s', $key, $val);
+        }
+    }
 
-				switch(count($urls)){
-					case 1:
-						$url[2]=$urls[0];
-						break;
-					case 2:
-						$url[1]=$urls[0];
-						$url[2]=$urls[1];
-						break;
-					default:
-				 	$url=$urls;
-						break;
-				}
-				$redirect=url($url[0],$url[1],$url[2],$url[3],$url[4]);
+    switch (count($urls)) {
+        case 1:
+            $url[2] = $urls[0];
+            break;
+        case 2:
+            $url[1] = $urls[0];
+            $url[2] = $urls[1];
+            break;
+        default:
+            $url = $urls;
+            break;
+    }
+    $redirect = url($url[0], $url[1], $url[2], $url[3], $url[4]);
     return $redirect;
 }
 
@@ -498,20 +499,20 @@ function url($area, $ctrl = null, $action = null, $param = null, $get = null)
     // 内置参数
     if ($param) {
         $param = is_array($param) ? implode("/", $param) : trim($param);
-								$param=DIRECTORY_SEPARATOR.$param;
+        $param = DIRECTORY_SEPARATOR . $param;
     }
 
     // get参数
     if ($get && is_array($get)) {
-								$get_str = '?';
-								$get_str_arr=[];
+        $get_str = '?';
+        $get_str_arr = [];
         foreach ($get as $key => $val) {
-            $get_str_arr[]= sprintf('%s=%s', $key, $val);
+            $get_str_arr[] = sprintf('%s=%s', $key, $val);
         }
-								$get_str .= implode('&', $get_str_arr);
+        $get_str .= implode('&', $get_str_arr);
     }
 
-    $rt = sprintf("%s/%s/%s/%s%s%s", SITE, $area, $ctrl, $action, $param, $get_str??'');
+    $rt = sprintf("%s/%s/%s/%s%s%s", SITE, $area, $ctrl, $action, $param, $get_str ?? '');
     return $rt;
 }
 
@@ -662,10 +663,10 @@ function debug()
     if (DEV) {
         $args = func_get_args();
         logs(str(<<<STR
-								********************** DEBUG START **********************
-								{0}
-								**********************  DEBUG END  **********************
-								STR, [str($args)]));
+                                ********************** DEBUG START **********************
+                                {0}
+                                **********************  DEBUG END  **********************
+                                STR, [str($args)]));
     }
 }
 
@@ -685,10 +686,10 @@ function env($name, $default = "")
  **/
 function get($var = null)
 {
-				if($var===null)
-					return $_GET;
-				else
-					return isset($_GET[$var]) ? $_GET[$var] : null;
+    if ($var === null)
+        return $_GET;
+    else
+        return isset($_GET[$var]) ? $_GET[$var] : null;
 }
 
 /**
@@ -696,10 +697,10 @@ function get($var = null)
  */
 function post($var = null)
 {
-				if($var===null)
-					return $_POST;
-				else
-					return isset($_POST[$var]) ? $_POST[$var] : null;
+    if ($var === null)
+        return $_POST;
+    else
+        return isset($_POST[$var]) ? $_POST[$var] : null;
 }
 
 /**
@@ -707,11 +708,11 @@ function post($var = null)
  */
 function param($var = null)
 {
-				$param = Common::ihtmlspecialchars(array_merge($_GET, $_POST));
-				if($var===null)
-					return $param;
-				else
-					return isset($param[$var]) ? $param[$var] : null;
+    $param = Common::ihtmlspecialchars(array_merge($_GET, $_POST));
+    if ($var === null)
+        return $param;
+    else
+        return isset($param[$var]) ? $param[$var] : null;
 }
 
 /**
@@ -746,10 +747,10 @@ function get_composer_json($key = 'require>php')
  * 输出json
  * @param {Object} $var 变量
  **/
-function show_json($status = 1, $data = array(), $success_msg = '',$fail_msg = '')
+function show_json($status = 1, $data = array(), $success_msg = '', $fail_msg = '')
 {
-	global $common;
-	Common::showJson($status,$data,$success_msg,$fail_msg);
+    global $common;
+    Common::showJson($status, $data, $success_msg, $fail_msg);
 }
 
 
@@ -759,22 +760,22 @@ function show_json($status = 1, $data = array(), $success_msg = '',$fail_msg = '
  **/
 function table_name($var = null)
 {
-	$src=explode(".",$var);
-	$area_name='admin';
-	if(count($src)==1){
-		$model_name=$src[0];
-	}else{
-		$area_name=$src[0]??'admin';
-		$model_name=$src[1]??"";
-	}
+    $src = explode(".", $var);
+    $area_name = 'admin';
+    if (count($src) == 1) {
+        $model_name = $src[0];
+    } else {
+        $area_name = $src[0] ?? 'admin';
+        $model_name = $src[1] ?? "";
+    }
 
-	try{
-			$reflectionClass = new ReflectionClass("areas\\{$area_name}\\model\\{$model_name}");
-			$instance = $reflectionClass->newInstance();
-			$name = $instance::getName();
-	}catch (Exception $exception) {
-		// var_dump($exception);
-		$name = null;
-	}
-	return $name;
+    try {
+        $reflectionClass = new ReflectionClass("areas\\{$area_name}\\model\\{$model_name}");
+        $instance = $reflectionClass->newInstance();
+        $name = $instance::getName();
+    } catch (Exception $exception) {
+        // var_dump($exception);
+        $name = null;
+    }
+    return $name;
 }

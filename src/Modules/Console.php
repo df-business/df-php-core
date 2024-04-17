@@ -1,6 +1,7 @@
 <?php
 
 namespace Dfer\DfPhpCore\Modules;
+
 use Dfer\Tools\Common;
 
 /**
@@ -33,11 +34,9 @@ use Dfer\Tools\Common;
  *                .:;;o&***o;.   .           | QQ: 3504725309
  *        .;;!o&****&&o;:.    ..
  * +----------------------------------------------------------------------
- *
  */
-class Console extends Common
+class temp_format_A12692 extends Common
 {
-
   /**
    * 初始化
    */
@@ -45,11 +44,11 @@ class Console extends Common
   {
     global $argc, $argv;
     //当前时间
-    define('TIMESTAMP', time());
+    \define('TIMESTAMP', time());
     //项目根目录
-    define('ROOT', dirname(__DIR__, 5) . DIRECTORY_SEPARATOR);
-    define('VERSION', file_get_contents(ROOT . 'VERSION'));
-    define('QUIET', in_array('-q', $argv));
+    \define('ROOT', \dirname(__DIR__, 5) . \DIRECTORY_SEPARATOR);
+    \define('VERSION', file_get_contents(ROOT . 'VERSION'));
+    \define('QUIET', \in_array('-q', $argv));
     $this->init();
   }
 
@@ -61,7 +60,7 @@ class Console extends Common
   {
     global $argc, $argv;
 
-    $str = <<<STR
+    $str = <<<'STR'
 DfPHP {ver}
 用法:
   命令 [选项]
@@ -92,15 +91,14 @@ STR;
       case 'dev:core':
         $this->devCore();
         break;
-						case 'dev:tools':
-						  $this->devTools();
-						  break;
+      case 'dev:tools':
+        $this->devTools();
+        break;
       default:
         $this->print("命令不存在");
         break;
     }
   }
-
 
   /**
    * 将框架里的最新内容同步到`df-php-root`
@@ -108,24 +106,23 @@ STR;
    **/
   function devRoot($var = null)
   {
-
     $projectRootDir = ROOT;
     // 模块项目所在的目录，非开发者无法使用该功能
-    $moduleRootDir    = dirname(ROOT) . DIRECTORY_SEPARATOR . 'df-php-root' . DIRECTORY_SEPARATOR . 'root' . DIRECTORY_SEPARATOR;
+    $moduleRootDir    = \dirname(ROOT) . \DIRECTORY_SEPARATOR . 'df-php-root' . \DIRECTORY_SEPARATOR . 'root' . \DIRECTORY_SEPARATOR;
 
     // 需要同步的目录
     $dir = [
       'areas',
-      'data' . DIRECTORY_SEPARATOR . 'db',
-						'data' . DIRECTORY_SEPARATOR . 'lang',
+      'data' . \DIRECTORY_SEPARATOR . 'db',
+      'data' . \DIRECTORY_SEPARATOR . 'lang',
       'extend',
-      'public' . DIRECTORY_SEPARATOR . 'view',
-      'public' . DIRECTORY_SEPARATOR . 'index.php',
+      'public' . \DIRECTORY_SEPARATOR . 'view',
+      'public' . \DIRECTORY_SEPARATOR . 'index.php',
       '.example.env',
       'df',
       'version'
     ];
-    if (is_dir(dirname($moduleRootDir))) {
+    if (is_dir(\dirname($moduleRootDir))) {
       $this->print($projectRootDir . ">>>" . $moduleRootDir . PHP_EOL);
       $this->print("////////////////////////////////////////////////// 文件删除 START //////////////////////////////////////////////////" . PHP_EOL);
       $this->deleteDir($moduleRootDir, QUIET);
@@ -140,7 +137,7 @@ STR;
       sleep(1.5);
       $this->print(PHP_EOL);
       $this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////" . PHP_EOL);
-      system("cd ../df-php-root/ && publish.bat");
+      system("cd ../df-php-root/ && p.bat");
       $this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////" . PHP_EOL);
     } else {
       $this->print("此功能为框架开发者使用");
@@ -153,12 +150,11 @@ STR;
    **/
   function devCore($var = null)
   {
-
-    $projectModuleRootDir = ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'dfer' . DIRECTORY_SEPARATOR . 'df-php-core' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;;
+    $projectModuleRootDir = ROOT . \DIRECTORY_SEPARATOR . 'vendor' . \DIRECTORY_SEPARATOR . 'dfer' . \DIRECTORY_SEPARATOR . 'df-php-core' . \DIRECTORY_SEPARATOR . 'src' . \DIRECTORY_SEPARATOR;
     // 模块项目所在的目录，非开发者无法使用该功能
-    $moduleRootDir    = dirname(ROOT) . DIRECTORY_SEPARATOR . 'df-php-core' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
+    $moduleRootDir    = \dirname(ROOT) . \DIRECTORY_SEPARATOR . 'df-php-core' . \DIRECTORY_SEPARATOR . 'src' . \DIRECTORY_SEPARATOR;
 
-    if (is_dir(dirname($moduleRootDir))) {
+    if (is_dir(\dirname($moduleRootDir))) {
       $this->print($projectModuleRootDir . ">>>" . $moduleRootDir . PHP_EOL);
       $this->print("////////////////////////////////////////////////// 文件删除 START //////////////////////////////////////////////////" . PHP_EOL);
       $this->deleteDir($moduleRootDir, QUIET);
@@ -171,44 +167,43 @@ STR;
       sleep(1.5);
       $this->print(PHP_EOL);
       $this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////" . PHP_EOL);
-      system("cd ../df-php-core/ && publish.bat");
+      system("cd ../df-php-core/ && p.bat");
       $this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////" . PHP_EOL);
     } else {
       $this->print("此功能为框架开发者使用");
     }
   }
 
-		/**
-		 * 将框架里的最新内容同步到`tools`
-		 * @param {Object} $var 变量
-		 **/
-		function devTools($var = null)
-		{
-				// 组件在项目中的目录
-		  $projectModuleRootDir = ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'dfer' . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;;
-		  // 模块项目所在的目录，非开发者无法使用该功能
-		  $moduleRootDir    = dirname(ROOT) . DIRECTORY_SEPARATOR . 'dfer-tools' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
+  /**
+   * 将框架里的最新内容同步到`tools`
+   * @param {Object} $var 变量
+   **/
+  function devTools($var = null)
+  {
+    // 组件在项目中的目录
+    $projectModuleRootDir = ROOT . \DIRECTORY_SEPARATOR . 'vendor' . \DIRECTORY_SEPARATOR . 'dfer' . \DIRECTORY_SEPARATOR . 'tools' . \DIRECTORY_SEPARATOR . 'src' . \DIRECTORY_SEPARATOR;
+    // 模块项目所在的目录，非开发者无法使用该功能
+    $moduleRootDir    = \dirname(ROOT) . \DIRECTORY_SEPARATOR . 'dfer-tools' . \DIRECTORY_SEPARATOR . 'src' . \DIRECTORY_SEPARATOR;
 
-		  if (is_dir(dirname($moduleRootDir))) {
-		    $this->print($projectModuleRootDir . ">>>" . $moduleRootDir . PHP_EOL);
-		    $this->print("////////////////////////////////////////////////// 文件删除 START //////////////////////////////////////////////////" . PHP_EOL);
-		    $this->deleteDir($moduleRootDir, QUIET);
-		    $this->print("//////////////////////////////////////////////////  文件删除 END  //////////////////////////////////////////////////" . PHP_EOL);
-		    sleep(1.5);
-		    $this->print(PHP_EOL);
-		    $this->print("////////////////////////////////////////////////// 文件复制 START //////////////////////////////////////////////////" . PHP_EOL);
-		    $this->copy($projectModuleRootDir, $moduleRootDir, QUIET);
-		    $this->print("//////////////////////////////////////////////////  文件复制 END  //////////////////////////////////////////////////" . PHP_EOL);
-		    sleep(1.5);
-		    $this->print(PHP_EOL);
-		    $this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////" . PHP_EOL);
-		    system("cd ../dfer-tools/ && publish.bat");
-		    $this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////" . PHP_EOL);
-		  } else {
-		    $this->print("此功能为框架开发者使用");
-		  }
-		}
-
+    if (is_dir(\dirname($moduleRootDir))) {
+      $this->print($projectModuleRootDir . ">>>" . $moduleRootDir . PHP_EOL);
+      $this->print("////////////////////////////////////////////////// 文件删除 START //////////////////////////////////////////////////" . PHP_EOL);
+      $this->deleteDir($moduleRootDir, QUIET);
+      $this->print("//////////////////////////////////////////////////  文件删除 END  //////////////////////////////////////////////////" . PHP_EOL);
+      sleep(1.5);
+      $this->print(PHP_EOL);
+      $this->print("////////////////////////////////////////////////// 文件复制 START //////////////////////////////////////////////////" . PHP_EOL);
+      $this->copy($projectModuleRootDir, $moduleRootDir, QUIET);
+      $this->print("//////////////////////////////////////////////////  文件复制 END  //////////////////////////////////////////////////" . PHP_EOL);
+      sleep(1.5);
+      $this->print(PHP_EOL);
+      $this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////" . PHP_EOL);
+      system("cd ../dfer-tools/ && p.bat");
+      $this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////" . PHP_EOL);
+    } else {
+      $this->print("此功能为框架开发者使用");
+    }
+  }
 
   /**
    * 输出
