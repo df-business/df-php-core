@@ -108,7 +108,7 @@ class Console extends Common
     {
       $projectRootDir = ROOT;
       // 模块项目所在的目录，非开发者无法使用该功能
-      $moduleRootDir = dirname(ROOT) . DIRECTORY_SEPARATOR . ' ' . DIRECTORY_SEPARATOR . 'root' . DIRECTORY_SEPARATOR;
+      $moduleRootDir = dirname(ROOT) . DIRECTORY_SEPARATOR . 'df-php-root' . DIRECTORY_SEPARATOR . 'root' . DIRECTORY_SEPARATOR;
 
       // 需要同步的目录
       $dir = [
