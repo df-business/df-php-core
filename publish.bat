@@ -31,10 +31,10 @@ if exist %cache% (
 )
 :: ########### 保存版本号 ###########
 echo !ver!>!cache!
-
-rem ########### 文件区分大小写 ###########
+echo;
+:: ########### 文件区分大小写 ###########
 git config core.ignorecase false
-rem ########### 提交git ###########
+:: ########### 提交git ###########
 git add *
 git commit -m !ver!
 git push origin !aa!.x
