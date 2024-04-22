@@ -64,6 +64,13 @@ abstract class Model extends Common
         'mysql'  => Mysql::class
     ];
 
+				/**
+				 * 静态实例数组
+				 * 对各种类实例化一次之后，可以在任意位置复用，不需要再次实例化
+				 */
+				protected static $instances = [];
+
+
     public function __construct(array $data = [])
     {
         // 获取当前模型名称
@@ -74,6 +81,7 @@ abstract class Model extends Common
             if (substr($name, -5) == 'Model') {
                 $name = substr($name, 0, -5);
             }
+												// 转化为下划线
             $this->name = $this->unHump($name);
         }
     }
@@ -95,8 +103,9 @@ abstract class Model extends Common
 
     public function __get($name)
     {
-        $bind = $this->bind[$name];
-        return new $bind;
+        $class = $this->bind[$name];
+								$instance = new $class;
+        return $instance;
     }
 
     /**
@@ -106,7 +115,9 @@ abstract class Model extends Common
      */
     public function __call($method, $args)
     {
-        return call_user_func_array([Mysql::class, $method], $args);
+								$class = Mysql::class;
+								$instance = static::getInstance($bind);
+        return call_user_func_array([$instance, $method], $args);
     }
 
     /**
@@ -117,7 +128,22 @@ abstract class Model extends Common
     public static function __callStatic($method, $args)
     {
         // 实例化`Model`类，触发`__construct`方法
-        $model = new static();
-        return call_user_func_array([$model->db(), $method], $args);
+								$class = static::class;
+								$instance = static::getInstance($class);
+        return call_user_func_array([$instance->db(), $method], $args);
     }
+
+				/**
+				 * 获取静态实例
+				 * @param {Object} $class
+				 */
+				public static function getInstance($class)
+				{
+				    // 没有创建静态实例就创建
+				    if (!isset(static::$instances[$class])) {
+				        static::$instances[$class] = new $class;
+				    }
+				    $instance = static::$instances[$class];
+				    return $instance;
+				}
 }

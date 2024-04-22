@@ -37,19 +37,26 @@ namespace Dfer\DfPhpCore\Modules\Statics;
  */
 abstract class Base
 {
+    /**
+     * 静态实例数组
+     * 对各种类实例化一次之后，可以在任意位置复用，不需要再次实例化
+     */
+    protected static $instances = [];
 
-    abstract protected function originClass($var = null);
+    abstract protected function className();
 
 
     /**
      * 调用不存在的公共方法
+     * 实例化当前对象的时候触发，同样是静态调用目标类，与"__callStatic"的区别在于可以直接获取className
      * @param {Object} $method
      * @param {Object} $args
      */
     public function __call($method, $args)
     {
-        $class = $this->originClass();
-        return call_user_func_array([$class, $method], $args);
+        $class = $this->className();
+        $instance = static::getInstance($class);
+        return call_user_func_array([$instance, $method], $args);
     }
 
     /**
@@ -60,8 +67,24 @@ abstract class Base
      */
     public static function __callStatic($method, $args)
     {
-        $class = (new static)->originClass();
-        return call_user_func_array([$class, $method], $args);
+        $class = (new static)->className();
+        $instance = static::getInstance($class);
+        return call_user_func_array([$instance, $method], $args);
+    }
+
+
+    /**
+     * 获取静态实例
+     * @param {Object} $class
+     */
+    public static function getInstance($class)
+    {
+        // 没有创建静态实例就创建
+        if (!isset(static::$instances[$class])) {
+            static::$instances[$class] = new $class;
+        }
+        $instance = static::$instances[$class];
+        return $instance;
     }
 
 }
