@@ -178,7 +178,7 @@ class Web extends Common
             $src = explode('/', $src_string);
 
             //短路径。只影响前端页面
-            if (SEO && $src[0] != ADMIN_URL) {
+            if (SEO &&!in_array($src[0],[ADMIN_URL,THEME_ADMIN])) {
                 $area_name = THEME_HOMEPAGE;
                 $ctrl_name = 'home';
                 $action_name = $src[0] ?? $src[0] ?: 'index';
@@ -216,12 +216,20 @@ class Web extends Common
             $action_name = $this->hump($action_name);
             $ctrl_path = "areas\\{$area_name}\\controller\\{$ctrl_name}";
 
-
-
             if (DEV) {
-                class_exists($ctrl_path) or die("控制器不存在:{$ctrl_path}");
+                class_exists($ctrl_path) or die(
+																<<<STR
+																控制器不存在<br/>
+																控制器::{$ctrl_path}<br/>
+																STR);
                 $controller = new $ctrl_path;
-                method_exists($controller, $action_name) or die(str('文件:{0}<br>控制器、方法定义出错:{1} {2}', [$ctrl_path, json_encode($_GET), json_encode($src)]));
+                method_exists($controller, $action_name) or die(str(
+																<<<STR
+																方法不存在<br/>
+																参数:{0}<br/>
+																控制器:{1}<br/>
+																方法: {2}<br/>
+																STR, [json_encode($_GET),$ctrl_path,$action_name]));
             } else {
                 class_exists($ctrl_path) or header(str("Location: {0}/../404.html", [VIEW_ASSETS]));
                 $controller = new $ctrl_path;
