@@ -30,11 +30,11 @@ if exist %cache% (
 	set "ver=!aa!.!bb!.!cc!"
 )
 :: ########### 保存版本号 ###########
-echo !ver!>!cache!;
+echo !ver!>!cache!
 
-:: ########### 文件区分大小写 ###########
+rem ########### 文件区分大小写 ###########
 git config core.ignorecase false
-:: ########### 提交git ###########
+rem ########### 提交git ###########
 git add *
 git commit -m !ver!
 git push origin !aa!.x

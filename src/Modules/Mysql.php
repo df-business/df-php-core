@@ -1083,7 +1083,7 @@ class Mysql extends Common
                     ('菜单', 'admin%2Fhome%2Fmenu', 'lock', 0, 150),
                     ('日志', 'admin%2Fhome%2Flog', 'history', 0, 160),
 
-                    ('布局', 'admin%2Fcolumn%2Flayout%2F1', 'file', 2, 0),
+                    ('布局', 'admin%2Fcolumn%2Flayout', 'file', 2, 0),
                     ('文章管理', 'admin%2Fcolumn%2Farticle', 'file', 2, 0),
                     ('链接管理', 'admin%2Fcolumn%2Flink', 'link', 2, 0),
                     ('音乐管理', 'admin%2Fcolumn%2Fmusic', 'music', 2, 0),
