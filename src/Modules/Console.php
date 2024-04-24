@@ -118,6 +118,7 @@ class Console extends Common
           'extend',
           'public' . DIRECTORY_SEPARATOR . 'view',
           'public' . DIRECTORY_SEPARATOR . 'index.php',
+          '.editorconfig',
           '.example.env',
           'df',
           'version'
