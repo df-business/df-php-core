@@ -65,8 +65,10 @@ class Web extends Common
         //内核根目录
         define('DF_PHP_ROOT', ROOT . DIRECTORY_SEPARATOR . 'vendor/dfer/df-php-core/src/');
         // 默认模板
+        define('DEFAULT_ADMIN', 'admin');
         define('THEME_HOMEPAGE', env('THEME_HOMEPAGE', 'homepage'));
-        define('THEME_ADMIN', env('THEME_ADMIN', 'admin'));
+        define('THEME_ADMIN', env('THEME_ADMIN', DEFAULT_ADMIN));
+        define('DEFAULT_ADMIN_ASSETS', "/view/".DEFAULT_ADMIN."/public/assets");
         // 后台入口
         define('ADMIN_URL', env('ADMIN_URL', 'df'));
         // 开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
@@ -202,7 +204,7 @@ class Web extends Common
 
             debug($_param, $param);
 
-            $base_area = 'admin';
+            $base_area = DEFAULT_ADMIN;
             $area = $this->unHump($_param['area']);
             define('VIEW_ASSETS', is_dir(ROOT . "/public/view/{$area}/public/assets") ? "/view/{$area}/public/assets" : "/view/{$base_area}/public/assets");
 
