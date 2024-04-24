@@ -34,6 +34,7 @@
  */
 
 use Dfer\Tools\Statics\{Common};
+
 // ********************** 常量 START **********************
 
 /*
@@ -44,6 +45,8 @@ use Dfer\Tools\Statics\{Common};
 
 class ENUM
 {
+
+
     const GO_BACK = 1;
     const RELOAD_PARENT = 2;
     const RELOAD_CURRENT = 3;
@@ -76,53 +79,67 @@ function view($layout_name, $special_tmpl = false)
     //手机模板
     if (Common::isMobile() && WAP_PAGE_ENABLE) {
         if ($special_tmpl) {
-            $layout_base = ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm";
+            $layout_base = get_html_file(ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm");
             $from = null;
             $to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}_m.php";
             $back = null;
-            $layout = is_file($layout_base) ? $layout_base : (ROOT . "/public/view/{$base_area}/public/{$layout_name}_m.htm");
+            $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}_m.htm");
         } else {
-            $layout_base = ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm";
-            $from_base = ROOT . "/public/view/{$area}/{$ctrl}/{$func}_m.htm";
-            $from = !is_file($from_base) ? (ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm") : $from_base;
+            $layout_base = get_html_file(ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm");
+            $from_base = get_html_file(ROOT . "/public/view/{$area}/{$ctrl}/{$func}_m.htm");
+            $from = !is_file($from_base) ? get_html_file(ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm") : $from_base;
             $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}_m.php";
             $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
-            $layout = is_file($layout_base) ? $layout_base : (ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
+            $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
         }
     }
     //PC模板
     else {
         if ($special_tmpl) {
-            $layout_base = ROOT . "/public/view/{$area}/public/{$layout_name}.htm";
+            $layout_base = get_html_file(ROOT . "/public/view/{$area}/public/{$layout_name}.htm");
             $from = null;
             $to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}.php";
             $back = null;
-            $layout = is_file($layout_base) ? $layout_base : (ROOT . "/public/view/{$base_area}/public/{$layout_name}_m.htm");
+            $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
         } else {
             //很奇怪无法获取php文件的修改时间，获取到的是空
             // 视图 - 布局页面
-            $layout_base = ROOT . "/public/view/{$area}/public/{$layout_name}.htm";
+            $layout_base = get_html_file(ROOT . "/public/view/{$area}/public/{$layout_name}.htm");
             // 视图 - 静态页面
-            $from = ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm";
+            $from = get_html_file(ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm");
             // 控制器文件
             $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
             // 缓存文件
             $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}.php";
             // 视图 - 读取默认模板
-            $layout = is_file($layout_base) ? $layout_base : (ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
+            $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
         }
     }
     //找不到该文件
     if ($from && !is_file($from)) {
         exit("错误: 视图文件 '{$from}' 不存在!");
     }
-    //缓存文件 不存在 or 缓存文件 修改时间小于 视图 - 静态页面 、视图 - 布局页面 、控制器文件 or 处于测试状态
+    // var_dump(compact('from','to','layout','back'),[filemtime($from), filemtime($to),filemtime($layout),filemtime($back)]);
+    //缓存文件 不存在 || from文件修改时间 > to文件修改时间 || layout文件修改时间 > to文件修改时间 || back文件修改时间 > to文件修改时间 || 测试模式
     if (!is_file($to) || filemtime($from) > filemtime($to) || filemtime($layout) > filemtime($to) || filemtime($back) > filemtime($to) || DEV) {
         //生成新的缓存
         view_conversion($from, $to, $layout);
     }
     // 直接读取缓存
     return $to;
+}
+
+/**
+ * 获取html文件
+ * 兼容htm和html
+ * @param {Object} $src 文件路径
+ **/
+function get_html_file($src = null)
+{
+    if (!is_file($src)) {
+        return "{$src}l";
+    }
+    return $src;
 }
 
 /**
@@ -447,14 +464,7 @@ function split_url($str, $get = null)
     $url[0] = $_param['area'];
     $url[1] = $_param['ctrl'];
     $url[2] = $_param['action'];
-    $url[3] = $url[3] ?? "";
-    //增加多参数
-    $url[4] = '';
-    if (is_array($get)) {
-        foreach ($get as $key => $val) {
-            $url[4] .= sprintf('&%s=%s', $key, $val);
-        }
-    }
+    $url[3] = $_param['param'];
 
     switch (count($urls)) {
         case 1:
@@ -468,7 +478,7 @@ function split_url($str, $get = null)
             $url = $urls;
             break;
     }
-    $redirect = url($url[0], $url[1], $url[2], $url[3], $url[4]);
+    $redirect = url($url[0], $url[1], $url[2], $url[3], $get);
     return $redirect;
 }
 
@@ -662,11 +672,16 @@ function debug()
 {
     if (DEV) {
         $args = func_get_args();
-        logs(str(<<<STR
-                                ********************** DEBUG START **********************
-                                {0}
-                                **********************  DEBUG END  **********************
-                                STR, [str($args)]));
+        logs(
+            str(
+                <<<STR
+        ********************** DEBUG START **********************
+        {0}
+        **********************  DEBUG END  **********************
+        STR,
+                [str($args)]
+            )
+        );
     }
 }
 

@@ -46,7 +46,7 @@ class Web extends Common
      * @var array
      */
     protected $bind = [
-        'mysql'  => Mysql::class
+        'mysql' => Mysql::class
     ];
 
     /**
@@ -163,12 +163,6 @@ class Web extends Common
     {
         global $_param;
         try {
-            df();
-            if (get('f')) {
-                $files->addFile(get('f'));
-            }
-
-            //初始页面
             $src_string = get('s') ?? (SEO ? "index" : THEME_HOMEPAGE);
             debug(sprintf("当前页面原始路径：%s", $src_string));
 
@@ -178,7 +172,7 @@ class Web extends Common
             $src = explode('/', $src_string);
 
             //短路径。只影响前端页面
-            if (SEO &&!in_array($src[0],[ADMIN_URL,THEME_ADMIN])) {
+            if (SEO && !in_array($src[0], [ADMIN_URL, THEME_ADMIN])) {
                 $area_name = THEME_HOMEPAGE;
                 $ctrl_name = 'home';
                 $action_name = $src[0] ?? $src[0] ?: 'index';
@@ -204,6 +198,7 @@ class Web extends Common
             $_param['area'] = $area_name;
             $_param['ctrl'] = $ctrl_name;
             $_param['action'] = $action_name;
+            $_param['param'] = $param;
 
             debug($_param, $param);
 
@@ -217,30 +212,36 @@ class Web extends Common
             $ctrl_path = "areas\\{$area_name}\\controller\\{$ctrl_name}";
 
             if (DEV) {
-                class_exists($ctrl_path) or die(
-																<<<STR
-																控制器不存在<br/>
-																控制器::{$ctrl_path}<br/>
-																STR);
+                class_exists($ctrl_path) or
+                    die(
+                        <<<STR
+                控制器不存在<br/>
+                控制器::{$ctrl_path}<br/>
+                STR);
                 $controller = new $ctrl_path;
-                method_exists($controller, $action_name) or die(str(
-																<<<STR
-																方法不存在<br/>
-																参数:{0}<br/>
-																控制器:{1}<br/>
-																方法: {2}<br/>
-																STR, [json_encode($_GET),$ctrl_path,$action_name]));
+                method_exists($controller, $action_name) or
+                    die(
+                        str(
+                            <<<STR
+                方法不存在<br/>
+                参数:{0}<br/>
+                控制器:{1}<br/>
+                方法: {2}<br/>
+                STR,
+                            [json_encode($_GET), $ctrl_path, $action_name]
+                        )
+                    );
             } else {
-                class_exists($ctrl_path) or header(str("Location: {0}/../404.html", [VIEW_ASSETS]));
+                class_exists($ctrl_path) or include_once view('404', true);
                 $controller = new $ctrl_path;
-                method_exists($controller, $action_name) or header(str("Location: {0}/../404.html", [VIEW_ASSETS]));
+                method_exists($controller, $action_name) or include_once view('404', true);
             }
             $controller->$action_name($param);
         } catch (Exception $e) {
             if (DEV)
                 echo str($e);
             else
-                header(str("Location: {0}/../404.html", [VIEW_ASSETS]));
+                include_once view('404', true);
         }
     }
 
