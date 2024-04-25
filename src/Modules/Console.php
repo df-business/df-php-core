@@ -121,7 +121,6 @@ class Console extends Common
           '.editorconfig',
           '.example.env',
           'df',
-          'publish.bat',
           'version'
       ];
       if (is_dir(dirname($moduleRootDir))) {
