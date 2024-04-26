@@ -61,8 +61,8 @@ class ENUM
 
 /**
  * 合成缓存文件
- * @param {Object} $layout	视图 - 布局页面
- * @param {Object} $special_tmpl	true 特殊模板 false 普通模板
+ * @param {Object} $layout    视图 - 布局页面
+ * @param {Object} $special_tmpl    true 特殊模板 false 普通模板
  */
 function view($layout_name, $special_tmpl = false)
 {
@@ -170,8 +170,8 @@ function view_conversion($from, $to, $layout)
  *
  * 先将子页面的控件加载到主页面，然后替换关键语句
  * "df-code"必须放在控件里，不然不会运行
- * @param {Object} $from	源文件
- * @param {Object} $layout	布局文件
+ * @param {Object} $from    源文件
+ * @param {Object} $layout    布局文件
  */
 function view_replace($from, $layout)
 {
@@ -181,7 +181,7 @@ function view_replace($from, $layout)
     }
     $layout = @file_get_contents($layout);
 
-    //	echo $from;
+    //    echo $from;
     //preg_match的第一个参数用单引号还是双引号，效果一样
     preg_match("/<df-html>([\s\S]*?)<\/df-html>/", $from, $html);
     preg_match("/<df-header>([\s\S]*?)<\/df-header>/", $from, $header);
@@ -209,7 +209,7 @@ function view_replace($from, $layout)
     $layout = preg_replace('/<df-header([\s\S]*?)\/>/', $header[1], $layout);
     $layout = preg_replace('/<df-body([\s\S]*?)\/>/', $body[1], $layout);
     $layout = preg_replace('/<df-footer([\s\S]*?)\/>/', $footer[1], $layout);
-    //	var_dump($layout);die();
+    //    var_dump($layout);die();
     //遍历list,需要提前替换
     $layout = preg_replace('/<df-each ([\s\S]*?)>/', '<?php $index=0; if(isset($1))foreach($1 as $key=>$value):$index++;?>', $layout);
     $layout = preg_replace('/<\/df-each>/', '<?php endforeach; ?>', $layout);
@@ -256,7 +256,7 @@ function view_replace($from, $layout)
 function cache_read($key)
 {
     $cachedata = showFirst("cache", ["key" => $key]);
-    //	  var_dump(empty($cachedata));die();
+    //      var_dump(empty($cachedata));die();
     if (empty($cachedata)) {
         return '';
     }
@@ -351,8 +351,8 @@ function session_del($name = '')
 // ###################################### cookie START ######################################
 /**
  * 设置cookie
- * @param {Object} $name	名称
- * @param {Object} $data	数据
+ * @param {Object} $name    名称
+ * @param {Object} $data    数据
  * @param {Object} $time 保存时间
  */
 function cookie_set($name, $data, $time)
@@ -362,7 +362,7 @@ function cookie_set($name, $data, $time)
 
 /**
  * 删除cookie
- * @param {Object} $name	名称
+ * @param {Object} $name    名称
  */
 function cookie_del($name)
 {
@@ -374,7 +374,7 @@ function cookie_del($name)
 /**
  * 网页跳转的提示页面
  * @param {Object} $layout 布局页面
- * @param {Object} $status	状态。true 成功 false 失败
+ * @param {Object} $status    状态。true 成功 false 失败
  * @param {Object} $redirect 跳转方式
  * @param {Object} $success_msg 成功信息
  * @param {Object} $fail_msg 失败信息
@@ -438,65 +438,63 @@ function ie_notice()
  * 拆分url参数，组成访问地址
  *
  * eg:
- * split_url("A/c/a/para",array(zdy=>$zdy))
- * split_url("A.c.a.para",array(zdy=>$zdy))
- * @param {Object} $str	url字符串
- * @param {Object} $get	get参数	数组
+ * split_url("A/c/a/para",array('zdy'=>$zdy))
+ * split_url("A.c.a.para",array('zdy'=>$zdy))
+ * @param {Object} $str    url字符串
+ * @param {Object} $param 方法参数  单个值或者一组值
+ * @param {Object} $get    get参数    数组
  */
-function split_url($str, $get = null)
+function split_url($url_str,$param=null, $get = [])
 {
     global $_param;
 
-    // var_dump(explode("/", "123"));die;
     //去掉字符串首尾空格
-    $str = trim($str);
+    $url_str = trim($url_str);
 
-    if (strpos($str, "/") !== false) {
-        $urls = explode("/", $str);
+    if (strpos($url_str, "/") !== false) {
+        $url_arr = explode("/", $url_str);
     } else
-        $urls = explode('.', $str);
+        $url_arr = explode('.', $url_str);
 
     //去掉元素的首尾空格
-    for ($i = 0; $i < count($urls); $i++) {
-        $urls[$i] = trim($urls[$i]);
+    for ($i = 0; $i < count($url_arr); $i++) {
+        $url_arr[$i] = trim($url_arr[$i]);
     }
 
-    $url[0] = $_param['area'];
-    $url[1] = $_param['ctrl'];
-    $url[2] = $_param['action'];
-    $url[3] = $_param['param'];
+    // 默认值
+    $area = $_param['area'];
+    $ctrl = $_param['ctrl'];
+    $action = $_param['action'];
 
-    switch (count($urls)) {
+    switch (count($url_arr)) {
         case 1:
-            $url[2] = $urls[0];
+            $action = $url_arr[0];
             break;
         case 2:
-            $url[1] = $urls[0];
-            $url[2] = $urls[1];
+            $ctrl = $url_arr[0];
+            $action = $url_arr[1];
             break;
         default:
-            $url = $urls;
             break;
     }
-    $redirect = url($url[0], $url[1], $url[2], $url[3], $get);
+    $redirect = url($area, $ctrl, $action, $param, $get);
     return $redirect;
 }
 
-
 /**
  *
- *	拼接url地址，组成访问地址
+ *    拼接url地址，组成访问地址
  *
  * eg:
  * url("admin","home",self::$db_menu."add",$v[0],array("parent_id"=>$param,"parent"=>$parent))
  *
- * @param {Object} $area	区域
- * @param {Object} $ctrl	控制器
- * @param {Object} $action	方法
- * @param {Object} $param	参数 字符串或者数组
- * @param {Object} $get	get参数	数组
+ * @param {Object} $area    区域
+ * @param {Object} $ctrl    控制器
+ * @param {Object} $action    方法
+ * @param {Object} $param    参数 单个值或者一组值
+ * @param {Object} $get    get参数    数组
  */
-function url($area, $ctrl = null, $action = null, $param = null, $get = null)
+function url($area, $ctrl = null, $action = null, $param = null, $get = [])
 {
     //去掉首尾空格
     $area = trim($area);
@@ -558,7 +556,7 @@ function to_url($url, $para = null)
  * 自动生成shell
  * disable_functions = passthru,system,exec      #php配置里exec是默认禁用的函数
  * eval会被判定为木马
- * df:生成	fd:删除
+ * df:生成    fd:删除
  * get不过滤错误
  *
  */
@@ -628,8 +626,8 @@ function clear_default_para($arr)
  * 用来输出日志
  *
  * @param {Object} $str
- * @param {Object} $type	类型
- * @param {Object} $override	是否覆盖（默认不覆盖）
+ * @param {Object} $type    类型
+ * @param {Object} $override    是否覆盖（默认不覆盖）
  */
 function logs($str, $type = \ENUM::LOGS_FILE, $override = false)
 {
@@ -658,7 +656,7 @@ function logs($str, $type = \ENUM::LOGS_FILE, $override = false)
             Common::mkDirs($file_dir);
 
             // $path="/www/wwwroot/dfphp.dfer.site/data/logs";
-            // 		var_dump($path,is_dir($path));;die;
+            //         var_dump($path,is_dir($path));;die;
             Common::writeFile(str("{0}\n{1}\n\n", [$str, $time]), str("{0}/{1}.log", [$file_dir, date('d')]), "a");
             break;
         default:
@@ -734,8 +732,8 @@ function param($var = null)
  * 格式化字符串
  * eg:
  * str("admin/home/{0}/{dd}",[123,'dd'=>333])
- * @param {Object} $string	字符串
- * @param {Object} $params	参数
+ * @param {Object} $string    字符串
+ * @param {Object} $params    参数
  */
 function str($string, $params = [])
 {

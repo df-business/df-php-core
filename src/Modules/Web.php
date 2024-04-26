@@ -171,28 +171,29 @@ class Web extends Common
             if (substr($src_string, -5) == ".html")
                 $src_string = str_replace(".html", "", $src_string);
 
-            $src = explode('/', $src_string);
+            $src_arr = explode('/', $src_string);
 
             //短路径。只影响前端页面
-            if (SEO && !in_array($src[0], [ADMIN_URL, THEME_ADMIN])) {
+            if (SEO && !in_array($src_arr[0], [ADMIN_URL, THEME_ADMIN])) {
                 $area_name = THEME_HOMEPAGE;
                 $ctrl_name = 'home';
-                $action_name = $src[0] ?? $src[0] ?: 'index';
+                $action_name = $src_arr[0] ?? $src_arr[0] ?: 'index';
 
                 $param = null;
-                if (isset($src[1])) {
-                    $param_items = array_slice($src, 1);
+                if (isset($src_arr[1])) {
+                    $param_items = array_slice($src_arr, 1);
                     $param = count($param_items) == 1 ? $param_items[0] : $param_items;
                 }
             } else {
                 // 完整路径
-                $area_name = $this->unHump($src[0]) == ADMIN_URL ? THEME_ADMIN : $src[0];
-                $ctrl_name = $src[1] ?? $src[1] ?: 'home';
-                $action_name = $src[2] ?? $src[2] ?: 'index';
+                $area_name = $this->unHump($src_arr[0]) == ADMIN_URL ? THEME_ADMIN : $src_arr[0];
+                $ctrl_name = $src_arr[1] ?? $src_arr[1] ?: 'home';
+                $action_name = $src_arr[2] ?? $src_arr[2] ?: 'index';
 
+                // action_name之后的数据全部作为方法的参数进行传递
                 $param = null;
-                if (isset($src[3])) {
-                    $param_items = array_slice($src, 3);
+                if (isset($src_arr[3])) {
+                    $param_items = array_slice($src_arr, 3);
                     $param = count($param_items) == 1 ? $param_items[0] : $param_items;
                 }
             }
