@@ -71,8 +71,16 @@ function view($layout_name, $special_tmpl = false)
     $ctrl = Common::unHump($_param['ctrl']);
     $func = Common::unHump($_param['action']);
 
-    // 模板缺失文件则调用admin的文件
-    $base_area = 'admin';
+    switch($layout_name){
+        case '404':
+            $base_area = THEME_HOMEPAGE;
+            break;
+        default:
+            // 模板缺失文件则调用admin的文件
+            $base_area = 'admin';
+            break;
+    }
+
     // var_dump(ROOT . "/public/view/{$area}/public/assets",VIEW_ASSETS,$area,$base_area);
     $layout_name = Common::unHump($layout_name);
     //手机、pc分开调用模板
