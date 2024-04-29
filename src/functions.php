@@ -77,9 +77,10 @@ function view($layout_name, $special_tmpl = false)
             break;
         default:
             // 模板缺失文件则调用admin的文件
-            $base_area = 'admin';
+            $base_area = DEFAULT_ADMIN;
             break;
     }
+    define('VIEW_ASSETS', is_dir(ROOT . "/public/view/{$area}/public/assets") ? "/view/{$area}/public/assets" : "/view/{$base_area}/public/assets");
 
     // var_dump(ROOT . "/public/view/{$area}/public/assets",VIEW_ASSETS,$area,$base_area);
     $layout_name = Common::unHump($layout_name);

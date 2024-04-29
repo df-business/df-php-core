@@ -205,10 +205,6 @@ class Web extends Common
 
             debug($_param, $param);
 
-            $base_area = DEFAULT_ADMIN;
-            $area = $this->unHump($_param['area']);
-            define('VIEW_ASSETS', is_dir(ROOT . "/public/view/{$area}/public/assets") ? "/view/{$area}/public/assets" : "/view/{$base_area}/public/assets");
-
             $ctrl_name = ucwords($ctrl_name) . "Controller";
             // 控制器方法同时支持下划线和驼峰
             $action_name = $this->hump($action_name);
