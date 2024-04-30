@@ -456,6 +456,7 @@ function ie_notice()
 function split_url($url_str,$param=null, $get = [])
 {
     global $_param;
+    // var_dump($url_str,$_param);
 
     //去掉字符串首尾空格
     $url_str = trim($url_str);
@@ -482,6 +483,11 @@ function split_url($url_str,$param=null, $get = [])
         case 2:
             $ctrl = $url_arr[0];
             $action = $url_arr[1];
+            break;
+        case 3:
+            $area = $url_arr[0];
+            $ctrl = $url_arr[1];
+            $action = $url_arr[2];
             break;
         default:
             break;
@@ -547,17 +553,20 @@ function url($area, $ctrl = null, $action = null, $param = null, $get = [])
  */
 function to_url($url, $para = null)
 {
+    // var_dump($url,URL);
+    $url = split_url($url);
     if (!empty($para)) {
-        $url = split_url($url);
         $para = http_build_query($para);
-        $url = "location:{$url}?{$para}";
-    } else {
-        $url = split_url($url);
-        $url = "location:{$url}";
+        $url = "{$url}?{$para}";
     }
-
-    header($url);
-    die();
+    if(URL==$url){
+        return;
+    }
+    else{
+        $url="location:{$url}";
+        header($url);
+        die();
+    }
 }
 
 /**
@@ -599,20 +608,6 @@ function get_web()
     );
     $rt = Common::httpRequest("https://api.dfer.site/webctl/main/updateuser", $para);
     //var_dump($rt);
-}
-
-/**
- * 将arr组装成sql的where部分
- * @param {Object} $para
- * @param {Object} $type
- */
-function sql_where($para, $type)
-{
-    $str = "0";
-    foreach ($para as $i) {
-        $str .= " {$type} {$i[0]}='{$i[1]}'";
-    }
-    return $str;
 }
 
 /**

@@ -95,9 +95,9 @@ class Web extends Common
         //设置文件上传的最大尺寸(byte)
         define('FILE_SIZE_MAX', env('FILE_SIZE_MAX', 1024 * 1024 * 100));
 
-        // ssl状态
-        define('SSL_STATE', !empty($_SERVER['HTTPS']) || (isset($_SERVER['HTTP_X_CLIENT_SCHEME']) && $_SERVER['HTTP_X_CLIENT_SCHEME'] == 'https'));
-        if (SSL_STATE) {
+        // ssl启用
+        define('SSL_ACTIVE', !empty($_SERVER['HTTPS']) || (isset($_SERVER['HTTP_X_CLIENT_SCHEME']) && $_SERVER['HTTP_X_CLIENT_SCHEME'] == 'https'));
+        if (SSL_ACTIVE) {
             // 自动将页面元素的http升级为https,需要保证页面中所有资源都支持https访问
             header("Content-Security-Policy: upgrade-insecure-requests");
             define('SITE', 'https://' . $_SERVER['HTTP_HOST']);
@@ -105,7 +105,8 @@ class Web extends Common
             define('SITE', 'http://' . $_SERVER['HTTP_HOST']);
         }
         //当前页面完整url
-        define('URL', htmlspecialchars_decode(SITE . 'index.php?' . htmlspecialchars($_SERVER['QUERY_STRING'])));
+        define('URL_ORIGIN', htmlspecialchars_decode(SITE . 'index.php?' . htmlspecialchars($_SERVER['QUERY_STRING'])));
+        define('URL', htmlspecialchars_decode(SITE . htmlspecialchars($_SERVER['REQUEST_URI'])));
         // **********************  常量 END  **********************
 
         // ********************** 错误信息的控制 START **********************

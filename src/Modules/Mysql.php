@@ -58,6 +58,10 @@ class Mysql extends Common
         return $this->name;
     }
 
+    /**
+     * 设置
+     * @param {Object} array $item
+     */
     public function setup(array $item)
     {
         $this->name = $item['name'] ?? '';
@@ -95,7 +99,7 @@ class Mysql extends Common
     }
 
     /**
-     * 限制
+     * 数量
      */
     public function limit($param = array())
     {
@@ -105,6 +109,7 @@ class Mysql extends Common
 
     /**
      * 读取第一条数据
+     * @return {Object} 键值对
      */
     public function first($field = null)
     {
@@ -113,8 +118,11 @@ class Mysql extends Common
         return $rt;
     }
 
+
+
     /**
      * 读取第一条数据,不满足条件则返回空
+     * @return {Object} 键值对
      */
     public function find($field = null)
     {
@@ -135,6 +143,7 @@ class Mysql extends Common
 
     /**
      * 读取第一条数据的某个值
+     * @return {Object} 字段值
      */
     public function value($field)
     {
@@ -142,11 +151,10 @@ class Mysql extends Common
     }
 
     /**
-     * 输出列表
-     *
-     * 返回数组
+     * 查询结果
+     * @return {Object} 数组。
      */
-    public    function select()
+    public function select()
     {
         $r = $this->query($this->queryFormat());
         //始终返回数组
@@ -155,11 +163,9 @@ class Mysql extends Common
         return $rt;
     }
 
-
-
     /**
-     * 多行则返回数组
-     * 单行则返回键值对
+     * 查询结果
+     * @return {Object} 单条 键值对  多条 数组
      */
     public function show()
     {
@@ -180,14 +186,20 @@ class Mysql extends Common
         return $rt;
     }
 
+    /**
+     * 查询结果
+     * @return {Object} 对象。
+     */
+    public function object($field = null)
+    {
+        $r = $this->query($this->queryFormat());
+        $rt = $r->fetch_object();
+        return $rt;
+    }
 
     /**
      * 编辑
-     * $rt=update('df',['key'=>'xxx'],['id'=>3])
-     * $rt=update('df',['key'=>'xxx'],3)
-     *
-     * update('df',['key'=>'xxx'],3,"homepage/column/".$db_hc)
-     * update('df',['key'=>'xxx'],3,Enum.GO_BACK)
+     * @return {int} 状态。1 成功  0 失败
      */
     public function update($data = array(), $redirect = null)
     {
@@ -214,12 +226,7 @@ class Mysql extends Common
 
     /**
      * 新增
-     *
-     * 获取新行id
-     * $id=insert('df',['key'=>'xxx'])
-     *
-     * 跳转
-     * insert('df',['key'=>'xxx'],Enum.GO_BACK)
+     * @return {int} 插入数据的id
      */
     public function insert($data = array(), $redirect = null)
     {
@@ -232,25 +239,14 @@ class Mysql extends Common
         $return = 0;
         if ($r) {
             $return = $this->run('SELECT LAST_INSERT_ID()');
-            $return = $return[0][0]; //返回新增的id
+            $return = $return[0][0];
         }
         return $return;
     }
 
     /**
      * 删除数据
-     *
-     * 根据条件删除
-     * del('df',['type'=>3])
-     *
-     * 默认根据id删除
-     * del('df',5)
-     *
-     * 清空表
-     * del('df')
-     *
-     * 跳转
-     * del('df',['key'=>'xxx'],Enum.GO_BACK)
+     * @return {int} 状态。1 成功  0 失败
      */
     public function del($redirect = null)
     {
@@ -268,11 +264,7 @@ class Mysql extends Common
 
     /**
      * dataTable依赖
-     *
      * 分页处理
-     *
-     *
-     * showPage($db_Statistics,[],"Df_web_mng/data/".$db_Statistics);
      */
     public function showPage($url = '')
     {
@@ -357,7 +349,7 @@ class Mysql extends Common
      */
     public function tableExist($table = 'cache')
     {
-        $row =  $this->run("SHOW TABLES LIKE '" . $table . "'");
+        $row = $this->run("SHOW TABLES LIKE '" . $table . "'");
         if (!count($row)) {
             return false;
         }
@@ -366,17 +358,6 @@ class Mysql extends Common
 
     /**
      * 查询字符串格式化
-     *
-     * 多列
-     * queryFormat('df',['type'=>1,'parent_id'=>2],['time','desc'],[0,1]); *
-     * queryFormat('df',['type'=>1],['time','desc'],10);
-     * queryFormat('df',['type'=>1],['time','desc']);
-     * queryFormat('df',['type'=>1]);
-     *
-     * 单列
-     * 默认param为id
-     * queryFormat('df',1);
-     * queryFormat('df',['type'=>1]);
      */
     public function queryFormat()
     {
@@ -458,15 +439,6 @@ class Mysql extends Common
 
     /**
      * 格式化更新语句
-     *
-     * 新增
-     * queryFormat_other('df',['title'=>1]);
-     *
-     *
-     * 更新
-     * queryFormat_other('df',['title'=>1],['type'=>1]); *
-     * 默认para为id
-     * queryFormat_other('df',['title'=>1],3);
      */
     public function queryFormatUpdateInsert($data = array())
     {
@@ -546,14 +518,6 @@ class Mysql extends Common
 
     /**
      * 删除数据
-     *
-     * queryFormatDel('df',['type'=>3])
-     *
-     * 根据id删除
-     * queryFormatDel('df',5)
-     *
-     * 清空表
-     * queryFormatDel('df')
      */
     public function queryFormatDel()
     {
@@ -603,7 +567,8 @@ class Mysql extends Common
 
 
     /**
-     * 简洁执行sql语句
+     * 直接执行sql语句
+     * @return {Object} 查询 数组   新增 插入数据id   更新 受影响行数
      */
     public function run($sql)
     {
@@ -645,11 +610,10 @@ class Mysql extends Common
         return $rt;
     }
 
-    /*
-             * 运行sql
-             *
-             * 有容错处理
-             */
+    /**
+     * 运行sql
+     * 有容错处理
+     */
     public function query($sql)
     {
         global $db;
@@ -666,12 +630,12 @@ class Mysql extends Common
 
     /**
      * 连接sql服务器，执行sql语句
-     * 单刀插入数据（无视一切规则，强行添加）
+     * 直接插入数据（强行添加）
      * 支持远程连接
      * @param {Object} $tb
      * @param {Object} $data
      */
-    public     function add($tb, $data)
+    public function add($tb, $data)
     {
         $server = "localhost";
         $acc = "mysql account";
@@ -693,12 +657,12 @@ class Mysql extends Common
         return $r;
     }
 
-    /*开始事务
-             *
-             *停用自动提交
-             *检测表是否支持事务
-             */
-    public     function begin($table = array())
+    /**
+     * 开始事务
+     * 停用自动提交
+     * 检测表是否支持事务
+     */
+    public function begin($table = array())
     {
         global $db;
         //关闭自动提交
@@ -715,12 +679,11 @@ class Mysql extends Common
         }
     }
 
-    /*结束事务
-             *
-             * 提交数据
-             *
-             */
-    public     function commit()
+    /**
+     * 结束事务
+     * 提交数据
+     */
+    public function commit()
     {
         global $db;
         $db->commit();
@@ -728,25 +691,28 @@ class Mysql extends Common
         $db->autocommit(true);
     }
 
-    //回滚
-    public     function back()
+    /**
+     * 回滚
+     */
+    public function back()
     {
         global $db;
         $db->rollback();
     }
 
-    //关闭连接
-    public     function close()
+    /**
+     * 关闭连接
+     */
+    public function close()
     {
         global $db;
         $db->close();
     }
 
-    /*
-             *根据sql的返回值调用事务
-             *
-             *执行sql失败就回滚
-             */
+    /**
+     * 根据sql的返回值调用事务
+     * 执行sql失败就回滚
+     */
     public function affair($v)
     {
         if (!$v) {
@@ -1019,14 +985,16 @@ class Mysql extends Common
         //添加默认栏目
         $query = $db->query("SELECT COUNT(*) AS count FROM `article`")->fetch_array();
         if ($query[0] < 1) {
-            if ($db->query(
-                <<<STR
+            if (
+                $db->query(
+                    <<<STR
             INSERT INTO `article` (`title`, `describe`, `content`) VALUES
             ("关键字说明", "", '<p><span style="text-wrap: nowrap;">&lt;!-- 布局 --&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-html&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;/df-html&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-header&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;/df-header&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-body&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;/df-body&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-footer&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;/df-footer&gt;</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;df-html/&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-header/&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-body/&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-footer/&gt;</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 遍历数组，来循环显示多条数据 --&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-each $list&gt;</span></p><p>	<span style="text-wrap: nowrap;">&lt;df-val value=&quot;name&quot;/&gt;</span></p><p>	<span style="text-wrap: nowrap;">{::name}</span></p><p><span style="text-wrap: nowrap;">&lt;/df-each&gt;</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;df-each-cache $list&gt;</span></p><p>	<span style="text-wrap: nowrap;">&lt;df-val-cache value=&quot;name&quot;/&gt;</span></p><p>	<span style="text-wrap: nowrap;">{:::name}</span></p><p><span style="text-wrap: nowrap;">&lt;/df-each-cache&gt;</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 条件语句--&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-if $type==1&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-elif $type==2&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-else&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;/df-if&gt;</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 执行php代码 --&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-code&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;/df-code&gt;</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 打印参数 --&gt;</span></p><p><span style="text-wrap: nowrap;">&lt;df-print value=&quot;$str&quot; /&gt;</span></p><p><span style="text-wrap: nowrap;">{:$str}</span></p><p><span style="text-wrap: nowrap;">{$str}</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- js防止格式化 --&gt;</span></p><p><span style="text-wrap: nowrap;">/*code</span></p><p><span style="text-wrap: nowrap;">code*/</span></p><p><br/></p>'),
             ("数据库操作", "", '<p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">**数据库更新**</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;">http://dfphp.dfer.site/admin/login/create_db</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;">**引用模型**</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;">use areas\admin\model\{ConfigModel,LayoutImgModel,ArticleModel,LinkModel,MusicModel,MessageModel,NotepadModel};</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;">**查询**</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 列表 --&gt;</span></p><p><span style="text-wrap: nowrap;">$output = MusicModel::select();</span></p><p><span style="text-wrap: nowrap;">$output = ArticleModel::order(&#39;asc&#39;)-&gt;select();</span></p><p><span style="text-wrap: nowrap;">$output = NotepadModel::order([&#39;time&#39;, &#39;desc&#39;])-&gt;select();</span></p><p><span style="text-wrap: nowrap;">$output = MusicModel::where(3)-&gt;select();</span></p><p><span style="text-wrap: nowrap;">$output = MusicModel::where([&quot;id&quot; =&gt; 3])-&gt;select();</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 读取第一条数据,不满足条件则返回空 --&gt;</span></p><p><span style="text-wrap: nowrap;">$output = ArticleModel::where(3)-&gt;find();</span></p><p><span style="text-wrap: nowrap;">&lt;!-- 始终读取第一条数据 --&gt;</span></p><p><span style="text-wrap: nowrap;">$output = NotepadModel::where([&quot;id&quot; =&gt; 3])-&gt;first();</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 直接生成dataTable的接口数据 --&gt;</span></p><p><span style="text-wrap: nowrap;">NotepadModel::showPage(str(&quot;admin/column/{0}_ss&quot;,[NotepadModel::getName()]));</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 读取第一条数据的某个值 --&gt;</span></p><p><span style="text-wrap: nowrap;">$layout = ConfigModel::where([&#39;key&#39; =&gt; &#39;layout&#39;])-&gt;value(&#39;val&#39;);</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;">**新增**</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;">$ret = ConfigModel::insert([&#39;val&#39;=&gt;123]);</span></p><p><span style="text-wrap: nowrap;">$ret = LinkModel::update($dt);</span></p><p><span style="text-wrap: nowrap;">$ret = LinkModel::where(null)-&gt;update($dt);</span></p><p><span style="text-wrap: nowrap;">$ret = LinkModel::where([])-&gt;update($dt);</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">**修改**</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;">$ret = LinkModel::where(3)-&gt;update($dt);</span></p><p><span style="text-wrap: nowrap;">$ret = ConfigModel::where([&#39;key&#39; =&gt; &#39;layout&#39;])-&gt;update([&#39;val&#39;=&gt;$dt]);</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">**删除**</span></p><p><span style="text-wrap: nowrap;">```</span></p><p><span style="text-wrap: nowrap;">&lt;!-- 根据id删除 --&gt;</span></p><p><span style="text-wrap: nowrap;">ArticleModel::where(3)-&gt;del();</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 根据条件删除 --&gt;</span></p><p><span style="text-wrap: nowrap;">ArticleModel::where([&#39;type&#39;=&gt;3])-&gt;del();</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">&lt;!-- 清空表 --&gt;</span></p><p><span style="text-wrap: nowrap;">ArticleModel::del();</span></p><p><span style="text-wrap: nowrap;"><br/></span></p><p><span style="text-wrap: nowrap;">```</span></p><p><br/></p>'),
             ("框架介绍", "", '<p>- DfPHP</p><p>- 轻量级PHP开发框架</p><p>- [dfphp.dfer.site](http://dfphp.dfer.site)</p><p>- 由于df在做项目的过程中越来越习惯基于tp和vue的前后端分离写法，此框架将不再作为开发的首选方案，将减缓更新频率，仅作为老系统的过渡方案</p><p>- 工作QQ：3504725309</p><p>- 网站：www.dfer.site</p><p>- QQ群：76673820</p><p><br/></p>');
             STR
-            )) {
+                )
+            ) {
                 echo "添加数据 [article] 成功";
             } else {
                 echo "添加数据 [article] 失败";
@@ -1038,12 +1006,14 @@ class Mysql extends Common
         //添加通用参数
         $query = $db->query("SELECT COUNT(*) AS count FROM `config`")->fetch_array();
         if ($query[0] < 1) {
-            if ($db->query(<<<STR
+            if (
+                $db->query(<<<STR
             insert into `config`(`key`,`val`,`subs`) values
             ('hits','0','用户访问量'),
             ('admin','0','开启超级权限'),
             ('layout','{"bg_img":"/view/admin/public/assets/img/bg.jpg","music_play":"0","color":"#ffffff","title":"DfPHP","keywords":"DfPHP,轻量级php框架,化繁为简,返璞归真,大道至简","description":"遵循大道至简的php框架","inscribe":"© 2023 Dfer.Site"}','主页布局')
-            STR)) {
+            STR)
+            ) {
                 echo "添加数据 [config] 成功";
             } else {
                 echo "添加数据 [config] 失败";
@@ -1068,7 +1038,8 @@ class Mysql extends Common
         //添加基础菜单
         $query = $db->query("SELECT COUNT(*) AS count FROM `menu`")->fetch_array();
         if ($query[0] < 1) {
-            if ($db->query("INSERT INTO `menu` (`title`, `src`, `type`, `parent`, `order_num`) VALUES
+            if (
+                $db->query("INSERT INTO `menu` (`title`, `src`, `type`, `parent`, `order_num`) VALUES
                     ('动态首页', 'homepage%2Fhome%2F', 'home', 0, 0),
                     ('主页管理', '', 'folder', 0, 1),
                     ('用户管理', '', 'user', 0, 2),
@@ -1096,7 +1067,8 @@ class Mysql extends Common
                     ('查看字体', 'url%3A%2Fstatic_pages%2Ffont.html', 'file', 4, 8880),
                     ('页面管理', 'admin%2Fhome%2Fhtml', 'file', 4, 8881),
                     ('生成', 'admin%2Fhome%2FcreateStaticPage', 'file', 4, 8882)
-                    ;")) {
+                    ;")
+            ) {
                 echo "添加数据 [menu] 成功";
             } else {
                 echo "添加数据 [menu] 失败";
