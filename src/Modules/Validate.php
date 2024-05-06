@@ -56,6 +56,12 @@ abstract class Validate extends Common
      * @var array
      */
     protected $scene = [];
+
+    /**
+     * 错误信息
+     */
+    protected $error = [];
+
     /**
      * 当前验证场景
      * @var string
