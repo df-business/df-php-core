@@ -447,19 +447,20 @@ function ie_notice()
  * 拆分url参数，组成访问地址
  *
  * eg:
- * split_url("A/c/a/para",array('zdy'=>$zdy))
- * split_url("A.c.a.para",array('zdy'=>$zdy))
+ * split_url("A/c/a",$para,array('zdy'=>$zdy))
+ * split_url("A.c.a",$para,array('zdy'=>$zdy))
  * @param {Object} $str    url字符串
  * @param {Object} $param 方法参数  单个值或者一组值
  * @param {Object} $get    get参数    数组
  */
-function split_url($url_str,$param=null, $get = [])
+function split_url($url_str='',$param=null, $get = [])
 {
     global $_param;
     // var_dump($url_str,$_param);
 
-    //去掉字符串首尾空格
+    //去掉首尾多余的字符
     $url_str = trim($url_str);
+    $url_str = trim($url_str,'/');
 
     if (strpos($url_str, "/") !== false) {
         $url_arr = explode("/", $url_str);
