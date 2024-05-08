@@ -250,6 +250,9 @@ function view_replace($from, $layout)
     // 通过注释防止js重排代码格式的时候打乱格式，这里解除注释效果
     $layout = preg_replace('/\/\*code([\s\S]*?)code\*\//', '$1', $layout);
 
+    // 通过注释防止html重排代码格式的时候打乱格式，这里解除注释效果
+    $layout = preg_replace('/<!--code([\s\S]*?)code-->/', '$1', $layout);
+
     $layout = '' . $layout;
     return $layout;
 }

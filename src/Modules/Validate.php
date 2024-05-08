@@ -60,7 +60,7 @@ abstract class Validate extends Common
     /**
      * 错误信息
      */
-    protected $error = [];
+    public $error = [];
 
     /**
      * 当前验证场景
