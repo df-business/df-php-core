@@ -1,18 +1,18 @@
 {
 	"name": "dfer/df-php-core",
 	"type": "library",
+    "license": "MIT",
 	"description": "DfPHP的内核",
-	"license": "MIT",
 	"authors": [{
 		"name": "df",
 		"email": "df_business@qq.com"
 	}],
 	"homepage": "http://www.dfer.site",
+	"keywords": ["df", "dfer.site"],
 	"require": {
 		"php": ">=7.0",
 		"dfer/tools": "^1.0.0"
 	},
-	"keywords": ["df", "dfer.site"],
 	"autoload": {
 		"psr-4": {
 			"Dfer\\DfPhpCore\\": "src/"
