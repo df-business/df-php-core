@@ -74,6 +74,7 @@ class Console extends Common
       dev:root                    将项目的核心文件发布至`df-php-root`组件库
       dev:core                    将项目里的`df-php-core`同步至组件库
       dev:tools                   将项目里的`tools`同步至组件库
+      dev:topthink                将项目里的`topthink`同步至组件库
 
       STR;
       if ($argc == 1) {
@@ -93,6 +94,9 @@ class Console extends Common
           break;
         case 'dev:tools':
           $this->devTools();
+          break;
+        case 'dev:topthink':
+          $this->devTopthink();
           break;
         default:
           $this->print("命令不存在");
@@ -200,6 +204,37 @@ class Console extends Common
         $this->print(PHP_EOL);
         $this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////" . PHP_EOL);
         system("cd ../dfer-tools/ && publish.bat");
+        $this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////" . PHP_EOL);
+      } else {
+        $this->print("此功能为框架开发者使用");
+      }
+    }
+
+    /**
+     * 将框架里的最新内容同步到`topthink`
+     * @param {Object} $var 变量
+     */
+    function devTopthink($var = null)
+    {
+      // 组件在项目中的目录
+      $projectModuleRootDir = ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'dfer' . DIRECTORY_SEPARATOR . 'topthink' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
+      // 模块项目所在的目录，非开发者无法使用该功能
+      $moduleRootDir = dirname(ROOT) . DIRECTORY_SEPARATOR . 'dfer-topthink' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
+
+      if (is_dir(dirname($moduleRootDir))) {
+        $this->print($projectModuleRootDir . ">>>" . $moduleRootDir . PHP_EOL);
+        $this->print("////////////////////////////////////////////////// 文件删除 START //////////////////////////////////////////////////" . PHP_EOL);
+        $this->deleteDir($moduleRootDir, QUIET);
+        $this->print("//////////////////////////////////////////////////  文件删除 END  //////////////////////////////////////////////////" . PHP_EOL);
+        sleep(1.5);
+        $this->print(PHP_EOL);
+        $this->print("////////////////////////////////////////////////// 文件复制 START //////////////////////////////////////////////////" . PHP_EOL);
+        $this->copy($projectModuleRootDir, $moduleRootDir, QUIET);
+        $this->print("//////////////////////////////////////////////////  文件复制 END  //////////////////////////////////////////////////" . PHP_EOL);
+        sleep(1.5);
+        $this->print(PHP_EOL);
+        $this->print("////////////////////////////////////////////////// 提交git START //////////////////////////////////////////////////" . PHP_EOL);
+        system("cd ../dfer-topthink/ && publish.bat");
         $this->print("//////////////////////////////////////////////////  提交git END  //////////////////////////////////////////////////" . PHP_EOL);
       } else {
         $this->print("此功能为框架开发者使用");

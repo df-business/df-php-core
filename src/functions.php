@@ -500,6 +500,7 @@ function split_url($url_str='',$param=null, $get = [])
     return $redirect;
 }
 
+if (!defined('APP_NAMESPACE')) {
 /**
  *
  *    拼接url地址，组成访问地址
@@ -542,7 +543,7 @@ function url($area, $ctrl = null, $action = null, $param = null, $get = [])
     $rt = sprintf("%s/%s/%s/%s%s%s", SITE, $area, $ctrl, $action, $param, $get_str ?? '');
     return $rt;
 }
-
+}
 
 /**
  * 跳转到指定url，并携带参数
