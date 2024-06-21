@@ -151,6 +151,16 @@ class Mysql extends Common
     }
 
     /**
+     * 查询数据的数量
+     * @return {Object} 字段值
+     */
+    public function count()
+    {
+        $this->field = "count(*)";
+        return intval($this->first()[0]);
+    }
+
+    /**
      * 查询结果
      * @return {Object} 数组。
      */
