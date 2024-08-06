@@ -539,8 +539,7 @@ function url($area, $ctrl = null, $action = null, $param = null, $get = [])
         }
         $get_str .= implode('&', $get_str_arr);
     }
-
-    $rt = sprintf("%s/%s/%s/%s%s%s", SITE, $area, $ctrl, $action, $param, $get_str ?? '');
+    $rt = sprintf("%s/%s/%s/%s/%s%s", SITE, $area, $ctrl, $action, $param, $get_str ?? '');
     return $rt;
 }
 }
