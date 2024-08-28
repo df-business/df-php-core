@@ -33,7 +33,7 @@
  *
  */
 
-use Dfer\Tools\Statics\{Common};
+use Dfer\Tools\Statics\{Common,Env};
 
 // ********************** 常量 START **********************
 
@@ -696,7 +696,7 @@ function debug()
  */
 function env($name, $default = "")
 {
-    $val = \Dfer\Tools\Env::get($name, $default);
+    $val = Env::get($name, $default);
     // var_dump($val);
     return $val;
 }
