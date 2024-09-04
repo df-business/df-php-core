@@ -25,10 +25,10 @@
  *                           :;:: !@;        ..
  *                               ;@*........
  *                       ....   !@* ..
- *                 ......    .!%$! ..        | AUTHOR: dfer
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
- *                .:;;o&***o;.   .           | QQ: 3504725309
- *        .;;!o&****&&o;:.    ..
+ *                 ......    .!%$! ..     | AUTHOR: dfer
+ *         ......        .;o*%*!  .       | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .        | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..          | WEBSITE: http://www.dfer.site
  * +----------------------------------------------------------------------
  *
  */
@@ -42,7 +42,6 @@ use Dfer\Tools\Statics\{Common,Env};
  *
  * \ENUM::RELOAD_PARENT
  */
-
 class ENUM
 {
 
@@ -55,7 +54,6 @@ class ENUM
     const LOGS_FILE = 6;
     const USER_BACK = 'df-ac-pw';
 }
-
 
 // ###################################### view START ######################################
 
@@ -256,9 +254,11 @@ function view_replace($from, $layout)
     $layout = '' . $layout;
     return $layout;
 }
+
 // ######################################  view END  ######################################
 
 // ###################################### cache START ######################################
+
 /**
  * 服务器缓存
  * eg:
@@ -311,11 +311,10 @@ function cache_clean()
     return $result;
 }
 
-
 // ######################################  cache END  ######################################
 
-
 // ###################################### session START ######################################
+
 /**
  * 服务器缓存
  *
@@ -342,10 +341,12 @@ function session_get($name)
     }
     return $redirect;
 }
+
 function session_set($name, $val)
 {
     $_SESSION[$name] = $val;
 }
+
 /**
  * 删除ses
  * @param {Object} $name
@@ -358,9 +359,11 @@ function session_del($name = '')
         unset($_SESSION[$name]);
     }
 }
+
 // ######################################  session END  ######################################
 
 // ###################################### cookie START ######################################
+
 /**
  * 设置cookie
  * @param {Object} $name    名称
@@ -380,8 +383,8 @@ function cookie_del($name)
 {
     setcookie($name, null, time() - 1, '/');
 }
-// ######################################  cookie END  ######################################
 
+// ######################################  cookie END  ######################################
 
 /**
  * 网页跳转的提示页面
@@ -628,8 +631,6 @@ function clear_default_para($arr)
     return $arr;
 }
 
-
-
 /**
  * 用来输出日志
  *
@@ -672,8 +673,9 @@ function logs($str, $type = \ENUM::LOGS_FILE, $override = false)
     }
 }
 
-
-//打印调试信息
+/**
+ * 打印调试信息
+ */
 function debug()
 {
     if (DEV) {
@@ -748,7 +750,6 @@ function str($string, $params = [])
     return Common::str($string, $params);
 }
 
-
 /**
  * 读取"composer.json"文件内容
  * @param {Object} $key 键值字符串，支持多级
@@ -773,7 +774,6 @@ function show_json($status = 1, $data = array(), $success_msg = '', $fail_msg = 
     global $common;
     Common::showJson($status, $data, $success_msg, $fail_msg);
 }
-
 
 /**
  * 读取表名

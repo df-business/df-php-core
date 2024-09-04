@@ -1,10 +1,5 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules;
-
-use Dfer\Tools\Common;
-
-
 /**
  * +----------------------------------------------------------------------
  * | 语言类
@@ -30,16 +25,20 @@ use Dfer\Tools\Common;
  *                           :;:: !@;        ..
  *                               ;@*........
  *                       ....   !@* ..
- *                 ......    .!%$! ..        | AUTHOR: dfer
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
- *                .:;;o&***o;.   .           | QQ: 3504725309
- *        .;;!o&****&&o;:.    ..
+ *                 ......    .!%$! ..     | AUTHOR: dfer
+ *         ......        .;o*%*!  .       | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .        | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..          | WEBSITE: http://www.dfer.site
  * +----------------------------------------------------------------------
  *
  */
+
+namespace Dfer\DfPhpCore\Modules;
+
+use Dfer\Tools\Common;
+
 class Lang
 {
-
     /**
      * 配置参数
      * @var array
@@ -117,6 +116,7 @@ class Lang
 
         return $langSet;
     }
+
     /**
      * 保存当前语言到Cookie
      * @access protected
@@ -138,6 +138,7 @@ class Lang
     {
         return $this->config['default_lang'];
     }
+
     /**
      * 获取当前语言
      * @access public
@@ -213,7 +214,6 @@ class Lang
 
         return isset($result) && is_array($result) ? $result : [];
     }
-
 
     /**
      * 切换语言

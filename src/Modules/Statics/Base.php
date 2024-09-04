@@ -1,8 +1,5 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules\Statics;
-
-
 /**
  * +----------------------------------------------------------------------
  * | 静态调用
@@ -28,13 +25,16 @@ namespace Dfer\DfPhpCore\Modules\Statics;
  *                           :;:: !@;        ..
  *                               ;@*........
  *                       ....   !@* ..
- *                 ......    .!%$! ..        | AUTHOR: dfer
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
- *                .:;;o&***o;.   .           | QQ: 3504725309
- *        .;;!o&****&&o;:.    ..
+ *                 ......    .!%$! ..     | AUTHOR: dfer
+ *         ......        .;o*%*!  .       | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .        | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..          | WEBSITE: http://www.dfer.site
  * +----------------------------------------------------------------------
  *
  */
+
+namespace Dfer\Tools\Statics;
+
 abstract class Base
 {
     /**
@@ -86,5 +86,4 @@ abstract class Base
         $instance = static::$instances[$class];
         return $instance;
     }
-
 }

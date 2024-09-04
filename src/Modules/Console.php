@@ -1,9 +1,5 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules;
-
-use Dfer\Tools\Common;
-
 /**
  * +----------------------------------------------------------------------
  * | 控制台内核
@@ -29,12 +25,18 @@ use Dfer\Tools\Common;
  *                           :;:: !@;        ..
  *                               ;@*........
  *                       ....   !@* ..
- *                 ......    .!%$! ..        | AUTHOR: dfer
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
- *                .:;;o&***o;.   .           | QQ: 3504725309
- *        .;;!o&****&&o;:.    ..
+ *                 ......    .!%$! ..     | AUTHOR: dfer
+ *         ......        .;o*%*!  .       | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .        | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..          | WEBSITE: http://www.dfer.site
  * +----------------------------------------------------------------------
+ *
  */
+
+namespace Dfer\DfPhpCore\Modules;
+
+use Dfer\Tools\Common;
+
 class Console extends Common
 {
     /**

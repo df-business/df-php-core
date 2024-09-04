@@ -1,9 +1,5 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules;
-
-use Dfer\Tools\{Common};
-
 /**
  * +----------------------------------------------------------------------
  * | 模型类
@@ -29,13 +25,18 @@ use Dfer\Tools\{Common};
  *                           :;:: !@;        ..
  *                               ;@*........
  *                       ....   !@* ..
- *                 ......    .!%$! ..        | AUTHOR: dfer
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
- *                .:;;o&***o;.   .           | QQ: 3504725309
- *        .;;!o&****&&o;:.    ..
+ *                 ......    .!%$! ..     | AUTHOR: dfer
+ *         ......        .;o*%*!  .       | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .        | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..          | WEBSITE: http://www.dfer.site
  * +----------------------------------------------------------------------
  *
  */
+
+namespace Dfer\DfPhpCore\Modules;
+
+use Dfer\Tools\{Common};
+
 abstract class Model extends Common
 {
     /**
@@ -69,7 +70,6 @@ abstract class Model extends Common
      * 对各种类实例化一次之后，可以在任意位置复用，不需要再次实例化
      */
     protected static $instances = [];
-
 
     public function __construct(array $data = [])
     {

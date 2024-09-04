@@ -1,9 +1,5 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules;
-
-use Dfer\Tools\{Common};
-
 /**
  * +----------------------------------------------------------------------
  * | mysql数据库驱动
@@ -29,16 +25,20 @@ use Dfer\Tools\{Common};
  *                           :;:: !@;        ..
  *                               ;@*........
  *                       ....   !@* ..
- *                 ......    .!%$! ..        | AUTHOR: dfer
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
- *                .:;;o&***o;.   .           | QQ: 3504725309
- *        .;;!o&****&&o;:.    ..
+ *                 ......    .!%$! ..     | AUTHOR: dfer
+ *         ......        .;o*%*!  .       | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .        | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..          | WEBSITE: http://www.dfer.site
  * +----------------------------------------------------------------------
  *
  */
+
+namespace Dfer\DfPhpCore\Modules;
+
+use Dfer\Tools\{Common};
+
 class Mysql extends Common
 {
-
     /**
      * 当前数据表名称（不含前缀）
      * @var string
@@ -46,12 +46,10 @@ class Mysql extends Common
     protected $name;
     protected $json;
     protected $jsonAssoc;
-
     protected $field = array();
     protected $where = array();
     protected $order = array();
     protected $limit = array();
-
 
     public function getName(): string
     {
@@ -78,7 +76,6 @@ class Mysql extends Common
         $this->field = $param;
         return $this;
     }
-
 
     /**
      * 条件
@@ -117,8 +114,6 @@ class Mysql extends Common
         $rt = $r->fetch_array(MYSQLI_BOTH);
         return $rt;
     }
-
-
 
     /**
      * 读取第一条数据,不满足条件则返回空
@@ -273,44 +268,40 @@ class Mysql extends Common
     }
 
     /**
-     * dataTable依赖
-     * 分页处理
+     * dataTable异步分页
+     * @param {Object} $model_name 用于组装地址的模型名称
      */
-    public function showPage($url = '')
+    public function showPage($model_name)
     {
         if ($_POST) {
             $table_name = $this->name;
-
             $search = $_POST['search']['value'];
             $order_column = $_POST['order'][0]['column'];
             $order_column = $_POST['columns'][$order_column]['data'];
             $order_type = $_POST['order'][0]['dir'];
             $order = [$order_column, $order_type];
-
             $start = $_POST['start'];
             $length = $_POST['length'];
             $limit = [$start, $length];
             //var_dump($order_column,$_POST['order'][0]['column'],$_POST['columns']);
-
             $total_count = $this->run(sprintf("select count(*) from %s", $table_name))[0][0];
             // $data = showList($tb, $para, $order, [$start, $length]);
             $data = $this->order($order)->limit($limit)->select();
             $data_rt = array();
-            if (!empty($url)) {
+            if (!empty($model_name)) {
                 foreach ($data as $key => $value) {
-                    $url_view = split_url(sprintf("%s_view/%s", $url, $value[0]));
-                    $url_edit = split_url(sprintf("%s_add/%s", $url, $value[0]));
-                    $url_del = split_url(sprintf("%s_del/%s", $url, $value[0]));
+                    $url_view = split_url(sprintf("%s_view", $model_name), $value[0]);
+                    $url_edit = split_url(sprintf("%s_add", $model_name), $value[0]);
+                    $url_del = split_url(sprintf("%s_del", $model_name), $value[0]);
                     $opt = <<<EOT
                 <a href='{$url_view}'>[预览]</a>
                 <a href='{$url_edit}'>[编辑]</a>
-                <a href='{$url_del}' onclick='return confirm("您确认要删除吗？")'>[删除]</a>
+                <a href='{$url_del}' onclick='return confirm("您确认要删除《{$value[0]}》吗？")'>[删除]</a>
                 EOT;
                     $value['opt'] = $opt;
                     $data_rt[] = $value;
                 }
             }
-
             $return = array(
                 'draw' => $_POST['draw'],
                 'recordsTotal' => $total_count,
@@ -318,11 +309,9 @@ class Mysql extends Common
                 'data' => $data_rt,
                 'error' => ''
             );
-
             $this->showJsonBase($return);
         }
     }
-
 
     /**
      * 将表中的所有字段初始化为空字符串
@@ -351,8 +340,6 @@ class Mysql extends Common
         return $item;
     }
 
-
-
     /**
      * 判断表是否存在
      * @param {Object} $table
@@ -380,8 +367,6 @@ class Mysql extends Common
         if (empty($table_name)) {
             return null;
         }
-
-
         //拼接field
         if (empty($field)) {
             $field_string = '*';
@@ -397,7 +382,6 @@ class Mysql extends Common
         } else {
             $field_string = '*';
         }
-
         //拼接where
         if (empty($where)) {
             $where_string = '';
@@ -417,7 +401,6 @@ class Mysql extends Common
                 }
             }
         }
-
         //拼接order
         if (empty($order)) {
             $order_string = '';
@@ -430,7 +413,6 @@ class Mysql extends Common
                 $order_string = sprintf('order by %s %s', array_key_first($order), $order[array_key_first($order)]);
             }
         }
-
         //拼接limit
         if (empty($limit)) {
             $limit_string = '';
@@ -441,7 +423,6 @@ class Mysql extends Common
                 $limit_string = sprintf('limit %s', $limit);
             }
         }
-
         //带条件获取整个表的数据
         $sqlString = sprintf("select %s from `%s` %s %s %s", $field_string, $table_name, $where_string, $order_string, $limit_string); //sql语句的表名区分大小写
         return $sqlString;
@@ -453,10 +434,8 @@ class Mysql extends Common
     public function queryFormatUpdateInsert($data = array())
     {
         global $db;
-
         $table_name = $this->name;
         $where = $this->where;
-
         //新增
         if (empty($where)) {
             $data_str = $data_str_key = $data_str_val = '';
@@ -533,7 +512,6 @@ class Mysql extends Common
     {
         $table_name = $this->name;
         $where = $this->where;
-
         // 拼接where
         if (is_numeric($where)) {
             $where_string = 'where id=' . $where;
@@ -547,14 +525,11 @@ class Mysql extends Common
                 }
             }
         }
-
         // sql语句的表名区分大小写
         $sqlString = sprintf("delete from `%s` %s", $table_name, $where_string);
 
         return $sqlString;
     }
-
-
 
     /**
      * 根据字段类型获取默认值
@@ -573,8 +548,6 @@ class Mysql extends Common
         $value = $dt[0][0];
         return $value;
     }
-
-
 
     /**
      * 直接执行sql语句
@@ -731,7 +704,6 @@ class Mysql extends Common
         }
     }
 
-
     /**
      * 数据库连接初始化
      * @param {Object} $var 变量
@@ -789,9 +761,6 @@ class Mysql extends Common
         return $db;
     }
 
-
-
-
     /**
      * 创建表
      * @param {Object} $con 数据库连接对象
@@ -799,7 +768,6 @@ class Mysql extends Common
      */
     public function create($db)
     {
-
         echo "###################################### 创建表 START ######################################";
         echo "<br />" . PHP_EOL;
 

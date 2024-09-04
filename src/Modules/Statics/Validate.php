@@ -1,9 +1,5 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules\Statics;
-
-
-
 /**
  * +----------------------------------------------------------------------
  * | 静态调用
@@ -29,16 +25,20 @@ namespace Dfer\DfPhpCore\Modules\Statics;
  *                           :;:: !@;        ..
  *                               ;@*........
  *                       ....   !@* ..
- *                 ......    .!%$! ..        | AUTHOR: dfer
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
- *                .:;;o&***o;.   .           | QQ: 3504725309
- *        .;;!o&****&&o;:.    ..
+ *                 ......    .!%$! ..     | AUTHOR: dfer
+ *         ......        .;o*%*!  .       | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .        | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..          | WEBSITE: http://www.dfer.site
  * +----------------------------------------------------------------------
  *
  */
+
+namespace Dfer\DfPhpCore\Modules\Statics;
+
 class Validate extends Base
 {
-    protected function className(){
+    protected function className()
+    {
         return str_replace("\Statics", "", __CLASS__);
     }
 }

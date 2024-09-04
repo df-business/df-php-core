@@ -1,10 +1,5 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules;
-
-use Dfer\Tools\Common;
-use Dfer\DfPhpCore\Modules\Statics\Lang;
-
 /**
  * +----------------------------------------------------------------------
  * | 验证类
@@ -30,13 +25,19 @@ use Dfer\DfPhpCore\Modules\Statics\Lang;
  *                           :;:: !@;        ..
  *                               ;@*........
  *                       ....   !@* ..
- *                 ......    .!%$! ..        | AUTHOR: dfer
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
- *                .:;;o&***o;.   .           | QQ: 3504725309
- *        .;;!o&****&&o;:.    ..
+ *                 ......    .!%$! ..     | AUTHOR: dfer
+ *         ......        .;o*%*!  .       | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .        | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..          | WEBSITE: http://www.dfer.site
  * +----------------------------------------------------------------------
  *
  */
+
+namespace Dfer\DfPhpCore\Modules;
+
+use Dfer\Tools\Common;
+use Dfer\DfPhpCore\Modules\Statics\Lang;
+
 abstract class Validate extends Common
 {
     /**
@@ -102,7 +103,6 @@ abstract class Validate extends Common
     {
         return $this->error;
     }
-
 
     /**
      * 数据自动验证
@@ -380,7 +380,6 @@ abstract class Validate extends Common
 
         return [$type, $rule, $info];
     }
-
 
     /**
      * 获取数据值

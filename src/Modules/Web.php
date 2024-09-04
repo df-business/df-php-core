@@ -1,7 +1,5 @@
 <?php
 
-namespace Dfer\DfPhpCore\Modules;
-
 /**
  * +----------------------------------------------------------------------
  * | 网页内核
@@ -27,20 +25,21 @@ namespace Dfer\DfPhpCore\Modules;
  *                           :;:: !@;        ..
  *                               ;@*........
  *                       ....   !@* ..
- *                 ......    .!%$! ..        | AUTHOR: dfer
- *         ......        .;o*%*!  .          | EMAIL: df_business@qq.com
- *                .:;;o&***o;.   .           | QQ: 3504725309
- *        .;;!o&****&&o;:.    ..
+ *                 ......    .!%$! ..     | AUTHOR: dfer
+ *         ......        .;o*%*!  .       | EMAIL: df_business@qq.com
+ *                .:;;o&***o;.   .        | QQ: 3504725309
+ *        .;;!o&****&&o;:.    ..          | WEBSITE: http://www.dfer.site
  * +----------------------------------------------------------------------
  *
  */
+
+namespace Dfer\DfPhpCore\Modules;
 
 use Dfer\DfPhpCore\Modules\{Mysql};
 use Dfer\Tools\{Common};
 
 class Web extends Common
 {
-
     /**
      * 容器绑定标识
      * @var array
@@ -156,7 +155,6 @@ class Web extends Common
         // **********************  框架初始化 END  **********************
         $this->index();
     }
-
 
     /**
      * 入口文件
