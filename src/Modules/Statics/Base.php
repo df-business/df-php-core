@@ -33,7 +33,7 @@
  *
  */
 
-namespace Dfer\Tools\Statics;
+namespace Dfer\DfPhpCore\Modules\Statics;
 
 abstract class Base
 {
