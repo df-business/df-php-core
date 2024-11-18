@@ -10,8 +10,7 @@
 	"homepage": "http://www.dfer.site",
 	"keywords": ["df", "dfer.site"],
 	"require": {
-		"php": ">=7.0",
-		"dfer/tools": "^1.0.0"
+		"dfer/tools": ">=1.0.0"
 	},
 	"autoload": {
 		"psr-4": {
