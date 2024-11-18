@@ -52,13 +52,13 @@ if exist %cache% (
 ) else (
 	:::::::::::::::::::: 默认版本号 ::::::::::::::::::::
 	set ver_str=0.0.0
-	set aa=1
+	set aa=6
 	set bb=0
 	set cc=0
 	set "ver=!aa!.!bb!.!cc!"
 )
 :::::::::::::::::::: 保存版本号 ::::::::::::::::::::
-echo !ver!>!cache!
+powershell -Command "Write-Output '!ver!' | Out-File -FilePath !cache! -NoNewline -Encoding utf8"
 
 :::::::::::::::::::: 文件区分大小写 ::::::::::::::::::::
 git config core.ignorecase false
