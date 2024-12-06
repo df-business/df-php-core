@@ -135,7 +135,7 @@ class Console extends Common
    */
   function devRoot($var = null)
   {
-    $projectRootDir = ROOT;
+    $projectRootDir = ROOT.DIRECTORY_SEPARATOR;
     // 模块项目所在的目录，非开发者无法使用该功能
     $moduleRootDir = dirname(ROOT) . DIRECTORY_SEPARATOR . 'df-php-root' . DIRECTORY_SEPARATOR . 'root' . DIRECTORY_SEPARATOR;
 
