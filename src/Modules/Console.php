@@ -150,7 +150,6 @@ class Console extends Common
       'public' . DIRECTORY_SEPARATOR . 'view',
       'public' . DIRECTORY_SEPARATOR . 'index.php',
       '.editorconfig',
-      '.example.env',
       'df',
       'version'
     ];
