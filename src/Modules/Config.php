@@ -43,7 +43,7 @@ class Config extends Common
      * 配置参数
      * @var array
      */
-    protected $config = [];
+    protected static $config = [];
 
     /**
      * 配置前缀
@@ -53,26 +53,20 @@ class Config extends Common
 
     protected $configExt = '.php';
 
-
-    public function __construct()
-    {
-        $this->init();
-    }
-
     /**
      * 加载配置文件
      * @param {Object} $var 变量
      */
     public function init($var = null)
     {
-        $path = ROOT . DIRECTORY_SEPARATOR . 'data';
+        $path = ROOT . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR;
         // 自动读取配置文件
         if (is_dir($path . 'config')) {
             $dir = $path . 'config' . DIRECTORY_SEPARATOR;
         }
 
         $files = isset($dir) ? scandir($dir) : [];
-
+        // var_dump($files);
         foreach ($files as $file) {
             if ('.' . pathinfo($file, PATHINFO_EXTENSION) === $this->configExt) {
                 $this->load($dir . $file, pathinfo($file, PATHINFO_FILENAME));
@@ -96,7 +90,6 @@ class Config extends Common
         if (isset($filename)) {
             return $this->loadFile($filename, $name);
         }
-
         return $this->config;
     }
 
@@ -104,7 +97,7 @@ class Config extends Common
     {
         $name = strtolower($name);
         $type = pathinfo($file, PATHINFO_EXTENSION);
-
+        // var_dump($file, $name,$type);
         if ('php' == $type) {
             return $this->set(include $file, $name);
         }
@@ -132,30 +125,30 @@ class Config extends Common
     /**
      * 设置配置参数 name为数组则为批量设置
      * @access public
-     * @param  string|array  $name 配置参数名（支持三级配置 .号分割）
      * @param  mixed         $value 配置值
+     * @param  string|array  $name 配置参数名（支持三级配置 .号分割）
      * @return mixed
      */
-    public function set($name, $value = null)
+    public function set($value, $name = null)
     {
-        if (is_array($name)) {
+        if (is_array($value)) {
             // 批量设置
-            if (!empty($value)) {
-                if (isset($this->config[$value])) {
-                    $result = array_merge($this->config[$value], $name);
+            if (!empty($name)) {
+                if (isset($this->config[$name])) {
+                    $result = array_merge($this->config[$name], $value);
                 } else {
-                    $result = $name;
+                    $result = $value;
                 }
 
-                $this->config[$value] = $result;
+                $this->config[$name] = $result;
             } else {
-                $result = $this->config = array_merge($this->config, $name);
+                $result = $this->config = array_merge($this->config, $value);
             }
         } else {
             // 为空直接返回 已有配置
             $result = $this->config;
         }
-
+        // var_dump($this->config);
         return $result;
     }
 
@@ -168,6 +161,7 @@ class Config extends Common
      */
     public function get($name = null, $default = null)
     {
+        // var_dump($this->config,$name);
         if ($name && false === strpos($name, '.')) {
             $name = $this->prefix . '.' . $name;
         }
@@ -186,9 +180,9 @@ class Config extends Common
         $name = explode('.', $name);
         $name[0] = strtolower($name[0]);
         $config = $this->config;
-
         // 按.拆分成多维数组进行判断
         foreach ($name as $val) {
+            // var_dump($val);
             if (isset($config[$val])) {
                 $config = $config[$val];
             } else {

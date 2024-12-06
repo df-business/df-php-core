@@ -35,7 +35,7 @@
 
 namespace Dfer\DfPhpCore\Modules;
 
-use Dfer\DfPhpCore\Modules\{Mysql};
+use Dfer\DfPhpCore\Modules\Statics\{Mysql, Config};
 use Dfer\Tools\{Common};
 
 class Web extends Common
@@ -45,7 +45,8 @@ class Web extends Common
      * @var array
      */
     protected $bind = [
-        'mysql' => Mysql::class
+        'mysql' => Mysql::class,
+        'config' => Config::class
     ];
 
     /**
@@ -63,36 +64,40 @@ class Web extends Common
         define('WEB_ROOT', $_SERVER['DOCUMENT_ROOT']);
         //内核根目录
         define('DF_PHP_ROOT', ROOT . DIRECTORY_SEPARATOR . 'vendor/dfer/df-php-core/src/');
+
+        // 配置参数初始化
+        $this->config::init();
+
         // 默认模板
         define('DEFAULT_ADMIN', 'admin');
-        define('THEME_HOMEPAGE', env('THEME_HOMEPAGE', 'homepage'));
-        define('THEME_ADMIN', env('THEME_ADMIN', DEFAULT_ADMIN));
-        define('DEFAULT_ADMIN_ASSETS', "/view/".DEFAULT_ADMIN."/public/assets");
+        define('THEME_HOMEPAGE', config('theme_homepage', 'homepage'));
+        define('THEME_ADMIN', config('theme_admin', DEFAULT_ADMIN));
+        define('DEFAULT_ADMIN_ASSETS', "/view/" . DEFAULT_ADMIN . "/public/assets");
         // 后台入口
-        define('ADMIN_URL', env('ADMIN_URL', 'df'));
+        define('ADMIN_URL', config('admin_url', 'df'));
         // 开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
-        define('DEV', env('DEV', 1));
-        define('SERVER', env('SERVER', 'localhost'));
-        define('ACC', env('ACC', 'dfphp_dfer_site'));
-        define('PWD', env('PWD', 'mMHBCAimbKKjPP67'));
-        define('DATABASE', env('DATABASE', 'dfphp_dfer_site'));
+        define('DEV', config('dev', 1));
+        define('SERVER', config('server', 'localhost'));
+        define('ACC', config('account', 'dfphp_dfer_site'));
+        define('PWD', config('password', 'mMHBCAimbKKjPP67'));
+        define('DATABASE', config('database', 'dfphp_dfer_site'));
 
         //email模块的开关
         define('EMAIL_ENABLE', false);
         // 自动检测语言
-        define('LANG_DETECT', env('LANG_DETECT', 0));
+        define('LANG_DETECT', config('lang_detect', 0));
         // 当前框架的版本
         define('VERSION', file_get_contents(ROOT . DIRECTORY_SEPARATOR . 'version'));
         //当前框架需要的最低php版本
-        define('PHP_VERSION_MIN', env('PHP_VERSION_MIN', get_composer_json()));
+        define('PHP_VERSION_MIN', config('php_version_min', '7.3'));
         //seo优化模式
-        define('SEO', env('SEO', 0));
+        define('SEO', config('SEO', 0));
         //PC页面、手机页面分离开关
-        define('WAP_PAGE_ENABLE', env('WAP_PAGE_ENABLE', 1));
+        define('WAP_PAGE_ENABLE', config('wap_page_enable', 1));
         // 3*24小时
-        define('SESSION_EXPIRES', env('SESSION_EXPIRES', 3 * 24 * 3600));
+        define('SESSION_EXPIRES', config('session_expires', 3 * 24 * 3600));
         //设置文件上传的最大尺寸(byte)
-        define('FILE_SIZE_MAX', env('FILE_SIZE_MAX', 1024 * 1024 * 100));
+        define('FILE_SIZE_MAX', config('file_size_max', 1024 * 1024 * 100));
 
         // ssl启用
         define('SSL_ACTIVE', !empty($_SERVER['HTTPS']) || (isset($_SERVER['HTTP_X_CLIENT_SCHEME']) && $_SERVER['HTTP_X_CLIENT_SCHEME'] == 'https'));
@@ -144,7 +149,7 @@ class Web extends Common
         header("Access-Control-Allow-Origin: *");
 
         global $db, $_site, $_param;
-        $db = $this->mysql->init();
+        $db = $this->mysql::init();
         $_param = param();
         $_site = [
             'logo' => "https://oss.dfer.site/df_icon/81x81.png",
@@ -211,15 +216,13 @@ class Web extends Common
 
             if (DEV) {
                 class_exists($ctrl_path) or
-                    die(
-                        <<<STR
+                    die(<<<STR
                 控制器不存在<br/>
                 控制器::{$ctrl_path}<br/>
                 STR);
                 $controller = new $ctrl_path;
                 method_exists($controller, $action_name) or
-                    die(
-                        str(
+                    die(str(
                             <<<STR
                 方法不存在<br/>
                 参数:{0}<br/>
@@ -227,8 +230,7 @@ class Web extends Common
                 方法: {2}<br/>
                 STR,
                             [json_encode($_GET), $ctrl_path, $action_name]
-                        )
-                    );
+                        ));
             } else {
                 class_exists($ctrl_path) or include_once view('404', true);
                 $controller = new $ctrl_path;
@@ -246,6 +248,6 @@ class Web extends Common
     public function __get($name)
     {
         $bind = $this->bind[$name];
-        return new $bind;
+        return $bind;
     }
 }

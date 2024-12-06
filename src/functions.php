@@ -33,8 +33,8 @@
  *
  */
 
-use Dfer\Tools\Statics\{Common,Env};
-
+use Dfer\Tools\Statics\{Common};
+use Dfer\DfPhpCore\Modules\Statics\{Config};
 // ********************** 常量 START **********************
 
 /*
@@ -42,6 +42,7 @@ use Dfer\Tools\Statics\{Common,Env};
  *
  * \ENUM::RELOAD_PARENT
  */
+
 class ENUM
 {
 
@@ -69,7 +70,7 @@ function view($layout_name, $special_tmpl = false)
     $ctrl = Common::unHump($_param['ctrl']);
     $func = Common::unHump($_param['action']);
 
-    switch($layout_name){
+    switch ($layout_name) {
         case '404':
             $base_area = THEME_HOMEPAGE;
             break;
@@ -459,14 +460,14 @@ function ie_notice()
  * @param {Object} $param 方法参数  单个值或者一组值
  * @param {Object} $get    get参数    数组
  */
-function split_url($url_str='',$param=null, $get = [])
+function split_url($url_str = '', $param = null, $get = [])
 {
     global $_param;
     // var_dump($url_str,$_param);
 
     //去掉首尾多余的字符
     $url_str = trim($url_str);
-    $url_str = trim($url_str,'/');
+    $url_str = trim($url_str, '/');
 
     if (strpos($url_str, "/") !== false) {
         $url_arr = explode("/", $url_str);
@@ -504,47 +505,47 @@ function split_url($url_str='',$param=null, $get = [])
 }
 
 if (!defined('APP_NAMESPACE')) {
-/**
- *
- *    拼接url地址，组成访问地址
- *
- * eg:
- * url("admin","home",self::$db_menu."add",$v[0],array("parent_id"=>$param,"parent"=>$parent))
- *
- * @param {Object} $area    区域
- * @param {Object} $ctrl    控制器
- * @param {Object} $action    方法
- * @param {Object} $param    参数 单个值或者一组值
- * @param {Object} $get    get参数    数组
- */
-function url($area, $ctrl = null, $action = null, $param = null, $get = [])
-{
-    //去掉首尾空格
-    $area = trim($area);
-    $ctrl = $ctrl ? trim($ctrl) : 'home';
-    $action = $action ? trim($action) : 'index';
+    /**
+     *
+     *    拼接url地址，组成访问地址
+     *
+     * eg:
+     * url("admin","home",self::$db_menu."add",$v[0],array("parent_id"=>$param,"parent"=>$parent))
+     *
+     * @param {Object} $area    区域
+     * @param {Object} $ctrl    控制器
+     * @param {Object} $action    方法
+     * @param {Object} $param    参数 单个值或者一组值
+     * @param {Object} $get    get参数    数组
+     */
+    function url($area, $ctrl = null, $action = null, $param = null, $get = [])
+    {
+        //去掉首尾空格
+        $area = trim($area);
+        $ctrl = $ctrl ? trim($ctrl) : 'home';
+        $action = $action ? trim($action) : 'index';
 
-    if ($area == '/') {
-        return SITE;
-    }
-    // 内置参数
-    if ($param) {
-        $param = is_array($param) ? implode("/", $param) : trim($param);
-        $param = DIRECTORY_SEPARATOR . $param;
-    }
-
-    // get参数
-    if ($get && is_array($get)) {
-        $get_str = '?';
-        $get_str_arr = [];
-        foreach ($get as $key => $val) {
-            $get_str_arr[] = sprintf('%s=%s', $key, $val);
+        if ($area == '/') {
+            return SITE;
         }
-        $get_str .= implode('&', $get_str_arr);
+        // 内置参数
+        if ($param) {
+            $param = is_array($param) ? implode("/", $param) : trim($param);
+            $param = DIRECTORY_SEPARATOR . $param;
+        }
+
+        // get参数
+        if ($get && is_array($get)) {
+            $get_str = '?';
+            $get_str_arr = [];
+            foreach ($get as $key => $val) {
+                $get_str_arr[] = sprintf('%s=%s', $key, $val);
+            }
+            $get_str .= implode('&', $get_str_arr);
+        }
+        $rt = sprintf("%s/%s/%s/%s/%s%s", SITE, $area, $ctrl, $action, $param, $get_str ?? '');
+        return $rt;
     }
-    $rt = sprintf("%s/%s/%s/%s/%s%s", SITE, $area, $ctrl, $action, $param, $get_str ?? '');
-    return $rt;
-}
 }
 
 /**
@@ -566,11 +567,10 @@ function to_url($url, $para = null)
         $para = http_build_query($para);
         $url = "{$url}?{$para}";
     }
-    if(URL==$url){
+    if (URL == $url) {
         return;
-    }
-    else{
-        $url="location:{$url}";
+    } else {
+        $url = "location:{$url}";
         header($url);
         die();
     }
@@ -694,11 +694,11 @@ function debug()
 }
 
 /**
- * 获取环境变量
+ * 获取配置参数
  */
-function env($name, $default = "")
+function config($name, $default = "")
 {
-    $val = Env::get($name, $default);
+    $val = Config::get($name, $default);
     // var_dump($val);
     return $val;
 }
@@ -754,7 +754,7 @@ function str($string, $params = [])
  * 读取"composer.json"文件内容
  * @param {Object} $key 键值字符串，支持多级
  */
-function get_composer_json($key = 'require>php')
+function get_composer_json($key = 'require>dfer/df-php-core')
 {
     $json = file_get_contents(ROOT . '/composer.json');
     $data = json_decode($json, true);
