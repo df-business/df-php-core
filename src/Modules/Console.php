@@ -142,7 +142,6 @@ class Console extends Common
     // 需要同步的目录
     $dir = [
       'areas',
-      'data' . DIRECTORY_SEPARATOR . 'config',
       'data' . DIRECTORY_SEPARATOR . 'db',
       'data' . DIRECTORY_SEPARATOR . 'lang',
       'extend',
