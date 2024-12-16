@@ -88,9 +88,9 @@ function view($layout_name, $special_tmpl = false)
     if (Common::isMobile() && WAP_PAGE_ENABLE) {
         if ($special_tmpl) {
             $layout_base = get_html_file(ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm");
-            $from = null;
+            $from = "";
             $to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}_m.php";
-            $back = null;
+            $back = "";
             $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}_m.htm");
         } else {
             $layout_base = get_html_file(ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm");
@@ -105,9 +105,9 @@ function view($layout_name, $special_tmpl = false)
     else {
         if ($special_tmpl) {
             $layout_base = get_html_file(ROOT . "/public/view/{$area}/public/{$layout_name}.htm");
-            $from = null;
+            $from = "";
             $to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}.php";
-            $back = null;
+            $back = "";
             $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
         } else {
             //很奇怪无法获取php文件的修改时间，获取到的是空
@@ -133,6 +133,7 @@ function view($layout_name, $special_tmpl = false)
         //生成新的缓存
         view_conversion($from, $to, $layout);
     }
+    // die;
     // 直接读取缓存
     return $to;
 }
@@ -183,13 +184,13 @@ function view_conversion($from, $to, $layout)
  */
 function view_replace($from, $layout)
 {
-    $from = $from ? file_get_contents($from) : null;
+    $from = $from ? file_get_contents($from) : "";
     if (empty($layout)) {
         return $from;
     }
     $layout = @file_get_contents($layout);
 
-    //    echo $from;
+    // var_dump($from,$html,$header,$body,$footer);
     //preg_match的第一个参数用单引号还是双引号，效果一样
     preg_match("/<df-html>([\s\S]*?)<\/df-html>/", $from, $html);
     preg_match("/<df-header>([\s\S]*?)<\/df-header>/", $from, $header);
@@ -382,7 +383,8 @@ function cookie_set($name, $data, $time)
  */
 function cookie_del($name)
 {
-    setcookie($name, null, time() - 1, '/');
+    setcookie($name, "", time() - 1, '/');
+    // die;
 }
 
 // ######################################  cookie END  ######################################
@@ -705,25 +707,28 @@ function config($name, $default = "")
 
 /**
  * 读取get
- * @param {Object} $var 变量
+ * @param String $key 参数名
+ * @param Object $default 默认值
  */
-function get($var = null)
+function get($key = null,$default=null)
 {
-    if ($var === null)
+    if ($key === null)
         return $_GET;
     else
-        return isset($_GET[$var]) ? $_GET[$var] : null;
+        return isset($_GET[$key]) ? $_GET[$key] : $default;
 }
 
 /**
  * 获取post参数
+ * @param String $key 参数名
+ * @param Object $default 默认值
  */
-function post($var = null)
+function post($key = null,$default=null)
 {
-    if ($var === null)
+    if ($key === null)
         return $_POST;
     else
-        return isset($_POST[$var]) ? $_POST[$var] : null;
+        return isset($_POST[$key]) ? $_POST[$key] : $default;
 }
 
 /**

@@ -989,7 +989,7 @@ class Mysql extends Common
             insert into `config`(`key`,`val`,`subs`) values
             ('hits','0','用户访问量'),
             ('admin','0','开启超级权限'),
-            ('layout','{"bg_img":"/view/admin/public/assets/img/bg.jpg","music_play":"0","color":"#ffffff","title":"DfPHP","keywords":"DfPHP,轻量级php框架,化繁为简,返璞归真,大道至简","description":"遵循大道至简的php框架","inscribe":"© 2023 Dfer.Site"}','主页布局')
+            ('layout','{"bg_img":"/view/admin/public/assets/img/bg.jpg","music_play":"0","color":"#ffffff","title":"DfPHP","keywords":"DfPHP,轻量级php框架,化繁为简,返璞归真,大道至简","description":"化繁为简","inscribe":"© 2023-2024 Dfer.Site"}','主页布局')
             STR)
             ) {
                 echo "添加数据 [config] 成功";
@@ -1003,7 +1003,7 @@ class Mysql extends Common
         //添加静态页面
         $query = $db->query("SELECT COUNT(*) AS count FROM `html`")->fetch_array();
         if ($query[0] < 1) {
-            if ($db->query("insert into `html` (`file_n`,`src`) values('index','homepage/home/')")) {
+            if ($db->query("insert into `html` (`file_n`,`src`) values('index','homepage/home/index')")) {
                 echo "添加数据 [html] 成功";
             } else {
                 echo "添加数据 [html] 失败";
@@ -1018,14 +1018,13 @@ class Mysql extends Common
         if ($query[0] < 1) {
             if (
                 $db->query("INSERT INTO `menu` (`title`, `src`, `type`, `parent`, `order_num`) VALUES
-                    ('动态首页', 'homepage%2Fhome%2F', 'home', 0, 0),
+                    ('动态首页', 'homepage%2Fhome%2Findex', 'home', 0, 0),
                     ('主页管理', '', 'folder', 0, 1),
                     ('用户管理', '', 'user', 0, 2),
                     ('生成静态页面', '', 'folder', 0, 8888),
 
                     ('记事本', 'admin%2Fcolumn%2Fnotepad', 'book', 0, 100),
                     ('记事本 服务器端处理', 'admin%2Fcolumn%2Fnotepad_ss', 'book', 0, 101),
-                    ('关于此站点', 'admin%2Fcolumn%2Fcolumn	', 'info', 0, 110),
                     ('刷新数据', 'js%3Arefresh_data%28%29%3B', 'refresh', 0, 120),
                     ('装载数据', 'admin%2Flogin%2Fcreate_db', 'save', 0, 130),
                     ('框架信息', 'admin%2Fhome%2Finfo', 'info', 0, 140),
