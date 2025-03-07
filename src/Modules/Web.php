@@ -69,9 +69,11 @@ class Web extends Common
         $this->config::init();
 
         // 默认模板
+        define('DEFAULT_HOMEPAGE', 'homepage');
         define('DEFAULT_ADMIN', 'admin');
-        define('THEME_HOMEPAGE', config('theme_homepage', 'homepage'));
+        define('THEME_HOMEPAGE', config('theme_homepage', DEFAULT_HOMEPAGE));
         define('THEME_ADMIN', config('theme_admin', DEFAULT_ADMIN));
+        define('DEFAULT_HOMEPAGE_ASSETS', "/view/" . DEFAULT_HOMEPAGE . "/public/assets");
         define('DEFAULT_ADMIN_ASSETS', "/view/" . DEFAULT_ADMIN . "/public/assets");
         // 后台入口
         define('ADMIN_URL', config('admin_url', 'df'));
