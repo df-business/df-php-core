@@ -79,25 +79,29 @@ function view($layout_name, $special_tmpl = false)
             $base_area = DEFAULT_ADMIN;
             break;
     }
+    // 当前控制器对应的资源目录（不存在则从`base_area`获取）
     define('VIEW_ASSETS', is_dir(ROOT . "/public/view/{$area}/public/assets") ? "/view/{$area}/public/assets" : "/view/{$base_area}/public/assets");
 
     // var_dump(ROOT . "/public/view/{$area}/public/assets",VIEW_ASSETS,$area,$base_area);
     $layout_name = Common::unHump($layout_name);
-    //手机、pc分开调用模板
-    //手机模板
+    // 手机、pc分开调用模板
+    // 手机模板
     if (Common::isMobile() && WAP_PAGE_ENABLE) {
         if ($special_tmpl) {
             $layout_base = get_html_file(ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm");
             $from = "";
             $to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}_m.php";
             $back = "";
+            // 当前控制器对应的wap布局文件（不存在则从`base_area`获取）
             $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}_m.htm");
         } else {
             $layout_base = get_html_file(ROOT . "/public/view/{$area}/public/{$layout_name}_m.htm");
             $from_base = get_html_file(ROOT . "/public/view/{$area}/{$ctrl}/{$func}_m.htm");
-            $from = !is_file($from_base) ? get_html_file(ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm") : $from_base;
+            // 当前方法对应的wap视图文件（不存在则使用pc视图文件）
+            $from = is_file($from_base) ? $from_base : get_html_file(ROOT . "/public/view/{$area}/{$ctrl}/{$func}.htm");
             $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}_m.php";
             $back = ROOT . "/areas/{$area}/controller/{$ctrl}controller.php";
+            // 当前控制器对应的wap布局文件（不存在则从`base_area`获取）
             $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
         }
     }
@@ -108,6 +112,7 @@ function view($layout_name, $special_tmpl = false)
             $from = "";
             $to = ROOT . "/data/cache/areas/{$area}/view/public/{$layout_name}.php";
             $back = "";
+            // 当前控制器对应的pc布局文件（不存在则从`base_area`获取）
             $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
         } else {
             //很奇怪无法获取php文件的修改时间，获取到的是空
@@ -120,6 +125,7 @@ function view($layout_name, $special_tmpl = false)
             // 缓存文件
             $to = ROOT . "/data/cache/areas/{$area}/view/{$ctrl}/{$func}.php";
             // 视图 - 读取默认模板
+            // 当前控制器对应的pc布局文件（不存在则从`base_area`获取）
             $layout = is_file($layout_base) ? $layout_base : get_html_file(ROOT . "/public/view/{$base_area}/public/{$layout_name}.htm");
         }
     }
@@ -710,7 +716,7 @@ function config($name, $default = "")
  * @param String $key 参数名
  * @param Object $default 默认值
  */
-function get($key = null,$default=null)
+function get($key = null, $default = null)
 {
     if ($key === null)
         return $_GET;
@@ -723,7 +729,7 @@ function get($key = null,$default=null)
  * @param String $key 参数名
  * @param Object $default 默认值
  */
-function post($key = null,$default=null)
+function post($key = null, $default = null)
 {
     if ($key === null)
         return $_POST;
