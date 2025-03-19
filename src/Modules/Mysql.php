@@ -848,14 +848,6 @@ class Mysql extends Common
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户信息收集';
             ";
 
-        $sql[] = "CREATE TABLE `layout_img` (
-              `id` int(11) NOT NULL AUTO_INCREMENT,
-              `title` varchar(100) CHARACTER SET utf8 DEFAULT '',
-              `img` varchar(100) CHARACTER SET utf8 DEFAULT '' COMMENT '背景图像',
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='背景图片列表';
-            ";
-
         $sql[] = "CREATE TABLE `article` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `title` varchar(100) CHARACTER SET utf8 DEFAULT '',
@@ -989,7 +981,7 @@ class Mysql extends Common
             insert into `config`(`key`,`val`,`subs`) values
             ('hits','0','用户访问量'),
             ('admin','0','开启超级权限'),
-            ('layout','{"bg_img":"/view/admin/public/assets/img/bg.jpg","music_play":"0","color":"#ffffff","title":"DfPHP","keywords":"DfPHP,轻量级php框架,化繁为简,返璞归真,大道至简","description":"化繁为简","inscribe":"© 2023-2024 Dfer.Site"}','主页布局')
+            ('layout','{"color":"#c7edcc","title":"DfPHP","keywords":"DfPHP,轻量级php框架,化繁为简,返璞归真,大道至简","description":"大道至简","inscribe":"Dfer.Site"}','主页参数')
             STR)
             ) {
                 echo "添加数据 [config] 成功";

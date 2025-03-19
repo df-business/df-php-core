@@ -52,7 +52,8 @@ class Console extends Common
     //项目根目录
     define('ROOT', dirname(__DIR__, 5));
     define('VERSION', file_get_contents(ROOT . DIRECTORY_SEPARATOR . 'version'));
-    define('QUIET', in_array('-q', $argv));
+    // 命令里有`-d`，则显示详细信息
+    define('QUIET', in_array('-d', $argv)?false:true);
 
     Config::init();
     // 开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
@@ -241,7 +242,6 @@ class Console extends Common
    */
   function print($var = null)
   {
-    if (!QUIET)
-      echo $this->str($var);
+    echo $this->str($var);
   }
 }
