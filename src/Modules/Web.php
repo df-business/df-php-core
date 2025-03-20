@@ -100,6 +100,8 @@ class Web extends Common
         define('SESSION_EXPIRES', config('session_expires', 3 * 24 * 3600));
         //设置文件上传的最大尺寸(byte)
         define('FILE_SIZE_MAX', config('file_size_max', 1024 * 1024 * 100));
+        // 记录agent
+        define('AGENT_CHECK', config('agent_check', false));
 
         // ssl启用
         define('SSL_ACTIVE', !empty($_SERVER['HTTPS']) || (isset($_SERVER['HTTP_X_CLIENT_SCHEME']) && $_SERVER['HTTP_X_CLIENT_SCHEME'] == 'https'));
@@ -159,6 +161,11 @@ class Web extends Common
             'qq' => "3504725309",
             'time' => $this->getTime(TIMESTAMP)
         ];
+
+        if (AGENT_CHECK) {
+            $this->agentWrite();
+        }
+
         // **********************  框架初始化 END  **********************
         $this->index();
     }
@@ -225,14 +232,14 @@ class Web extends Common
                 $controller = new $ctrl_path;
                 method_exists($controller, $action_name) or
                     die(str(
-                            <<<STR
+                        <<<STR
                 方法不存在<br/>
                 参数:{0}<br/>
                 控制器:{1}<br/>
                 方法: {2}<br/>
                 STR,
-                            [json_encode($_GET), $ctrl_path, $action_name]
-                        ));
+                        [json_encode($_GET), $ctrl_path, $action_name]
+                    ));
             } else {
                 class_exists($ctrl_path) or include_once view('404', true);
                 $controller = new $ctrl_path;
