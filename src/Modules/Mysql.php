@@ -595,20 +595,21 @@ class Mysql extends Common
 
     /**
      * 运行sql
-     * 有容错处理
+     * 支持多行sql，有容错处理
+     * @param {Object} $sql
      */
     public function query($sql)
     {
         global $db;
         debug($sql);
-        $r = $db->query($sql);
+        $result = $db->multi_query($sql);
         //容错处理
         if (!empty($db->error)) {
-            $err = sprintf("语句：%s %s 错误信息：%s", $sql, PHP_EOL, json_encode($db->error));
-            echo $err;
-            debug($err);
+            $result = $sql . PHP_EOL . json_encode($db->error) . PHP_EOL;
+            echo $result;
+            debug($result);
         }
-        return $r;
+        return $result;
     }
 
     /**
@@ -901,6 +902,17 @@ class Mysql extends Common
               `content` longtext CHARACTER SET utf8,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='测试';
+                    ";
+
+        $sql[] = "CREATE TABLE `oss_upload_logs` (
+              `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+              `user_id` int(11) unsigned NOT NULL DEFAULT '0',
+              `file_path` varchar(255) DEFAULT '',
+              `url` varchar(255) DEFAULT '',
+              `create_time` int(11) unsigned DEFAULT '0',
+              `type` tinyint(1) unsigned DEFAULT '1' COMMENT '分类 1 图片 2 视频',
+              PRIMARY KEY (`id`) USING BTREE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='oss上传记录';
                     ";
         // **********************  拓展库 END  **********************
 
