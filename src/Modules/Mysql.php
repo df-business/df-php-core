@@ -35,14 +35,12 @@
 
 namespace Dfer\DfPhpCore\Modules;
 
+use Exception, mysqli_sql_exception, MySQLi;
 use Dfer\Tools\{Common};
 
 class Mysql extends Common
 {
-    /**
-     * 当前数据表名称（不含前缀）
-     * @var string
-     */
+    // 当前数据表名称（不含前缀）
     protected $name;
     protected $json;
     protected $jsonAssoc;
@@ -58,9 +56,9 @@ class Mysql extends Common
 
     /**
      * 设置
-     * @param {Object} array $item
+     * @param Array $item
      */
-    public function setup(array $item)
+    public function setup($item = [])
     {
         $this->name = $item['name'] ?? '';
         $this->json = $item['json'] ?? [];
@@ -70,8 +68,9 @@ class Mysql extends Common
 
     /**
      * 字段
+     * @param Array $param
      */
-    public function field($param = array())
+    public function field($param = [])
     {
         $this->field = $param;
         return $this;
@@ -79,8 +78,9 @@ class Mysql extends Common
 
     /**
      * 条件
+     * @param Array $param
      */
-    public function where($param = array())
+    public function where($param = [])
     {
         $this->where = $param;
         return $this;
@@ -88,8 +88,9 @@ class Mysql extends Common
 
     /**
      * 排序
+     * @param Array $param
      */
-    public function order($param = array())
+    public function order($param = [])
     {
         $this->order = $param;
         return $this;
@@ -97,8 +98,9 @@ class Mysql extends Common
 
     /**
      * 数量
+     * @param Array $param
      */
-    public function limit($param = array())
+    public function limit($param = [])
     {
         $this->limit = $param;
         return $this;
@@ -106,48 +108,48 @@ class Mysql extends Common
 
     /**
      * 读取第一条数据
-     * @return {Object} 键值对
+     * @return Object 键值对
      */
-    public function first($field = null)
+    public function first()
     {
-        $r = $this->query($this->queryFormat());
-        $rt = $r->fetch_array(MYSQLI_BOTH);
-        return $rt;
+        $result_query = $this->query($this->queryFormat());
+        $result = $result_query->fetch_array(MYSQLI_BOTH);
+        return $result;
     }
 
     /**
      * 读取第一条数据,不满足条件则返回空
-     * @return {Object} 键值对
+     * @return Object 键值对
      */
-    public function find($field = null)
+    public function find()
     {
         if (empty($this->where)) {
-            $rt = [];
+            $result = [];
         } else {
-            $r = $this->query($this->queryFormat());
-            $rt = $r->fetch_array(MYSQLI_BOTH);
+            $result_query = $this->query($this->queryFormat());
+            $result = $result_query->fetch_array(MYSQLI_BOTH);
 
-            foreach ($rt as $key => &$value) {
+            foreach ($result as $key => &$value) {
                 if ($this->jsonAssoc && in_array($key, (array) $this->json)) {
                     $value = json_decode($value, true);
                 }
             }
         }
-        return $rt;
+        return $result;
     }
 
     /**
      * 读取第一条数据的某个值
-     * @return {Object} 字段值
+     * @return String 字段值
      */
-    public function value($field)
+    public function value($field = [])
     {
         return $this->find()[$field];
     }
 
     /**
      * 查询数据的数量
-     * @return {Object} 字段值
+     * @return Int
      */
     public function count()
     {
@@ -157,49 +159,48 @@ class Mysql extends Common
 
     /**
      * 查询结果
-     * @return {Object} 数组。
+     * @return Array
      */
     public function select()
     {
-        $r = $this->query($this->queryFormat());
-        //始终返回数组
-        $rt = $r->fetch_all(MYSQLI_BOTH);
-        $rt = empty($rt) ? array() : $rt;
-        return $rt;
+        $result_query = $this->query($this->queryFormat());
+        // 始终返回数组
+        $result = $result_query->fetch_all(MYSQLI_BOTH);
+        $result = empty($result) ? array() : $result;
+        return $result;
     }
 
     /**
      * 查询结果
-     * @return {Object} 单条 键值对  多条 数组
+     * @return Object 单条:键值对 多条:数组
      */
     public function show()
     {
         $sql = $this->queryFormat();
-        $r = $this->query($sql);
+        $result_query = $this->query($sql);
 
-        //多条
-        if ($r->num_rows > 1) {
-            $rt = $r->fetch_all(MYSQLI_BOTH);
-        }
-        //单条
-        else {
+        if ($result_query->num_rows > 1) {
+            //多条
+            $result = $result_query->fetch_all(MYSQLI_BOTH);
+        } else {
+            //单条
             //读取首条数据
-            $rt = $r->fetch_array(MYSQLI_BOTH);
+            $result = $result_query->fetch_array(MYSQLI_BOTH);
         }
 
-        $rt = empty($rt) ? array() : $rt;
-        return $rt;
+        $result = empty($result) ? array() : $result;
+        return $result;
     }
 
     /**
      * 查询结果
-     * @return {Object} 对象。
+     * @return Object
      */
-    public function object($field = null)
+    public function object()
     {
-        $r = $this->query($this->queryFormat());
-        $rt = $r->fetch_object();
-        return $rt;
+        $result_query = $this->query($this->queryFormat());
+        $result = $result_query->fetch_object();
+        return $result;
     }
 
     /**
@@ -209,20 +210,18 @@ class Mysql extends Common
     public function update($data = array(), $redirect = null)
     {
         $sql = $this->queryFormatUpdateInsert($data);
-        // var_dump($sql);
         $return = 0;
-        // 新增
         if (empty($this->where)) {
+            // 新增
             $return = $this->insert($data, $redirect);
-        }
-        // 编辑
-        else {
+        } else {
+            // 编辑
             // 开启事务。防止高并发
             $this->query("START TRANSACTION");
-            $r = $this->query($sql);
+            $result_query = $this->query($sql);
             // 提交事务
             $this->query("COMMIT");
-            if ($r) {
+            if ($result_query) {
                 $return = 1;
             }
         }
@@ -238,11 +237,11 @@ class Mysql extends Common
         $sql = $this->queryFormatUpdateInsert($data);
         //开启事务。防止高并发
         $this->query("START TRANSACTION");
-        $r = $this->query($sql);
+        $result_query = $this->query($sql);
         //提交事务
         $this->query("COMMIT");
         $return = 0;
-        if ($r) {
+        if ($result_query) {
             $return = $this->run('SELECT LAST_INSERT_ID()');
             $return = $return[0][0];
         }
@@ -255,13 +254,12 @@ class Mysql extends Common
      */
     public function del($redirect = null)
     {
-        global $db;
         $return = 0;
 
         $sql = $this->queryFormatDel();
-        $r = $this->query($sql);
+        $result_query = $this->query($sql);
 
-        if ($r) {
+        if ($result_query) {
             $return = 1;
         }
         return $return;
@@ -269,7 +267,7 @@ class Mysql extends Common
 
     /**
      * dataTable异步分页
-     * @param {Object} $model_name 用于组装地址的模型名称
+     * @param String $model_name 用于组装地址的模型名称
      */
     public function showPage($model_name)
     {
@@ -283,9 +281,7 @@ class Mysql extends Common
             $start = $_POST['start'];
             $length = $_POST['length'];
             $limit = [$start, $length];
-            //var_dump($order_column,$_POST['order'][0]['column'],$_POST['columns']);
             $total_count = $this->run(sprintf("select count(*) from %s", $table_name))[0][0];
-            // $data = showList($tb, $para, $order, [$start, $length]);
             $data = $this->order($order)->limit($limit)->select();
             $data_rt = array();
             if (!empty($model_name)) {
@@ -323,14 +319,12 @@ class Mysql extends Common
         $database = DATABASE;
         $table_name = $this->name;
         //获取表字段名、类型、备注
-        $r = $this->run(sprintf("select column_name,data_type,column_comment from information_schema.COLUMNS where table_name = '%s' and table_schema = '%s'", $table_name, $database));
-        //unset($r[0]);
+        $result_query = $this->run(sprintf("select column_name,data_type,column_comment from information_schema.COLUMNS where table_name = '%s' and table_schema = '%s'", $table_name, $database));
 
         $item = [];
-        //var_dump($r);
-        foreach ($r as $v) {
-            $name = $v[0];
-            $type = $v[1];
+        foreach ($result_query as $value) {
+            $name = $value[0];
+            $type = $value[1];
             if ($type == "int") {
                 $item[$name] = 0;
             } else {
@@ -342,9 +336,10 @@ class Mysql extends Common
 
     /**
      * 判断表是否存在
-     * @param {Object} $table
+     * @param String $table
+     * @return Bool
      */
-    public function tableExist($table = 'cache')
+    public function tableExist($table)
     {
         $row = $this->run("SHOW TABLES LIKE '" . $table . "'");
         if (!count($row)) {
@@ -355,6 +350,7 @@ class Mysql extends Common
 
     /**
      * 查询字符串格式化
+     * @return String
      */
     public function queryFormat()
     {
@@ -424,20 +420,22 @@ class Mysql extends Common
             }
         }
         //带条件获取整个表的数据
-        $sqlString = sprintf("select %s from `%s` %s %s %s", $field_string, $table_name, $where_string, $order_string, $limit_string); //sql语句的表名区分大小写
-        return $sqlString;
+        $sql_string = sprintf("select %s from `%s` %s %s %s", $field_string, $table_name, $where_string, $order_string, $limit_string); //sql语句的表名区分大小写
+        return $sql_string;
     }
 
     /**
      * 格式化更新语句
+     * @param Array $data
+     * @return String
      */
-    public function queryFormatUpdateInsert($data = array())
+    public function queryFormatUpdateInsert($data)
     {
         global $db;
         $table_name = $this->name;
         $where = $this->where;
-        //新增
         if (empty($where)) {
+            //新增
             $data_str = $data_str_key = $data_str_val = '';
             if (!empty($data)) {
                 foreach ($data as $key => $value) {
@@ -458,13 +456,10 @@ class Mysql extends Common
             $data_str_key = substr($data_str_key, 0, -1);
             $data_str_val = substr($data_str_val, 0, -1);
             $data_str = sprintf('(%s) values(%s)', $data_str_key, $data_str_val);
-
-
-
-            $sqlString = sprintf("insert into `%s` %s", $table_name, $data_str); //sql语句的表名区分大小写
-        }
-        //编辑
-        else {
+            //sql语句的表名区分大小写
+            $sql_string = sprintf("insert into `%s` %s", $table_name, $data_str);
+        } else {
+            //编辑
             $data_str = 'set';
             if (!empty($data)) {
                 foreach ($data as $key => $value) {
@@ -483,7 +478,6 @@ class Mysql extends Common
             //去掉尾部逗号
             $data_str = substr($data_str, 0, -1);
 
-
             //拼接where
             if (is_numeric($where)) {
                 $where_string = 'where id=' . $where;
@@ -497,16 +491,14 @@ class Mysql extends Common
                     }
                 }
             }
-
-
-            $sqlString = sprintf("update `%s` %s %s", $table_name, $data_str, $where_string); //sql语句的表名区分大小写
+            $sql_string = sprintf("update `%s` %s %s", $table_name, $data_str, $where_string); //sql语句的表名区分大小写
         }
-        //var_dump($sqlString);die();
-        return $sqlString;
+        return $sql_string;
     }
 
     /**
      * 删除数据
+     * @return String
      */
     public function queryFormatDel()
     {
@@ -526,79 +518,99 @@ class Mysql extends Common
             }
         }
         // sql语句的表名区分大小写
-        $sqlString = sprintf("delete from `%s` %s", $table_name, $where_string);
+        $sql_string = sprintf("delete from `%s` %s", $table_name, $where_string);
 
-        return $sqlString;
+        return $sql_string;
     }
 
     /**
      * 根据字段类型获取默认值
-     * @param {Object} $tb
-     * @param {Object} $column
+     * @param String $table_name
+     * @param String $column
+     * @return String
      */
-    public function getTypeValue($tb, $column)
+    public function getTypeValue($table_name, $column)
     {
         $sql = sprintf("SELECT
                  NUMERIC_SCALE,COLUMN_NAME,DATA_TYPE
                 FROM
                     information_schema. COLUMNS
                 WHERE TABLE_NAME = '%s' and COLUMN_NAME='%s';
-                ", $tb, $column);
-        $dt = $this->run($sql);
-        $value = $dt[0][0];
+                ", $table_name, $column);
+        $data = $this->run($sql);
+        $value = $data[0][0];
         return $value;
     }
 
     /**
      * 直接执行sql语句
-     * @return {Object} 查询 数组   新增 插入数据id   更新 受影响行数
+     * @param String $sql 查询语句
+     * @return Object 查询:数组 新增:插入数据id 更新:受影响行数
      */
     public function run($sql)
     {
         global $db;
         $sql = trim($sql);
-        //echo $sql;
         //查询
-        $o = strtolower(substr($sql, 0, 4));
-        if ($o == "sele" || $o == 'show') {
-            $r = $db->query($sql);
-            if ($r->num_rows > 0) {
-                $rt = $r->fetch_all(MYSQLI_BOTH);
-            } //返回编号和字段名
-            else {
-                $rt = array();
+        $sign = strtolower(substr($sql, 0, 4));
+        if ($sign == "sele" || $sign == 'show') {
+            $result_query = $db->query($sql);
+            if ($result_query->num_rows > 0) {
+                // 返回编号和字段名
+                $result = $result_query->fetch_all(MYSQLI_BOTH);
+            } else {
+                $result = array();
             }
         }
-        //执行
+        // 执行
         else {
             $db->query($sql);
-            //返回新插入的数据id
-            if ($o == "inse") {
-                $rt = $db->insert_id;
+            // 返回新插入的数据id
+            if ($sign == "inse") {
+                $result = $db->insert_id;
             } else {
-                //受影响行数
-                $rt = $db->affected_rows;
+                // 受影响行数
+                $result = $db->affected_rows;
             }
-            $rt = $rt ? $rt : false;
+            $result = $result ? $result : false;
         }
 
+        // 容错处理
+        if (!empty($db->error)) {
+            $result = $sql . PHP_EOL . json_encode($db->error) . PHP_EOL;
+            echo $result;
+            debug($result);
+        }
+        return $result;
+    }
+
+    /**
+     * 运行sql
+     * 只支持单行sql，有容错处理
+     * @param String $sql
+     * @return Object
+     */
+    public function query($sql)
+    {
+        global $db;
+        debug($sql);
+        $result = $db->query($sql);
         //容错处理
         if (!empty($db->error)) {
-            $err = sprintf("语句：%s\r\n错误信息：%s", $sql, json_encode($db->error));
-            //echo $err;
-            logs($err, 'sql err');
-            //die();
-            $rt = false;
+            $result = $sql . PHP_EOL . json_encode($db->error) . PHP_EOL;
+            echo $result;
+            debug($result);
         }
-        return $rt;
+        return $result;
     }
 
     /**
      * 运行sql
      * 支持多行sql，有容错处理
-     * @param {Object} $sql
+     * @param String $sql
+     * @return Object
      */
-    public function query($sql)
+    public function queryMulti($sql)
     {
         global $db;
         debug($sql);
@@ -616,47 +628,47 @@ class Mysql extends Common
      * 连接sql服务器，执行sql语句
      * 直接插入数据（强行添加）
      * 支持远程连接
-     * @param {Object} $tb
-     * @param {Object} $data
+     * @param String $table_name
+     * @param Array $data
      */
-    public function add($tb, $data)
+    public function add($table_name, $data)
     {
         $server = "localhost";
-        $acc = "mysql account";
-        $pwd = "mysql password";
+        $account = "mysql account";
+        $password = "mysql password";
         $database = "database name";
-        @$db = new MySQLi($server, $acc, $pwd, $database); //阻止显示错误
-        $sql1 = '';
-        $sql2 = '';
-        foreach ($data as $key => $val) {
-            $sql1 = $sql1 . $key . ',';
-            $sql2 = $sql2 . "'" . $val . "',";
+        @$db = new MySQLi($server, $account, $password, $database); //阻止显示错误
+        $list_field = '';
+        $list_value = '';
+        foreach ($data as $key => $value) {
+            $list_field = $list_field . $key . ',';
+            $list_value = $list_value . "'" . $value . "',";
         }
-        $sql1 = substr($sql1, 0, strlen($sql1) - 1);
-        $sql2 = substr($sql2, 0, strlen($sql2) - 1);
-        $sql = "insert into `{$tb}`({$sql1}) values({$sql2})";
-        logs($sql, 2);
-        //echo $tb.$sql1.$sql2.$sql;
-        $r = query($sql);
-        return $r;
+        $list_field = substr($list_field, 0, strlen($list_field) - 1);
+        $list_value = substr($list_value, 0, strlen($list_value) - 1);
+        $sql = "insert into `{$table_name}`({$list_field}) values({$list_value})";
+        debug($sql);
+        $result = $db->query($sql);
+        return $result;
     }
 
     /**
      * 开始事务
      * 停用自动提交
      * 检测表是否支持事务
+     * @param {Object} $table
      */
-    public function begin($table = array())
+    public function begin($table = [])
     {
         global $db;
         //关闭自动提交
         $db->autocommit(false);
         if (!empty($table)) {
             $table = is_array($table) ? $table : array($table);
-            foreach ($table as $v) {
-                $Engine = query("show table status like '$v'");
-                $Engine = strtolower($Engine[0]['Engine']);
-                if ($Engine != 'innodb') {
+            foreach ($table as $value) {
+                $engine = $db->query("show table status like '$value'");
+                $engine = strtolower($engine[0]['Engine']);
+                if ($engine != 'innodb') {
                     die("$table表类型必须是InnoDB");
                 }
             }
@@ -697,11 +709,10 @@ class Mysql extends Common
      * 根据sql的返回值调用事务
      * 执行sql失败就回滚
      */
-    public function affair($v)
+    public function affair($value)
     {
-        if (!$v) {
+        if (!$value) {
             $this->back();
-            // $this->showJson('202', '账户收款失败');
         }
     }
 
@@ -711,7 +722,7 @@ class Mysql extends Common
      */
     public function init()
     {
-        $con = mysqli_connect(SERVER, ACC, PWD);
+        $con = mysqli_connect(SERVER, ACCOUNT, PASSWORD);
         if (!$con) {
             echo "服务器 [" . SERVER . "] 连接失败";
             echo "<br>";
@@ -721,25 +732,24 @@ class Mysql extends Common
         try {
 
             // ********************** 连接数据库 START **********************
-
             if (mysqli_select_db($con, $database)) {
                 //数据库存在
-                @$db = new \MySQLi(SERVER, ACC, PWD, $database);
+                @$db = new MySQLi(SERVER, ACCOUNT, PASSWORD, $database);
                 //连接数据库，忽略错误
                 //当bool1为false就会执行bool2，当数据库出错就会输出字符并终止程序
                 !mysqli_connect_error() or die("数据库 [{$database}] 错误");
                 //防止乱码
                 $db->query('set names utf8');
             } else {
-                throw new \mysqli_sql_exception;
+                throw new mysqli_sql_exception;
             }
             // **********************  连接数据库 END  **********************
-        } catch (\Exception $exc) {
+        } catch (Exception $exc) {
             // ********************** 创建数据库 START **********************
 
             if (mysqli_query($con, "CREATE DATABASE {$database}")) {
                 echo str("数据库 {0} 创建成功 <br /> {1}", [$database, PHP_EOL]);
-                @$db = new \MySQLi(SERVER, ACC, PWD, $database);
+                @$db = new MySQLi(SERVER, ACCOUNT, PASSWORD, $database);
                 !mysqli_connect_error() or die("数据库 [{$database}] 错误");
                 $db->query('set names utf8');
                 if ($this->create($db)) {
@@ -917,17 +927,17 @@ class Mysql extends Common
         // **********************  拓展库 END  **********************
 
         $num = 0;
-        foreach ($sql as $key => $val) {
+        foreach ($sql as $key => $value) {
             echo str("{0}.", [$key + 1]);
-            $str = explode("(", $val);
+            $str = explode("(", $value);
             $str = $str[0];
             try {
-                if ($db->query($val)) {
+                if ($db->query($value)) {
                     echo str("{0} [成功]", [$str]);
                 } else {
-                    throw new \mysqli_sql_exception;
+                    throw new mysqli_sql_exception;
                 }
-            } catch (\Exception $exc) {
+            } catch (Exception $exc) {
                 echo str("{0} [失败: {1}]", [$str, $db->error]);
             }
             echo "<br />" . PHP_EOL;
@@ -940,7 +950,6 @@ class Mysql extends Common
         echo "<br />" . PHP_EOL;
 
         //添加登陆账号
-        //echo $db->query("SELECT * FROM `user`")->fetch_array()[1];   //读取首条数据
         $query = $db->query("SELECT COUNT(*) AS `count` FROM `user`")->fetch_array();
         if ($query[0] < 1) {
             if ($db->query("insert into `user`(`nm`,`pw`,`pic`,`create_time`) values('df','df','/view/admin/public/assets/img/logo.png','2024-02-27 16:01:24')")) {
@@ -1067,9 +1076,9 @@ class Mysql extends Common
         echo "###################################### 更新数据库 START ######################################";
         echo "<br />" . PHP_EOL;
         $sql_update = "";
-        $dbPath = ROOT . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR;
-        if (is_dir($dbPath)) {
-            $files = glob($dbPath . '*.sql');
+        $db_path = ROOT . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR;
+        if (is_dir($db_path)) {
+            $files = glob($db_path . '*.sql');
             foreach ($files as $file) {
                 $sql_update = $sql_update . PHP_EOL . file_get_contents($file);
             }
@@ -1083,9 +1092,9 @@ class Mysql extends Common
                     if ($db->multi_query($value)) {
                         echo str("<pre>{0} [更新成功]</pre>", [$value]);
                     } else {
-                        throw new \mysqli_sql_exception;
+                        throw new mysqli_sql_exception;
                     }
-                } catch (\Exception $exc) {
+                } catch (Exception $exc) {
                     echo str("<pre>{0} [更新失败: {1}]</pre>", [$value, $db->error]);
                 }
                 echo "<br />" . PHP_EOL;

@@ -80,8 +80,8 @@ class Web extends Common
         // 开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
         define('DEV', config('dev', 1));
         define('SERVER', config('server', 'localhost'));
-        define('ACC', config('account', 'dfphp_dfer_site'));
-        define('PWD', config('password', 'mMHBCAimbKKjPP67'));
+        define('ACCOUNT', config('account', 'dfphp_dfer_site'));
+        define('PASSWORD', config('password', 'mMHBCAimbKKjPP67'));
         define('DATABASE', config('database', 'dfphp_dfer_site'));
 
         //email模块的开关

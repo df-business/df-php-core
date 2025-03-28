@@ -53,14 +53,14 @@ class Console extends Common
     define('ROOT', dirname(__DIR__, 5));
     define('VERSION', file_get_contents(ROOT . DIRECTORY_SEPARATOR . 'version'));
     // 命令里有`-d`，则显示详细信息
-    define('QUIET', in_array('-d', $argv)?false:true);
+    define('QUIET', in_array('-d', $argv) ? false : true);
 
     Config::init();
     // 开发模式开关（调试完之后关闭此开关，否则有泄露网站结构的风险）
     define('DEV', config('dev', 1));
     define('SERVER', config('server', 'localhost'));
-    define('ACC', config('account', 'dfphp_dfer_site'));
-    define('PWD', config('password', 'mMHBCAimbKKjPP67'));
+    define('ACCOUNT', config('account', 'dfphp_dfer_site'));
+    define('PASSWORD', config('password', 'mMHBCAimbKKjPP67'));
     define('DATABASE', config('database', 'dfphp_dfer_site'));
 
     $db = Mysql::init();
@@ -136,7 +136,7 @@ class Console extends Common
    */
   function devRoot($var = null)
   {
-    $projectRootDir = ROOT.DIRECTORY_SEPARATOR;
+    $projectRootDir = ROOT . DIRECTORY_SEPARATOR;
     // 模块项目所在的目录，非开发者无法使用该功能
     $moduleRootDir = dirname(ROOT) . DIRECTORY_SEPARATOR . 'df-php-root' . DIRECTORY_SEPARATOR . 'root' . DIRECTORY_SEPARATOR;
 
