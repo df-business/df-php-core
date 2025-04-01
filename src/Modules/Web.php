@@ -179,7 +179,7 @@ class Web extends Common
         global $_param;
         try {
             $src_string = get('s') ?? (SEO ? "index" : THEME_HOMEPAGE);
-            debug(sprintf("当前页面原始路径：%s", $src_string));
+            // debug(sprintf("当前页面原始路径：%s", $src_string));
 
             if (substr($src_string, -5) == ".html")
                 $src_string = str_replace(".html", "", $src_string);
@@ -216,7 +216,7 @@ class Web extends Common
             $_param['action'] = $action_name;
             $_param['param'] = $param;
 
-            debug($_param, $param);
+            // debug($_param, $param);
 
             $ctrl_name = ucwords($ctrl_name) . "Controller";
             // 控制器方法同时支持下划线和驼峰
