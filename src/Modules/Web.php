@@ -83,7 +83,6 @@ class Web extends Common
         define('ACCOUNT', config('account', 'dfphp_dfer_site'));
         define('PASSWORD', config('password', 'mMHBCAimbKKjPP67'));
         define('DATABASE', config('database', 'dfphp_dfer_site'));
-
         //email模块的开关
         define('EMAIL_ENABLE', false);
         // 自动检测语言
@@ -102,7 +101,6 @@ class Web extends Common
         define('FILE_SIZE_MAX', config('file_size_max', 1024 * 1024 * 100));
         // 记录agent
         define('AGENT_CHECK', config('agent_check', false));
-
         // ssl启用
         define('SSL_ACTIVE', !empty($_SERVER['HTTPS']) || (isset($_SERVER['HTTP_X_CLIENT_SCHEME']) && $_SERVER['HTTP_X_CLIENT_SCHEME'] == 'https'));
         if (SSL_ACTIVE) {
@@ -141,15 +139,29 @@ class Web extends Common
 
         // ********************** 框架初始化 START **********************
 
-        //使html内容可以擦除
+        // 开启输出缓冲
         ob_start();
-        //开启缓存
+        // 设置 Session 存储路径
+        $sessionPath = ROOT.DIRECTORY_SEPARATOR."data".DIRECTORY_SEPARATOR."session";
+        if (!file_exists($sessionPath)) {
+            // PHP 的 session 机制不会自动创建目录
+            mkdir($sessionPath, 0775, true);
+        }
+        else {
+            chmod($sessionPath, 0775);
+        }
+        ini_set('session.save_path', $sessionPath);
+        // 设置 Session 过期时间（秒）
+        ini_set('session.gc_maxlifetime', SESSION_EXPIRES);
+        // 设置 Session Cookie 的过期时间
+        ini_set('session.cookie_lifetime', SESSION_EXPIRES);
+        // 启动新会话
         session_start();
-        //设置时区
+        // 设置时区
         date_default_timezone_set("PRC");
-        //编码为utf-8
+        // 设置内容类型为HTML，字符编码为UTF-8
         header("Content-Type:text/html; charset=utf-8");
-        //解除跨域限制
+        // 允许所有域名跨域访问
         header("Access-Control-Allow-Origin: *");
 
         global $db, $_site, $_param;

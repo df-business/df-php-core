@@ -324,47 +324,34 @@ function cache_clean()
 // ###################################### session START ######################################
 
 /**
- * 服务器缓存
- *
- *  默认情况下，PHP.ini 中设置的 SESSION 保存方式是 files（session.save_handler = files），即使用读写文件的方式保存 SESSION 数据，而 SESSION 文件保存的目录由 session.save_path 指定
- *
- *  当写入 SESSION 数据的时候，php 会获取到客户端的 SESSION_ID，然后根据这个 SESSION ID 到指定的 SESSION 文件保存目录中找到相应的 SESSION 文件，不存在则创建之
- *
- * 不同浏览器的session不一样
- *
- * 浏览器主窗与无痕窗的ses不一样
- * 经测试，safari多个无痕窗的ses是独立的，但chrome多个无痕窗的ses是公用的
- *
- * 清空浏览器缓存无法影响session
- *
- * session默认的生命周期通常是20分钟
- * @param {Object} $name
+ * 读取session
+ * @param String $key 键名
  */
-function session_get($name)
+function session_get($key)
 {
-    if (!empty($_SESSION[$name])) {
-        $redirect = $_SESSION[$name];
-    } else {
-        $redirect = "";
-    }
-    return $redirect;
-}
-
-function session_set($name, $val)
-{
-    $_SESSION[$name] = $val;
+    return $_SESSION[$key]??'';
 }
 
 /**
- * 删除ses
- * @param {Object} $name
+ * 写入session
+ * @param String $key 键名
+ * @param Object $value 值
  */
-function session_del($name = '')
+function session_set($key, $value)
 {
-    if (empty($name)) {
+    $_SESSION[$key] = $value;
+}
+
+/**
+ * 删除session
+ * @param String $key 键名
+ */
+function session_del($key = '')
+{
+    if (empty($key)) {
         session_destroy();
     } else {
-        unset($_SESSION[$name]);
+        unset($_SESSION[$key]);
     }
 }
 
@@ -373,24 +360,32 @@ function session_del($name = '')
 // ###################################### cookie START ######################################
 
 /**
- * 设置cookie
- * @param {Object} $name    名称
- * @param {Object} $data    数据
- * @param {Object} $time 保存时间
+ * 读取cookie
+ * @param String $key 键名
  */
-function cookie_set($name, $data, $time)
+function cookie_get($key)
 {
-    setcookie($name, $data, time() + $time, '/');
+    return $_COOKIE[$key]??'';
+}
+
+/**
+ * 设置cookie
+ * @param String $key 键名
+ * @param Object $value 值
+ * @param Int $time 保存时间（秒）
+ */
+function cookie_set($key, $value, $time)
+{
+    setcookie($key, $value, time() + $time, '/');
 }
 
 /**
  * 删除cookie
- * @param {Object} $name    名称
+ * @param String $key 键名
  */
-function cookie_del($name)
+function cookie_del($key)
 {
-    setcookie($name, "", time() - 1, '/');
-    // die;
+    setcookie($key, "", time() - 1, '/');
 }
 
 // ######################################  cookie END  ######################################
