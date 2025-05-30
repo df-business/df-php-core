@@ -282,7 +282,7 @@ class Mysql extends Common
             $length = $_POST['length'];
             $limit = [$start, $length];
             $total_count = $this->run(sprintf("select count(*) from %s", $table_name))[0][0];
-            $data = $this->order($order)->limit($limit)->select();
+            $data = $this->where("`content` like '%{$search}%'")->order($order)->limit($limit)->select();
             $data_rt = array();
             if (!empty($model_name)) {
                 foreach ($data as $key => $value) {
@@ -380,13 +380,13 @@ class Mysql extends Common
         }
         //拼接where
         if (empty($where)) {
-            $where_string = '';
+            $where_string = "";
         } elseif (is_numeric($where)) {
-            $where_string = 'where id=' . $where;
+            $where_string = "where id={$where}";
         } elseif (is_string($where)) {
-            $where_string = 'where ' . $where;
+            $where_string = "where {$where}";
         } elseif (is_array($where)) {
-            $where_string = 'where 1=1';
+            $where_string = "where 1=1";
             if (!empty($where)) {
                 foreach ($where as $key => $value) {
                     if ($value === null) {
