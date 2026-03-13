@@ -62,8 +62,12 @@ class Console extends Common
     define('ACCOUNT', config('account', 'dfphp_dfer_site'));
     define('PASSWORD', config('password', 'mMHBCAimbKKjPP67'));
     define('DATABASE', config('database', 'dfphp_dfer_site'));
-
-    $db = Mysql::init();
+    try{
+        $db = Mysql::init();
+    }catch (mysqli_sql_exception $exception) {
+        $err_msg=$exception->getMessage();
+        echo $err_msg;
+    }
     $this->init();
   }
 

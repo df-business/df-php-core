@@ -722,11 +722,11 @@ class Mysql extends Common
      */
     public function init()
     {
-        $con = mysqli_connect(SERVER, ACCOUNT, PASSWORD);
+        $con = @mysqli_connect(SERVER, ACCOUNT, PASSWORD);
         if (!$con) {
             echo "服务器 [" . SERVER . "] 连接失败";
-            echo "<br>";
-            die();
+            echo $this->isCommandLineInterface()?PHP_EOL:"<br>";
+            return false;
         }
         $database = DATABASE;
         try {
